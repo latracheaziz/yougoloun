@@ -30,6 +30,14 @@ export function Platforms() {
   const run = [...platforms, ...platforms];
   return (
     <section data-tone="light" aria-label={platforms.join(', ')} className="overflow-hidden border-y hairline bg-paper py-[clamp(1.5rem,3vw,2.5rem)]">
+      <svg aria-hidden="true" width="0" height="0" className="absolute">
+        <defs>
+          <linearGradient id="platforms-gradient" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" style={{ stopColor: 'var(--color-blue)' }} />
+            <stop offset="1" style={{ stopColor: 'var(--color-green)' }} />
+          </linearGradient>
+        </defs>
+      </svg>
       <div ref={track} aria-hidden="true" className="flex w-max">
         {[0, 1].map((half) => (
           <div key={half} className="flex shrink-0 items-center">
@@ -40,7 +48,9 @@ export function Platforms() {
                 >
                   {name}
                 </span>
-                <span className="text-[clamp(1rem,2vw,1.5rem)] text-ember">✦</span>
+                <svg aria-hidden="true" viewBox="0 0 24 24" className="size-[clamp(1rem,2vw,1.5rem)] shrink-0">
+                  <path d="M12 0C13 8 16 11 24 12 16 13 13 16 12 24 11 16 8 13 0 12 8 11 11 8 12 0Z" fill="url(#platforms-gradient)" />
+                </svg>
               </span>
             ))}
           </div>

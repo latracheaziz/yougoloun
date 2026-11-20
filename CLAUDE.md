@@ -4,7 +4,7 @@ Site for a digital marketing & growth agency in Hail, KSA. يقولون = "they 
 Two parts, one page:
 1. **Space (cinematic, WebGL):** Earth in space → the Gulf (city arcs, "they say" words) → four cornerstone rings
    meeting above Hail → a dive into the clouds until the screen is white.
-2. **Light site (editorial, document scroll):** the cloud white becomes the paper background; a payoff
+2. **Light site (editorial, document scroll, brand blue/green/navy):** the cloud white becomes the paper background; a payoff
    ("27.5219° N · 41.6907° E — حائل / Hail, Saudi Arabia"), then positioning, services, platforms, portfolio,
    process, FAQ, contact.
 
@@ -61,7 +61,7 @@ Vite 8 (Rolldown) · React 19 · TypeScript 7 · React Router 8 · three r187 ·
 - World state: mutable objects in `src/gl/state.ts` (`space`, `dive`). Globe children (arcs, whispers, rings,
   beacon) live in geographic coordinates inside `<Earth>`; lat/lon convention in `src/gl/geo.ts`.
 - Shaders: `src/gl/shaders/*` imported with `?raw`; output linear HDR, end with tonemapping + colorspace chunks.
-- Colours: CSS tokens (`@theme static`) are the single source; WebGL reads them via `token()` (`src/gl/palette.ts`).
+- Colours: values in `src/config/palette.ts` (single source); WebGL reads them via `token()` (`src/gl/palette.ts`).
 - Quality tiers in `src/config/quality.ts` (DPR cap, render scale, bloom levels, particles); `PerformanceMonitor`
   steps down at runtime. Postprocessing is the main GPU cost.
 - Small extra WebGL: `src/gl/MiniGlobe.tsx` (dotted globe in Contact, own lazy chunk, mounted near view) and
@@ -69,22 +69,32 @@ Vite 8 (Rolldown) · React 19 · TypeScript 7 · React Router 8 · three r187 ·
 - `prefers-reduced-motion`: no dive/shake/streaks/cloud layers — static shot + plain fade to white.
 
 ## Design system
-**Space part:** night `#05070D`, deep `#0B1B3A`, sand `#E8D3B0`, ember `#FF6B2C`, glow `#FFC46B` (+ haze, 3D only).
+**All colour values live in `src/config/palette.ts`** (brand values sampled from the logo, approximate until
+the SVG arrives). A Vite plugin (`vite.config.ts`) injects them as `--p-*` custom properties into `<head>`;
+Tailwind tokens in `src/styles/index.css` (`@theme`) only point at them; WebGL reads the file via `token()`.
+
+**Space part (golden hour)** — night, deep, sand, **ember (orange lives only here)**, glow, haze (3D only).
 
 **Light site** (wrapper `.light`; never give it a background — the Arrival top must stay transparent):
-- Colours: paper `#F5F3EF` (`bg-paper`), paper-2 `#EBE7E0`, ink `#0E0E10` (`text-ink`), **ember is the only accent**.
-  Muted text = ink 58% (`.muted`), dividers = ink 12% (`.hairline` + `border-*`). No desert colours, no beige text.
-- Grid: `.shell` (gutter + max 1680px) + `.grid-12`; sections use `.section-y`; thin dividers between rows.
-- Type: `.display` (Clash Display / Alexandria) for headlines, `.h-section` for section titles, `.label` for small mono
-  caps; `SectionMark` = "05 / 09 — label".
-- Components: `.chip` (filters, aria-pressed), `.btn` + `.btn-primary` (ember) / `.btn-ink` / `.btn-line`,
-  `.expander` (grid 0fr→1fr height animation; toggle with `data-open`). ⚠ don't name a class `collapse` (Tailwind utility).
-- Dark band: Contact + Footer use `bg-ink text-paper` with `.tone-dark` and `data-tone="dark"` — the story ends in "space".
-- Portfolio cards wear their project's accent (`projects` in `src/config/light.ts`).
-- Interactions: `Cursor` (dot + ring; `data-cursor="view|drag|talk"` shows a labelled disc), `Magnetic` wrapper,
-  `useReveal(scope)` → `[data-reveal="lines"]` (line-by-line masks; words in Arabic) and `[data-reveal="up"]`.
-  All respect reduced motion.
-- Fonts (self-hosted): Clash Display, Alexandria, IBM Plex Sans / Sans Arabic, IBM Plex Mono.
+- Brand: blue `#4BAFE1` (light `#6CC4EE` / deep `#3A9AD3`), green `#87B84D` (`#9CC566` / `#74AE42`), navy `#2B2A5C`;
+  brand gradient blue → green 135° (`.bg-brand-gradient`, `var(--p-gradient-brand)`; also `--p-gradient-blue/green`).
+- Text: ink `#14142E` (near-black navy) on paper `#F5F3EF` / paper-2 / white. Muted = ink 64% (`.muted`).
+- **Contrast rules:** never blue/green text on paper/white, never white text on blue/green. Links / small
+  highlighted text on light: `text-link` (`#1F6FA8`, AA) or `.link`. Blue/green are for fills, gradients,
+  hover states, highlights, the cursor, chips, process accents and decorative shapes (SVG gradients, not text).
+- CTAs: `.btn-brand` (gradient + navy text) or `.btn-navy` (navy + white). The header CTA is ember over space and
+  switches to the gradient when the header tone is light.
+- Dark band (Contact + Footer): `.band` (deep navy `#1D1C45`) + `.tone-dark` + `data-tone="dark"`; hovers use blue-light.
+- Motif: the logo's speech bubble — `.bubble` (pill with a squared bottom-start corner), `BubbleMark` (two-bubble
+  placeholder logo in `Wordmark.tsx`), `SectionMark variant="brand"`, the cursor's hover/label states, process cards.
+  Keep it subtle.
+- Grid: `.shell` + `.grid-12`; sections use `.section-y`; dividers `.hairline` (ink 12%).
+- Type: `.display` headlines, `.h-section` section titles, `.label` small mono caps.
+- Components: `.chip` (pressed = gradient), `.expander` (grid 0fr→1fr, toggle `data-open`; ⚠ never name a class
+  `collapse` — Tailwind utility). Portfolio cards keep each project's own accent (`src/config/light.ts`); their text
+  uses the project's dark `ink`, accents only on tags/borders.
+- Interactions: `Cursor` (`data-cursor="view|drag|talk"`), `Magnetic`, `useReveal(scope)` (`[data-reveal="lines|up"]`).
+- Fonts (self-hosted): Clash Display, Alexandria, IBM Plex Sans / Sans Arabic, IBM Plex Mono. Film grain = CSS `.grain`.
 
 ## Arabic / RTL rules
 - `<html lang dir>` per route (`/ar` rtl, `/en` ltr). Use logical properties (`ps-`, `ms-`, `start-`, `end-`).

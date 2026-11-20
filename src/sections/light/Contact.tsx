@@ -28,9 +28,9 @@ export function Contact() {
   const contactLabel = t.nav.items.find((i) => i.target === 'contact')?.label;
 
   return (
-    <section ref={root} id="contact" data-tone="dark" aria-labelledby="contact-title" className="tone-dark relative overflow-hidden bg-ink text-paper">
+    <section ref={root} id="contact" data-tone="dark" aria-labelledby="contact-title" className="tone-dark band relative overflow-hidden">
       <div className="shell section-y">
-        <SectionMark n={9} label={contactLabel} className="text-paper/60" />
+        <SectionMark n={9} label={contactLabel} variant="brand" className="text-paper/70" />
         <h2 id="contact-title" data-reveal="lines" className="display mt-8 max-w-[15ch] text-[clamp(2.75rem,8vw,8.5rem)] text-balance">
           {t.contact.headline}
         </h2>
@@ -42,7 +42,7 @@ export function Contact() {
             </p>
             <div data-reveal="up" className="mt-10 flex flex-wrap gap-3">
               <Magnetic>
-                <a href={whatsappLink(t.ui.whatsappMessage)} target="_blank" rel="noopener noreferrer" data-cursor="talk" className="btn btn-primary min-h-14 px-7">
+                <a href={whatsappLink(t.ui.whatsappMessage)} target="_blank" rel="noopener noreferrer" data-cursor="talk" className="btn btn-brand min-h-14 px-7">
                   {t.hero.actions.primary}
                   <span aria-hidden="true">↗</span>
                 </a>
@@ -58,7 +58,7 @@ export function Contact() {
               <div>
                 <dt className="label text-paper/45">{t.contact.labels.email}</dt>
                 <dd className="mt-2">
-                  <a href={mailtoLink()} dir="ltr" className="underline decoration-paper/25 underline-offset-4 transition-colors hover:text-ember hover:decoration-ember">
+                  <a href={mailtoLink()} dir="ltr" className="underline decoration-paper/25 underline-offset-4 transition-colors hover:text-blue-light hover:decoration-blue-light">
                     {site.email}
                   </a>
                 </dd>
@@ -66,7 +66,7 @@ export function Contact() {
               <div>
                 <dt className="label text-paper/45">{t.contact.labels.phone}</dt>
                 <dd className="mt-2">
-                  <a href={whatsappLink(t.ui.whatsappMessage)} target="_blank" rel="noopener noreferrer" dir="ltr" className="transition-colors hover:text-ember">
+                  <a href={whatsappLink(t.ui.whatsappMessage)} target="_blank" rel="noopener noreferrer" dir="ltr" className="transition-colors hover:text-blue-light">
                     {site.phone.display}
                   </a>
                 </dd>

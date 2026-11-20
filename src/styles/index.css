@@ -1,23 +1,35 @@
 @import './fonts.css';
 @import 'tailwindcss';
 
-/* ───────────────────────── Design tokens (single source for HTML + WebGL) ─────────────────────────
-   The WebGL layer reads these same variables at runtime (src/gl/palette.ts).
+/* ───────────────────────── Design tokens ─────────────────────────
+   VALUES LIVE IN src/config/palette.ts — injected as --p-* into <head> by the Vite plugin.
+   These Tailwind tokens only point at them (bg-blue, text-ink, border-green/30 …).
    `static` = always emit the variables, even if no utility uses them. */
 @theme static {
-  --color-night: #05070d;
-  --color-deep: #0b1b3a;
-  --color-sand: #e8d3b0;
-  --color-ember: #ff6b2c;
-  --color-granite: #3a2e2a;
-  --color-glow: #ffc46b;
-  /* atmosphere blue for the day-side limb of the Earth (3D only) */
-  --color-haze: #6fa6ff;
+  /* SPACE / golden hour — the only place orange lives */
+  --color-night: var(--p-night);
+  --color-deep: var(--p-deep);
+  --color-sand: var(--p-sand);
+  --color-ember: var(--p-ember);
+  --color-granite: var(--p-granite);
+  --color-glow: var(--p-glow);
+  --color-haze: var(--p-haze);
 
-  /* LIGHT SITE (after the clouds): paper + ink, ember is the only accent */
-  --color-paper: #f5f3ef;
-  --color-paper-2: #ebe7e0;
-  --color-ink: #0e0e10;
+  /* BRAND (logo): blue + green speech bubbles, navy microphone */
+  --color-blue: var(--p-blue);
+  --color-blue-light: var(--p-blue-light);
+  --color-blue-deep: var(--p-blue-deep);
+  --color-green: var(--p-green);
+  --color-green-light: var(--p-green-light);
+  --color-green-deep: var(--p-green-deep);
+  --color-navy: var(--p-navy);
+
+  /* LIGHT SITE: paper + navy ink; blue/green are fills & shapes, never text on paper */
+  --color-paper: var(--p-paper);
+  --color-paper-2: var(--p-paper-2);
+  --color-ink: var(--p-ink);
+  --color-link: var(--p-link);
+  --color-band: var(--p-band);
 
   --font-display: 'Clash Display', 'Alexandria Variable', ui-sans-serif, system-ui, sans-serif;
   --font-body: 'IBM Plex Sans', 'IBM Plex Sans Arabic', ui-sans-serif, system-ui, sans-serif;
@@ -166,14 +178,39 @@ html[lang='ar'] {
   .light {
     color: var(--color-ink);
     --line: color-mix(in oklab, var(--color-ink) 12%, transparent);
-    --muted: color-mix(in oklab, var(--color-ink) 58%, transparent);
+    /* ≥ 4.5:1 on paper for small text */
+    --muted: color-mix(in oklab, var(--color-ink) 64%, transparent);
   }
   .light ::selection {
-    background: var(--color-ink);
-    color: var(--color-paper);
+    background: var(--color-blue-light);
+    color: var(--color-ink);
   }
   .light :focus-visible {
-    outline-color: var(--color-ember);
+    outline-color: var(--color-link);
+  }
+  /* Links on paper: darker blue (WCAG AA), never brand blue/green as text on light. */
+  .link {
+    color: var(--color-link);
+    text-decoration: underline;
+    text-decoration-color: color-mix(in oklab, var(--color-link) 35%, transparent);
+    text-underline-offset: 4px;
+    transition: text-decoration-color 0.3s ease;
+  }
+  .link:hover {
+    text-decoration-color: currentColor;
+  }
+  .bg-brand-gradient {
+    background-image: var(--p-gradient-brand);
+  }
+  /* Speech-bubble shape (the logo's motif): a pill with one squared corner at the bottom-start. */
+  .bubble {
+    border-radius: 999px;
+    border-end-start-radius: 0.3em;
+  }
+  /* Deep navy band (contact + footer). */
+  .band {
+    background: var(--color-band);
+    color: var(--color-paper);
   }
   .shell {
     padding-inline: var(--gutter);
@@ -200,13 +237,26 @@ html[lang='ar'] {
   .h-section:lang(ar) {
     font-size: clamp(2.1rem, 5vw, 5rem);
   }
-  .btn-ink {
-    background: var(--color-ink);
-    color: var(--color-paper);
-  }
-  .btn-ink:hover {
-    background: var(--color-ember);
+  /* CTAs in the light part: brand gradient + navy text, or navy + white text. */
+  .btn-brand {
+    background-image: linear-gradient(135deg, var(--color-blue), var(--color-green), var(--color-blue));
+    background-size: 200% 100%;
+    background-position: 0% 50%;
     color: var(--color-ink);
+    transition:
+      background-position 0.7s var(--ease-out-expo),
+      box-shadow 0.5s var(--ease-out-expo);
+  }
+  .btn-brand:hover {
+    background-position: 100% 50%;
+    box-shadow: 0 12px 30px -12px color-mix(in oklab, var(--color-blue) 70%, transparent);
+  }
+  .btn-navy {
+    background: var(--color-navy);
+    color: #fff;
+  }
+  .btn-navy:hover {
+    background: var(--color-ink);
   }
   .btn-line {
     border: 1px solid currentColor;
@@ -232,12 +282,13 @@ html[lang='ar'] {
     transition: background-color 0.4s var(--ease-out-expo), color 0.4s var(--ease-out-expo), border-color 0.4s var(--ease-out-expo);
   }
   .chip:hover {
-    border-color: var(--color-ink);
+    border-color: var(--color-blue);
+    background: color-mix(in oklab, var(--color-blue) 8%, transparent);
   }
   .chip[aria-pressed='true'] {
-    background: var(--color-ink);
-    border-color: var(--color-ink);
-    color: var(--color-paper);
+    background-image: var(--p-gradient-brand);
+    border-color: transparent;
+    color: var(--color-ink);
   }
 
   /* Height-animating collapse (accordions, service rows): grid 0fr → 1fr. */
@@ -282,6 +333,15 @@ html[lang='ar'] {
 }
 .site-header[data-scrolled] .glass {
   opacity: 1;
+}
+/* The header CTA is ember over space, brand gradient over the light site. */
+.site-header[data-tone='light'] .btn-primary,
+.site-header[data-tone='light'] .btn-primary:hover {
+  background-image: var(--p-gradient-brand);
+  color: var(--color-ink);
+}
+.site-header[data-tone='light'] .btn-primary:hover {
+  filter: brightness(1.06) saturate(1.1);
 }
 
 /* ───────────────────────── Journey layout ─────────────────────────
@@ -366,7 +426,9 @@ html[lang='ar'] {
   to { transform: translateY(220%); }
 }
 
-/* ───────────────────────── Custom cursor ───────────────────────── */
+/* ───────────────────────── Custom cursor ─────────────────────────
+   Brand blue dot + ring; over clickables the ring becomes a speech bubble (the logo's motif);
+   over [data-cursor] it fills with the brand gradient and shows a label in navy. */
 .has-cursor,
 .has-cursor * {
   cursor: none !important;
@@ -380,14 +442,14 @@ html[lang='ar'] {
   pointer-events: none;
   visibility: hidden;
   opacity: 0;
-  border-radius: 999px;
 }
 .cursor-dot {
   width: 6px;
   height: 6px;
   margin: -3px 0 0 -3px;
-  background: #fff;
-  mix-blend-mode: difference;
+  border-radius: 999px;
+  background: var(--color-blue);
+  box-shadow: 0 0 0 1.5px color-mix(in oklab, #fff 70%, transparent);
 }
 .cursor-ring {
   display: grid;
@@ -395,28 +457,32 @@ html[lang='ar'] {
   width: 34px;
   height: 34px;
   margin: -17px 0 0 -17px;
-  border: 1px solid #fff;
-  mix-blend-mode: difference;
+  border-radius: 999px;
+  border: 1.5px solid var(--color-blue);
   transition:
     width 0.45s var(--ease-out-expo),
     height 0.45s var(--ease-out-expo),
     margin 0.45s var(--ease-out-expo),
+    border-radius 0.45s var(--ease-out-expo),
     background-color 0.3s ease,
     border-color 0.3s ease,
     scale 0.3s ease;
 }
 .cursor-ring[data-state='hover'] {
-  width: 62px;
-  height: 62px;
-  margin: -31px 0 0 -31px;
+  width: 56px;
+  height: 46px;
+  margin: -23px 0 0 -28px;
+  border-color: var(--color-green);
+  background: color-mix(in oklab, var(--color-green) 14%, transparent);
+  border-end-start-radius: 6px;
 }
 .cursor-ring[data-state='label'] {
-  width: 92px;
-  height: 92px;
-  margin: -46px 0 0 -46px;
-  background: var(--color-ember);
-  border-color: var(--color-ember);
-  mix-blend-mode: normal;
+  width: 104px;
+  height: 64px;
+  margin: -32px 0 0 -52px;
+  border-color: transparent;
+  background-image: var(--p-gradient-brand);
+  border-end-start-radius: 8px;
 }
 .cursor-ring[data-down] {
   scale: 0.86;

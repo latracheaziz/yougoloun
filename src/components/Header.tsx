@@ -169,7 +169,7 @@ export function Header() {
             ))}
           </ul>
         </nav>
-        <a href={whatsappLink(t.ui.whatsappMessage)} target="_blank" rel="noopener noreferrer" className="btn btn-primary justify-center">
+        <a href={whatsappLink(t.ui.whatsappMessage)} target="_blank" rel="noopener noreferrer" className="btn btn-brand justify-center">
           {t.nav.cta.long}
         </a>
       </div>

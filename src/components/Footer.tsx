@@ -8,7 +8,7 @@ import { HailClock } from './HailClock';
 export function Footer() {
   const t = useContent();
   return (
-    <footer data-tone="dark" className="tone-dark relative z-20 border-t border-paper/10 bg-ink text-paper">
+    <footer data-tone="dark" className="tone-dark band relative z-20 border-t border-paper/10">
       <div className="shell grid-12 gap-y-12 py-[clamp(3.5rem,7vw,6rem)]">
         <div className="col-span-12 md:col-span-4">
           <a
@@ -35,7 +35,7 @@ export function Footer() {
                     e.preventDefault();
                     scrollToSection(item.target);
                   }}
-                  className="text-paper/70 transition-colors duration-300 hover:text-ember"
+                  className="text-paper/70 transition-colors duration-300 hover:text-blue-light"
                 >
                   {item.label}
                 </a>
@@ -47,7 +47,7 @@ export function Footer() {
         <div className="col-span-6 space-y-5 text-sm md:col-span-3">
           <div>
             <p className="label text-paper/40">{t.contact.labels.email}</p>
-            <a href={mailtoLink()} dir="ltr" className="mt-1.5 inline-block text-paper/80 transition-colors hover:text-ember">
+            <a href={mailtoLink()} dir="ltr" className="mt-1.5 inline-block text-paper/80 transition-colors hover:text-blue-light">
               {site.email}
             </a>
           </div>

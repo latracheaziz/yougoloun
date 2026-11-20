@@ -20,25 +20,32 @@ import { Glow } from './space/Glow';
 import { token } from './palette';
 import { useApp } from '@/store/app';
 
+// Dots coloured by the brand gradient (135deg in screen space: blue top-left → green bottom-right).
 const DOT_VERT = `
 uniform float uSize;
 uniform float uPixelRatio;
 varying float vFacing;
+varying float vT;
 void main() {
   vec4 mv = modelViewMatrix * vec4(position, 1.0);
+  vec4 centre = modelViewMatrix * vec4(0.0, 0.0, 0.0, 1.0);
   vec3 n = normalize(normalMatrix * position);
   vFacing = dot(n, normalize(-mv.xyz));
+  vec2 o = mv.xy - centre.xy;
+  vT = clamp(0.5 + (o.x - o.y) * 0.4, 0.0, 1.0);
   gl_Position = projectionMatrix * mv;
   gl_PointSize = uSize * uPixelRatio * (3.0 / -mv.z);
 }`;
 const DOT_FRAG = `
-uniform vec3 uColor;
+uniform vec3 uColorA;
+uniform vec3 uColorB;
 varying float vFacing;
+varying float vT;
 void main() {
   float d = length(gl_PointCoord - 0.5);
   if (d > 0.5 || vFacing < 0.0) discard;
-  float a = smoothstep(0.5, 0.35, d) * mix(0.25, 0.75, smoothstep(0.0, 0.6, vFacing));
-  gl_FragColor = vec4(uColor, a);
+  float a = smoothstep(0.5, 0.35, d) * mix(0.3, 0.95, smoothstep(0.0, 0.6, vFacing));
+  gl_FragColor = vec4(mix(uColorA, uColorB, vT), a);
 }`;
 
 /** Land as dots: a Fibonacci sphere, keeping the points that fall on land in the ocean mask. */
@@ -85,10 +92,11 @@ function Globe({ drag }: { drag: { x: number; y: number; vx: number; vy: number;
   const mobile = useApp((s) => s.mobile);
   const reduced = useApp((s) => s.reducedMotion);
   const dots = useLandDots(mobile ? 6000 : 11000);
-  const paper = useMemo(() => token('paper'), []);
-  const ember = useMemo(() => token('ember'), []);
-  const glow = useMemo(() => token('glow'), []);
-  const ink = useMemo(() => token('ink'), []);
+  const blue = useMemo(() => token('blue'), []);
+  const blueLight = useMemo(() => token('blueLight'), []);
+  const green = useMemo(() => token('green'), []);
+  const greenLight = useMemo(() => token('greenLight'), []);
+  const band = useMemo(() => token('band'), []);
 
   const dotMaterial = useMemo(
     () =>
@@ -97,9 +105,9 @@ function Globe({ drag }: { drag: { x: number; y: number; vx: number; vy: number;
         fragmentShader: DOT_FRAG,
         transparent: true,
         depthWrite: false,
-        uniforms: { uColor: { value: paper }, uSize: { value: 4.2 }, uPixelRatio: { value: 1 } },
+        uniforms: { uColorA: { value: blue }, uColorB: { value: green }, uSize: { value: 4.4 }, uPixelRatio: { value: 1 } },
       }),
-    [paper],
+    [blue, green],
   );
   const pulseMaterial = useMemo(
     () =>
@@ -110,9 +118,9 @@ function Globe({ drag }: { drag: { x: number; y: number; vx: number; vy: number;
         depthWrite: false,
         side: DoubleSide,
         blending: AdditiveBlending,
-        uniforms: { uColor: { value: ember }, uIntensity: { value: 1.2 }, uTime: { value: 0 } },
+        uniforms: { uColor: { value: green }, uIntensity: { value: 1.3 }, uTime: { value: 0 } },
       }),
-    [ember],
+    [green],
   );
   useEffect(
     () => () => {
@@ -153,16 +161,16 @@ function Globe({ drag }: { drag: { x: number; y: number; vx: number; vy: number;
       <group ref={spin}>
         <mesh>
           <sphereGeometry args={[0.992, 64, 32]} />
-          <meshBasicMaterial color={ink} />
+          <meshBasicMaterial color={band} />
         </mesh>
         {dots && <points geometry={dots} material={dotMaterial} />}
         {arcs.map((points, i) => (
-          <Line key={i} points={points} color={ember} lineWidth={1.1} transparent opacity={0.75} />
+          <Line key={i} points={points} color={blueLight} lineWidth={1.2} transparent opacity={0.85} />
         ))}
         <mesh position={ringAt} quaternion={ringQuat} material={pulseMaterial}>
           <planeGeometry args={[0.2, 0.2]} />
         </mesh>
-        <Glow position={pinAt} color={glow} size={mobile ? 30 : 38} intensity={() => 1.4} />
+        <Glow position={pinAt} color={greenLight} size={mobile ? 30 : 38} intensity={() => 1.5} />
       </group>
     </group>
   );

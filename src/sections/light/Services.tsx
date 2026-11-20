@@ -75,7 +75,7 @@ export function Services() {
       <div className="shell section-y">
         <div className="grid-12 gap-y-8">
           <div className="col-span-12 lg:col-span-7">
-            <SectionMark n={5} label={t.services.label} className="muted" />
+            <SectionMark n={5} label={t.services.label} variant="brand" className="muted" />
             <h2 id="services-title" data-reveal="lines" className="display h-section mt-6">
               {t.services.title}
             </h2>
@@ -107,15 +107,15 @@ export function Services() {
                       aria-controls={panel}
                       onClick={() => setOpen(open === s.num ? null : s.num)}
                       onPointerEnter={(e) => e.pointerType === 'mouse' && hoverRow(s.num)}
-                      className="group grid-12 w-full items-baseline py-[clamp(1.1rem,2vw,1.75rem)] text-start"
+                      className="group relative grid-12 w-full items-baseline py-[clamp(1.1rem,2vw,1.75rem)] text-start before:absolute before:-start-4 before:top-1/2 before:h-10 before:w-1 before:-translate-y-1/2 before:scale-y-0 before:rounded-full before:bg-[image:var(--p-gradient-brand)] before:transition-transform before:duration-500 aria-expanded:before:scale-y-100"
                     >
-                      <span lang="en" className="col-span-2 font-mono text-sm text-ink/45 transition-colors duration-300 group-aria-expanded:text-ember md:col-span-1">
+                      <span lang="en" className="col-span-2 font-mono text-sm text-ink/60 transition-colors duration-300 group-aria-expanded:text-link md:col-span-1">
                         {s.num}
                       </span>
                       <span className="col-span-9 font-display text-[clamp(1.25rem,2.6vw,2.4rem)] font-medium leading-tight transition-transform duration-500 ease-[var(--ease-out-expo)] group-aria-expanded:translate-x-3 rtl:group-aria-expanded:-translate-x-3 md:col-span-8">
                         {s.title}
                       </span>
-                      <span className="label col-span-2 hidden text-ink/45 md:block">{t.ui.serviceFilters[categoryOf(s.num)]}</span>
+                      <span className="label col-span-2 hidden muted md:block">{t.ui.serviceFilters[categoryOf(s.num)]}</span>
                       <span aria-hidden="true" className="relative col-span-1 ms-auto size-4 self-center">
                         <span className="absolute inset-x-0 top-1/2 h-px bg-current" />
                         <span className="absolute inset-y-0 start-1/2 w-px bg-current transition-transform duration-500 group-aria-expanded:rotate-90 group-aria-expanded:scale-y-0" />
@@ -138,8 +138,8 @@ export function Services() {
 
       {/* cursor-following preview (decorative) */}
       <div ref={preview} aria-hidden="true" className="pointer-events-none fixed top-0 left-0 z-30 hidden opacity-0 [@media(hover:hover)_and_(pointer:fine)]:block" style={{ visibility: 'hidden' }}>
-        <div className="-translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-xl shadow-[0_30px_60px_-20px_rgba(14,14,16,0.45)]">
-          <div ref={previewImg} className="h-[200px] w-[300px] bg-ink bg-no-repeat transition-[background-position,background-size] duration-700 ease-[var(--ease-out-expo)]" />
+        <div className="-translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-xl shadow-[0_30px_60px_-20px_rgba(20,20,46,0.5)] ring-2 ring-white">
+          <div ref={previewImg} className="h-[200px] w-[300px] bg-navy bg-no-repeat transition-[background-position,background-size] duration-700 ease-[var(--ease-out-expo)]" />
         </div>
       </div>
     </section>

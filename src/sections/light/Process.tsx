@@ -9,12 +9,16 @@ import { SectionMark } from '@/components/SectionMark';
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
-/** Card surfaces, step 01 → 04 (ember appears once, on the final step). */
+/**
+ * Card surfaces, step 01 → 04 — all from the brand palette (src/config/palette.ts).
+ * `accent` fills the speech-bubble step label (navy text on it) and the faint bubble shape.
+ * Text is always navy on light/blue/green surfaces and white on navy (never blue/green text).
+ */
 const SURFACES = [
-  { bg: 'var(--color-paper-2)', fg: 'var(--color-ink)', mute: 'color-mix(in oklab, var(--color-ink) 58%, transparent)' },
-  { bg: 'var(--color-ink)', fg: 'var(--color-paper)', mute: 'color-mix(in oklab, var(--color-paper) 62%, transparent)' },
-  { bg: '#ffffff', fg: 'var(--color-ink)', mute: 'color-mix(in oklab, var(--color-ink) 58%, transparent)' },
-  { bg: 'var(--color-ember)', fg: 'var(--color-ink)', mute: 'color-mix(in oklab, var(--color-ink) 72%, transparent)' },
+  { bg: 'var(--color-paper-2)', fg: 'var(--color-ink)', mute: 'color-mix(in oklab, var(--color-ink) 66%, transparent)', accent: 'var(--p-gradient-blue)' },
+  { bg: 'var(--color-navy)', fg: '#ffffff', mute: 'color-mix(in oklab, #ffffff 74%, transparent)', accent: 'var(--p-gradient-brand)' },
+  { bg: '#ffffff', fg: 'var(--color-ink)', mute: 'color-mix(in oklab, var(--color-ink) 66%, transparent)', accent: 'var(--p-gradient-green)' },
+  { bg: 'var(--p-gradient-brand)', fg: 'var(--color-ink)', mute: 'color-mix(in oklab, var(--color-ink) 80%, transparent)', accent: 'rgba(255,255,255,0.55)' },
 ];
 
 /** PDF §8 — four sticky cards that pile on top of each other as you scroll. */
@@ -52,7 +56,7 @@ export function Process() {
       <div className="shell section-y">
         <div className="grid-12 gap-y-6">
           <div className="col-span-12 lg:col-span-8">
-            <SectionMark n={7} label={t.process.label} className="muted" />
+            <SectionMark n={7} label={t.process.label} variant="brand" className="muted" />
             <h2 id="process-title" data-reveal="lines" className="display h-section mt-6">
               {t.process.title}
             </h2>
@@ -72,18 +76,20 @@ export function Process() {
               >
                 <article
                   data-card
-                  className="grid-12 min-h-[min(68vh,620px)] origin-top content-between gap-y-10 rounded-[28px] p-[clamp(1.75rem,4vw,3.5rem)] shadow-[0_-24px_60px_-40px_rgba(14,14,16,0.5)] will-change-transform"
+                  className="relative grid-12 min-h-[min(68vh,620px)] origin-top content-between gap-y-10 overflow-hidden rounded-[28px] p-[clamp(1.75rem,4vw,3.5rem)] shadow-[0_-24px_60px_-40px_rgba(20,20,46,0.55)] will-change-transform"
                   style={{ background: s.bg, color: s.fg }}
                 >
-                  <div className="col-span-12 flex items-start justify-between gap-6">
-                    <p className="label" style={{ color: s.mute }}>
+                  {/* faint speech-bubble shape, the logo's motif */}
+                  <span aria-hidden="true" className="bubble pointer-events-none absolute -end-16 -bottom-20 h-64 w-96 opacity-25 max-md:-end-10 max-md:-bottom-12 max-md:h-32 max-md:w-48" style={{ background: s.accent }} />
+                  <div className="relative col-span-12 flex items-start justify-between gap-6">
+                    <p className="label bubble px-3 py-1.5 text-ink" style={{ background: s.accent }}>
                       {t.process.stepLabel} <span lang="en">{step.num}</span>
                     </p>
                     <span lang="en" aria-hidden="true" className="font-display text-[clamp(4.5rem,14vw,12rem)] leading-[0.8] font-semibold tracking-[-0.05em]" style={{ color: 'transparent', WebkitTextStroke: `1.5px ${s.fg}` }}>
                       {step.num}
                     </span>
                   </div>
-                  <div className="col-span-12 lg:col-span-9">
+                  <div className="relative col-span-12 lg:col-span-9">
                     <h3 className="display text-[clamp(2rem,4.6vw,4.4rem)]">{step.title}</h3>
                     <p className="mt-5 max-w-[38rem] text-[clamp(1rem,1.25vw,1.2rem)] leading-relaxed" style={{ color: s.mute }}>
                       {step.body}

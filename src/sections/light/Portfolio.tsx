@@ -98,7 +98,7 @@ export function Portfolio() {
       <div className="shell section-y pb-[clamp(3rem,6vw,5rem)]">
         <div className="grid-12 items-end gap-y-8">
           <div className="col-span-12 lg:col-span-8">
-            <SectionMark n={6} label={t.portfolio.label} className="muted" />
+            <SectionMark n={6} label={t.portfolio.label} variant="brand" className="muted" />
             <h2 id="portfolio-title" data-reveal="lines" className="display h-section mt-6">
               {t.portfolio.title}
             </h2>
@@ -108,7 +108,7 @@ export function Portfolio() {
               {String(index + 1).padStart(2, '0')} / {String(count).padStart(2, '0')}
             </span>
             <span className="relative h-px w-28 overflow-hidden bg-ink/12">
-              <span ref={bar} className="absolute inset-0 origin-left bg-ink rtl:origin-right" style={{ transform: 'scaleX(0.12)' }} />
+              <span ref={bar} className="absolute inset-0 origin-left bg-brand-gradient rtl:origin-right" style={{ transform: 'scaleX(0.12)' }} />
             </span>
             <button type="button" aria-label={t.ui.carousel.previous} onClick={() => go(-1)} className="chip size-12 justify-center p-0">
               <span aria-hidden="true" className="rtl:-scale-x-100">←</span>
@@ -139,7 +139,7 @@ export function Portfolio() {
               style={{ '--accent': p.accent } as CSSProperties}
             >
               <div
-                className="relative aspect-[16/10] overflow-hidden rounded-[22px] bg-ink"
+                className="relative aspect-[16/10] overflow-hidden rounded-[22px] bg-navy"
                 onPointerEnter={(e) => {
                   if (!fine || reduced) return;
                   const img = e.currentTarget.querySelector('img');
@@ -171,7 +171,9 @@ export function Portfolio() {
                 </div>
                 <div className="col-span-12 md:col-span-7">
                   <p className="max-w-[34rem] leading-relaxed muted">{item.description}</p>
-                  <p className="label mt-6 text-[var(--accent)]">{t.portfolio.scopeLabel}</p>
+                  <p className="label mt-6" style={{ color: p.ink }}>
+                    {t.portfolio.scopeLabel}
+                  </p>
                   <ul className="mt-3 flex flex-wrap gap-2">
                     {item.scope.map((tag) => (
                       <li key={tag} className="rounded-full border border-[var(--accent)]/40 bg-[color-mix(in_oklab,var(--accent)_8%,transparent)] px-3 py-1.5 text-sm capitalize">

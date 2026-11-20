@@ -15,7 +15,7 @@ export function Faq() {
       <div className="shell section-y">
         <div className="grid-12 gap-y-10">
           <div className="col-span-12 lg:col-span-4">
-            <SectionMark n={8} label={<span lang="en">{t.faq.label}</span>} className="muted" />
+            <SectionMark n={8} label={<span lang="en">{t.faq.label}</span>} variant="brand" className="muted" />
             <h2 id="faq-title" data-reveal="lines" className="display mt-6 text-[clamp(2.25rem,4.4vw,4.25rem)]">
               {t.faq.title}
             </h2>
@@ -34,10 +34,15 @@ export function Faq() {
                       onClick={() => setOpen(expanded ? null : i)}
                       className="group flex w-full items-start justify-between gap-8 py-[clamp(1.4rem,2.6vw,2.2rem)] text-start"
                     >
-                      <span className="font-display text-[clamp(1.2rem,2vw,1.75rem)] leading-snug font-medium transition-colors duration-300 group-hover:text-ember">{item.q}</span>
-                      <span aria-hidden="true" className="relative mt-[0.45em] size-4 shrink-0">
-                        <span className="absolute inset-x-0 top-1/2 h-px bg-current" />
-                        <span className="absolute inset-y-0 start-1/2 w-px bg-current transition-transform duration-500 group-aria-expanded:scale-y-0" />
+                      <span className="font-display text-[clamp(1.2rem,2vw,1.75rem)] leading-snug font-medium transition-colors duration-300 group-hover:text-link">{item.q}</span>
+                      <span
+                        aria-hidden="true"
+                        className="relative mt-[0.15em] grid size-9 shrink-0 place-items-center rounded-full border hairline transition-colors duration-500 group-hover:border-blue group-aria-expanded:border-transparent group-aria-expanded:bg-[image:var(--p-gradient-brand)]"
+                      >
+                        <span className="relative size-3.5">
+                          <span className="absolute inset-x-0 top-1/2 h-px bg-current" />
+                          <span className="absolute inset-y-0 start-1/2 w-px bg-current transition-transform duration-500 group-aria-expanded:scale-y-0" />
+                        </span>
                       </span>
                     </button>
                   </h3>

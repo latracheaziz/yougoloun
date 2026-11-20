@@ -2,6 +2,7 @@ import { useRef } from 'react';
 import { useContent } from '@/i18n/LangContext';
 import { site } from '@/config/site';
 import { useReveal } from '@/interaction/useReveal';
+import { BubbleMark } from '@/components/Wordmark';
 
 /**
  * The payoff as the clouds clear. Its top is transparent and fades to paper, so it slides up
@@ -18,9 +19,9 @@ export function Arrival() {
       <div className="bg-paper">
         <div className="shell grid min-h-[90svh] place-items-center pb-[12vh] text-center">
           <div>
-            <span aria-hidden="true" className="relative mx-auto mb-10 block size-3">
-              <span className="absolute inset-0 animate-ping rounded-full bg-ember/60 motion-reduce:animate-none" />
-              <span className="absolute inset-0 rounded-full bg-ember" />
+            <span aria-hidden="true" className="relative mx-auto mb-10 grid size-16 place-items-center">
+              <span className="absolute inset-1 animate-ping rounded-full bg-blue/20 motion-reduce:animate-none" />
+              <BubbleMark size={44} />
             </span>
             <p data-reveal="up" lang="en" dir="ltr" className="font-mono text-[clamp(1.05rem,2.4vw,2rem)] tracking-tight text-ink/70">
               {site.hail.coords}

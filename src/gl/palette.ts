@@ -1,18 +1,17 @@
 import { Color } from 'three';
+import { brand, light, space } from '@/config/palette';
 
-export type Token = 'night' | 'deep' | 'sand' | 'ember' | 'granite' | 'glow' | 'haze' | 'paper' | 'ink';
+/** All palette entries, flat (values live in src/config/palette.ts). */
+const TOKENS = { ...space, ...brand, ...light };
+export type Token = keyof typeof TOKENS;
 
 const cache = new Map<Token, Color>();
 
-/**
- * Palette colour from the CSS design tokens (src/styles/index.css → @theme),
- * so HTML and WebGL can never drift apart. Returned in linear working space.
- */
+/** Palette colour for WebGL, in linear working space. */
 export function token(name: Token): Color {
   let c = cache.get(name);
   if (!c) {
-    const raw = getComputedStyle(document.documentElement).getPropertyValue(`--color-${name}`).trim();
-    c = new Color(raw || '#ff00ff');
+    c = new Color(TOKENS[name]);
     cache.set(name, c);
   }
   return c.clone();

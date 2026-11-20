@@ -1,10 +1,19 @@
-import { defineConfig } from 'vite';
+import { defineConfig, type Plugin } from 'vite';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 import { fileURLToPath } from 'node:url';
+import { paletteCss } from './src/config/palette';
+
+/** Injects src/config/palette.ts as --p-* CSS custom properties into <head> (first paint, no JS needed). */
+function palette(): Plugin {
+  return {
+    name: 'yougoloun-palette',
+    transformIndexHtml: () => [{ tag: 'style', attrs: { id: 'palette' }, children: paletteCss(), injectTo: 'head-prepend' }],
+  };
+}
 
 export default defineConfig({
-  plugins: [react(), tailwindcss()],
+  plugins: [palette(), react(), tailwindcss()],
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
