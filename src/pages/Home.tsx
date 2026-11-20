@@ -3,6 +3,7 @@ import { useContent } from '@/i18n/LangContext';
 import { site } from '@/config/site';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
+import { AltitudeMeter } from '@/components/AltitudeMeter';
 import { SmoothScroll } from '@/scroll/SmoothScroll';
 import { Tracks } from '@/scroll/Tracks';
 import { Hero } from '@/sections/Hero';
@@ -56,6 +57,7 @@ export default function Home() {
         <SectionStub id="contact" title={t.contact.headline} />
       </main>
 
+      <AltitudeMeter />
       <Footer />
       <div className="grain" aria-hidden="true" />
       <SmoothScroll />

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef, type ReactNode } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
 import { useTexture } from '@react-three/drei';
 import {
@@ -17,15 +17,18 @@ import earthFrag from '../shaders/earth.frag?raw';
 import cloudsFrag from '../shaders/clouds.frag?raw';
 import atmosphereFrag from '../shaders/atmosphere.frag?raw';
 import { token } from '../palette';
-import { space } from './state';
+import { space, world } from '../state';
 import { useApp } from '@/store/app';
 import { qualityPresets } from '@/config/quality';
 
 const MAPS = ['day', 'night', 'normal', 'ocean', 'clouds'] as const;
 const earthUrls = (set: string) => MAPS.map((m) => `/textures/earth/${set}/${m}.webp`);
 
-/** Globe + cloud shell + atmosphere halo. Orientation and lighting come from `space` (state.ts). */
-export function Earth() {
+/**
+ * Globe + cloud shell + atmosphere halo. Orientation and lighting come from `space` (gl/state.ts).
+ * `children` live in the globe's geographic frame (unit sphere, see gl/geo.ts) and turn with it.
+ */
+export function Earth({ children }: { children?: ReactNode }) {
   const textureSet = useApp((s) => s.textures);
   const tier = useApp((s) => s.tier);
   const segments = qualityPresets[tier].earthSegments;
@@ -117,6 +120,8 @@ export function Earth() {
 
   useFrame(() => {
     if (!root.current || !roll.current || !tilt.current || !spin.current) return;
+    root.current.visible = world.current === 'space';
+    if (!root.current.visible) return;
     root.current.position.copy(space.earthPosition);
     roll.current.rotation.z = space.roll;
     tilt.current.rotation.x = space.tilt;
@@ -133,6 +138,7 @@ export function Earth() {
           <group ref={spin}>
             <mesh geometry={geometry} material={materials.earth} />
             <mesh geometry={geometry} material={materials.cloudShell} scale={1.008} renderOrder={1} />
+            {children}
           </group>
         </group>
       </group>

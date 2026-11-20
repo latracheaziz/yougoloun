@@ -26,6 +26,8 @@ const IGNORE = [
   // GPU driver chatter from headless Chromium, not from the site
   /GPU stall due to ReadPixels/i,
   /Automatic fallback to software WebGL/i,
+  // deprecation notice from inside @react-three/fiber (not our code) — client said ignore
+  /THREE.Clock: This module has been deprecated/i,
 ];
 
 async function launch() {

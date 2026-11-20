@@ -4,7 +4,7 @@ import { AdditiveBlending, Color, MathUtils, ShaderMaterial, Vector3, type Mesh 
 import quadVert from '../shaders/quad.vert?raw';
 import flareFrag from '../shaders/flare.frag?raw';
 import { token } from '../palette';
-import { space } from './state';
+import { space, world } from '../state';
 
 const toCamera = new Vector3();
 const across = new Vector3();
@@ -50,7 +50,7 @@ export function SunFlare() {
     const intensity = 0.72 * space.flare * MathUtils.smoothstep(-facing, -0.15, 0.3);
     material.uniforms.uIntensity.value = intensity;
     material.uniforms.uTime.value = clock.elapsedTime;
-    mesh.visible = intensity > 0.002;
+    mesh.visible = world.current === 'space' && intensity > 0.002;
   });
 
   return (

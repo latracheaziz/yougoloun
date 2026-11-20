@@ -4,8 +4,12 @@ import { AdditiveBlending, BufferAttribute, BufferGeometry, Color, ShaderMateria
 import starsVert from '../shaders/stars.vert?raw';
 import starsFrag from '../shaders/stars.frag?raw';
 import { token } from '../palette';
+import { sky } from '../state';
 import { useApp } from '@/store/app';
 import { qualityPresets } from '@/config/quality';
+
+/** Normal of the galactic plane — shared with the night-sky Milky Way glow (skydome.frag). */
+export const GALACTIC_NORMAL = new Vector3(0.84, 0.3, 0.45).normalize();
 
 /** Deterministic PRNG so the sky is identical on every visit and every quality tier. */
 function mulberry32(seed: number) {
@@ -33,7 +37,7 @@ export function Stars() {
     const warm = token('glow');
     const cool = new Color('#a9c6ff');
     const white = new Color('#ffffff');
-    const band = new Vector3(0.32, 0.86, 0.4).normalize();
+    const band = GALACTIC_NORMAL;
     const dir = new Vector3();
     const c = new Color();
 
@@ -71,7 +75,7 @@ export function Stars() {
         transparent: true,
         depthWrite: false,
         blending: AdditiveBlending,
-        uniforms: { uTime: { value: 0 }, uPixelRatio: { value: 1 }, uIntensity: { value: 1.5 } },
+        uniforms: { uTime: { value: 0 }, uPixelRatio: { value: 1 }, uIntensity: { value: 1.5 }, uHorizonFade: { value: 0 } },
       }),
     [],
   );
@@ -80,11 +84,16 @@ export function Stars() {
   useEffect(() => () => material.dispose(), [material]);
 
   const ref = useRef<Points>(null);
-  useFrame(({ clock, viewport }) => {
+  useFrame(({ clock, viewport, camera }) => {
     material.uniforms.uTime.value = clock.elapsedTime;
     material.uniforms.uPixelRatio.value = viewport.dpr;
-    if (ref.current) ref.current.rotation.y = clock.elapsedTime * 0.0025;
+    material.uniforms.uIntensity.value = 1.5 * sky.stars;
+    material.uniforms.uHorizonFade.value = sky.horizonFade;
+    if (ref.current) {
+      ref.current.visible = sky.stars > 0.002;
+      ref.current.position.copy(camera.position);
+    }
   });
 
-  return <points ref={ref} geometry={geometry} material={material} frustumCulled={false} />;
+  return <points ref={ref} geometry={geometry} material={material} frustumCulled={false} renderOrder={-5} />;
 }

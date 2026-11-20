@@ -134,7 +134,12 @@ export const timeline = {
       world: 'space',
       scaleOnMobile: false,
       content: { enter: [0.35, 0.6], exit: null },
-      keys: { rise: [0, 0.6], earthReveal: [0.4, 1] }, // (P2)
+      keys: {
+        rise: [0, 0.6],
+        /** Total cloud cover — the terrain→globe swap happens here, hidden. */
+        worldSwap: 0.35,
+        earthReveal: [0.4, 1],
+      }, // (P2)
     },
   ] as const satisfies readonly SectionConfig[],
 };
@@ -154,3 +159,8 @@ export function globalRanges() {
 
 /** Map p within [a, b] to 0..1, clamped. */
 export const rangeProgress = (p: number, [a, b]: Range) => (b === a ? (p >= b ? 1 : 0) : Math.min(1, Math.max(0, (p - a) / (b - a))));
+
+/** Typed access to one section's config (and its keys). */
+export function sectionConfig<I extends SectionId>(id: I) {
+  return timeline.sections.find((s) => s.id === id) as Extract<TimelineSection, { id: I }>;
+}

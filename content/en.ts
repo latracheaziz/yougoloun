@@ -173,10 +173,10 @@ export const en: Content = {
     notFound: { title: 'Page not found', back: 'Back to home' },
   },
 
-  // ⚠ NOT FROM THE PDF (composed from PDF phrases)
+  // ⚠ NOT FROM THE PDF — title approved by the client
   seo: {
-    title: 'YOUGOLOUN (يقولون) — Full-Service Digital Marketing & Growth Agency for GCC & MENA',
-    description: 'Moving Brands Forward. Full-service digital marketing & growth agency for GCC & MENA, based in Hail, Kingdom of Saudi Arabia.',
+    title: 'Yougoloun | Digital Marketing & Growth Agency in Hail, Saudi Arabia',
+    description: 'Moving Brands Forward. Yougoloun is a full-service digital marketing agency in Hail, Saudi Arabia, building digital growth engines for brands across the GCC and MENA.',
     ogLocale: 'en_US',
   },
 };
