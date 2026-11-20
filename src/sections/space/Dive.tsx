@@ -7,7 +7,7 @@ import { rangeProgress, sectionConfig } from '@/config/timeline';
 const KEYS = sectionConfig('positioning').keys;
 
 /**
- * PDF §5 title over the dive. As the clouds brighten the text turns from sand to ink and its
+ * PDF §5 title over the dive. As the clouds brighten the text turns from mist to ink and its
  * scrim from a dark veil to a pale one, so it stays readable on every frame of the fall.
  * The three positioning statements follow in the light document.
  */

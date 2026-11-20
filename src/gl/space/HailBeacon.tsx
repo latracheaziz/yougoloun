@@ -15,8 +15,8 @@ export function HailBeacon() {
   const corePosition = useMemo(() => HAIL_LOCAL.clone().multiplyScalar(1.004), []);
   const ringPosition = useMemo(() => HAIL_LOCAL.clone().multiplyScalar(1.0025), []);
   const orientation = useMemo(() => new Quaternion().setFromUnitVectors(new Vector3(0, 0, 1), HAIL_LOCAL.clone().normalize()), []);
-  const color = useMemo(() => token('ember'), []);
-  const hot = useMemo(() => token('glow'), []);
+  const color = useMemo(() => token('accent'), []);
+  const hot = useMemo(() => token('accentLight'), []);
 
   const material = useMemo(
     () =>

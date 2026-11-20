@@ -6,9 +6,9 @@ export default function NotFound() {
   return (
     <main className="grid min-h-svh place-items-center px-[var(--gutter)] text-center">
       <div>
-        <p className="label text-sand/50">404</p>
+        <p className="label text-mist/50">404</p>
         <h1 className="display mt-6 text-5xl md:text-7xl">{t.ui.notFound.title}</h1>
-        <Link to={`/${t.lang}`} className="label mt-10 inline-block border-b border-sand/30 pb-1 hover:border-ember hover:text-ember">
+        <Link to={`/${t.lang}`} className="label mt-10 inline-block border-b border-mist/30 pb-1 hover:border-accent hover:text-accent">
           {t.ui.notFound.back}
         </Link>
       </div>

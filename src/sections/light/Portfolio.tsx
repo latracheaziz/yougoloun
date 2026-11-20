@@ -17,11 +17,10 @@ export function Portfolio() {
   const reduced = useApp((s) => s.reducedMotion);
   const root = useRef<HTMLElement>(null);
   const track = useRef<HTMLDivElement>(null);
-  const bar = useRef<HTMLSpanElement>(null);
   const [index, setIndex] = useState(0);
   useReveal(root);
 
-  // progress bar + current card
+  // current card (counter)
   useEffect(() => {
     const el = track.current;
     if (!el) return;
@@ -29,7 +28,6 @@ export function Portfolio() {
       const max = el.scrollWidth - el.clientWidth;
       const x = Math.abs(el.scrollLeft);
       const progress = max > 0 ? x / max : 0;
-      if (bar.current) bar.current.style.transform = `scaleX(${0.12 + progress * 0.88})`;
       setIndex(Math.round(progress * (t.portfolio.items.length - 1)));
     };
     onScroll();
@@ -107,9 +105,6 @@ export function Portfolio() {
             <span lang="en" dir="ltr" className="font-mono text-sm muted">
               {String(index + 1).padStart(2, '0')} / {String(count).padStart(2, '0')}
             </span>
-            <span className="relative h-px w-28 overflow-hidden bg-ink/12">
-              <span ref={bar} className="absolute inset-0 origin-left bg-brand-gradient rtl:origin-right" style={{ transform: 'scaleX(0.12)' }} />
-            </span>
             <button type="button" aria-label={t.ui.carousel.previous} onClick={() => go(-1)} className="chip size-12 justify-center p-0">
               <span aria-hidden="true" className="rtl:-scale-x-100">←</span>
             </button>
@@ -134,7 +129,7 @@ export function Portfolio() {
             <article
               key={item.slug}
               aria-roledescription="slide"
-              aria-label={`${i + 1} / ${count} — ${item.name}`}
+              aria-label={`${i + 1} / ${count}, ${item.name}`}
               className="group w-[min(84vw,1040px)] shrink-0 snap-start select-none"
               style={{ '--accent': p.accent } as CSSProperties}
             >

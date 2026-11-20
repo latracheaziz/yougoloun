@@ -27,6 +27,6 @@ void main() {
   float s = texture2D(uNoise, vec2(ang * 6.0, r * 0.3 - uTime * 0.85)).r;
   float streak = pow(smoothstep(0.52, 0.95, s), 5.0) * smoothstep(0.1, 0.62, r) * uStreaks;
 
-  vec3 color = coverColor * cover + vec3(1.0, 0.95, 0.88) * streak * 1.4 * (1.0 - cover);
+  vec3 color = coverColor * cover + vec3(1.0) * streak * 1.4 * (1.0 - cover);
   gl_FragColor = vec4(color, cover);
 }

@@ -39,9 +39,9 @@ export function Faq() {
                         aria-hidden="true"
                         className="relative mt-[0.15em] grid size-9 shrink-0 place-items-center rounded-full border hairline transition-colors duration-500 group-hover:border-blue group-aria-expanded:border-transparent group-aria-expanded:bg-[image:var(--p-gradient-brand)]"
                       >
-                        <span className="relative size-3.5">
+                        <span className="relative size-3.5 transition-transform duration-500 group-aria-expanded:rotate-45">
                           <span className="absolute inset-x-0 top-1/2 h-px bg-current" />
-                          <span className="absolute inset-y-0 start-1/2 w-px bg-current transition-transform duration-500 group-aria-expanded:scale-y-0" />
+                          <span className="absolute inset-y-0 start-1/2 w-px bg-current" />
                         </span>
                       </span>
                     </button>

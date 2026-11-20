@@ -140,7 +140,7 @@ export const en: Content = {
       },
       {
         q: 'How do you measure campaign success?',
-        a: 'Every partnership is tied to clear KPIs—including cost per acquisition (CPA), return on ad spend (ROAS), qualified leads, store foot traffic, and online order revenue.',
+        a: 'Every partnership is tied to clear KPIs, including cost per acquisition (CPA), return on ad spend (ROAS), qualified leads, store foot traffic, and online order revenue.',
       },
     ],
   },

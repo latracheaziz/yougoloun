@@ -33,7 +33,7 @@ export function Stars() {
     const sizes = new Float32Array(count);
     const phases = new Float32Array(count);
     const colors = new Float32Array(count * 3);
-    const warm = token('glow');
+    const warm = token('accentLight');
     const cool = new Color('#a9c6ff');
     const white = new Color('#ffffff');
     const band = GALACTIC_NORMAL;

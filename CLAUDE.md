@@ -73,7 +73,7 @@ Vite 8 (Rolldown) · React 19 · TypeScript 7 · React Router 8 · three r187 ·
 the SVG arrives). A Vite plugin (`vite.config.ts`) injects them as `--p-*` custom properties into `<head>`;
 Tailwind tokens in `src/styles/index.css` (`@theme`) only point at them; WebGL reads the file via `token()`.
 
-**Space part (golden hour)** — night, deep, sand, **ember (orange lives only here)**, glow, haze (3D only).
+**Space part** — night, deep, mist (text), accent = brand blue, accentLight = brand blue-light, haze (3D only). **No orange anywhere on the site.**
 
 **Light site** (wrapper `.light`; never give it a background — the Arrival top must stay transparent):
 - Brand: blue `#4BAFE1` (light `#6CC4EE` / deep `#3A9AD3`), green `#87B84D` (`#9CC566` / `#74AE42`), navy `#2B2A5C`;

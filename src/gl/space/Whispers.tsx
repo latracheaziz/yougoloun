@@ -87,7 +87,7 @@ export function Whispers() {
         uniforms: {
           uAtlas: { value: null },
           uGrid: { value: new Vector2(COLS, ROWS) },
-          uColor: { value: token('sand') },
+          uColor: { value: token('mist') },
           uOpacity: { value: 0 },
           uSize: { value: mobile ? 74 : 92 },
           uPixelRatio: { value: 1 },

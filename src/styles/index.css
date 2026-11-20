@@ -6,13 +6,12 @@
    These Tailwind tokens only point at them (bg-blue, text-ink, border-green/30 …).
    `static` = always emit the variables, even if no utility uses them. */
 @theme static {
-  /* SPACE / golden hour — the only place orange lives */
+  /* SPACE part (hero → dive): logo blues as accents, no orange */
   --color-night: var(--p-night);
   --color-deep: var(--p-deep);
-  --color-sand: var(--p-sand);
-  --color-ember: var(--p-ember);
-  --color-granite: var(--p-granite);
-  --color-glow: var(--p-glow);
+  --color-mist: var(--p-mist);
+  --color-accent: var(--p-accent);
+  --color-accent-light: var(--p-accent-light);
   --color-haze: var(--p-haze);
 
   /* BRAND (logo): blue + green speech bubbles, navy microphone */
@@ -55,7 +54,7 @@ html[lang='ar'] {
 
   html {
     background: var(--color-night);
-    color: var(--color-sand);
+    color: var(--color-mist);
     font-family: var(--font-body);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -70,12 +69,12 @@ html[lang='ar'] {
   }
 
   ::selection {
-    background: var(--color-ember);
+    background: var(--color-accent);
     color: var(--color-night);
   }
 
   :focus-visible {
-    outline: 1.5px solid var(--color-glow);
+    outline: 1.5px solid var(--color-accent-light);
     outline-offset: 4px;
     border-radius: 2px;
   }
@@ -150,20 +149,20 @@ html[lang='ar'] {
     letter-spacing: 0;
   }
   .btn-primary {
-    background: var(--color-ember);
+    background: var(--color-accent);
     color: var(--color-night);
   }
   .btn-primary:hover {
-    background: var(--color-glow);
+    background: var(--color-accent-light);
   }
   .btn-ghost {
-    border: 1px solid color-mix(in oklab, var(--color-sand) 28%, transparent);
+    border: 1px solid color-mix(in oklab, var(--color-mist) 28%, transparent);
     background: color-mix(in oklab, var(--color-night) 55%, transparent);
-    color: var(--color-sand);
+    color: var(--color-mist);
     backdrop-filter: blur(10px);
   }
   .btn-ghost:hover {
-    border-color: var(--color-sand);
+    border-color: var(--color-mist);
   }
 
   .hero-title {
@@ -313,7 +312,7 @@ html[lang='ar'] {
 
 /* Header tone: light text over space, dark text over clouds and paper. */
 .site-header {
-  --h-fg: var(--color-sand);
+  --h-fg: var(--color-mist);
   --h-glass: color-mix(in oklab, var(--color-night) 40%, transparent);
   color: var(--h-fg);
   transition: transform 0.6s var(--ease-out-expo), color 0.4s ease;
@@ -488,10 +487,10 @@ html[lang='ar'] {
   opacity: 1;
 }
 
-/* Dive title: sand → ink as the clouds brighten, with a matching scrim. */
+/* Dive title: mist → ink as the clouds brighten, with a matching scrim. */
 .dive-title {
   --ink: 0;
-  color: color-mix(in oklab, var(--color-sand), var(--color-ink) calc(var(--ink) * 100%));
+  color: color-mix(in oklab, var(--color-mist), var(--color-ink) calc(var(--ink) * 100%));
 }
 .dive-scrim {
   position: absolute;
@@ -505,9 +504,9 @@ html[lang='ar'] {
 
 /* Altitude meter: dark glass over space, light glass over the clouds. */
 .altimeter {
-  color: var(--color-sand);
+  color: var(--color-mist);
   background: color-mix(in oklab, var(--color-night) 45%, transparent);
-  border-color: color-mix(in oklab, var(--color-sand) 12%, transparent);
+  border-color: color-mix(in oklab, var(--color-mist) 12%, transparent);
   transition: color 0.4s ease, background-color 0.4s ease, border-color 0.4s ease;
 }
 .altimeter[data-tone='light'] {

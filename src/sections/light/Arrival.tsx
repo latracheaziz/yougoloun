@@ -14,7 +14,7 @@ export function Arrival() {
   useReveal(root);
 
   return (
-    <section ref={root} data-tone="light" aria-label={`${site.hail.coords} — ${t.ui.arrival.place}`} className="relative">
+    <section ref={root} data-tone="light" aria-label={`${site.hail.coords}, ${t.ui.arrival.place}`} className="relative">
       <div aria-hidden="true" className="h-[75vh] bg-[linear-gradient(to_bottom,transparent,var(--color-paper)_85%)]" />
       <div className="bg-paper">
         <div className="shell grid min-h-[90svh] place-items-center pb-[12vh] text-center">

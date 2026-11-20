@@ -85,7 +85,7 @@ export function Header() {
               e.preventDefault();
               go('home');
             }}
-            aria-label={`${t.brand.name} — ${t.nav.items[0].label}`}
+            aria-label={`${t.brand.name}, ${t.nav.items[0].label}`}
           >
             <Wordmark />
           </a>

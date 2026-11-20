@@ -24,7 +24,7 @@ export function SunFlare() {
         depthWrite: false,
         blending: AdditiveBlending,
         uniforms: {
-          uColor: { value: token('glow') },
+          uColor: { value: token('accentLight') },
           uCore: { value: new Color(1, 0.97, 0.92) },
           uIntensity: { value: 1 },
           uTime: { value: 0 },

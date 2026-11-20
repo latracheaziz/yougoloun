@@ -95,7 +95,7 @@ export default function Home() {
 
   return (
     <>
-      <a href="#main" className="label sr-only z-50 rounded-full bg-sand px-4 py-3 text-night focus:not-sr-only focus:fixed focus:start-4 focus:top-4">
+      <a href="#main" className="label sr-only z-50 rounded-full bg-mist px-4 py-3 text-night focus:not-sr-only focus:fixed focus:start-4 focus:top-4">
         {t.ui.skipToContent}
       </a>
 

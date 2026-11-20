@@ -11,7 +11,7 @@ export function About() {
         <h2 id="about-title" className="display mt-5 text-[clamp(2.4rem,5.6vw,5.25rem)]">
           {t.about.title}
         </h2>
-        <p className="mt-6 max-w-[34rem] text-[clamp(1rem,1.15vw,1.15rem)] leading-relaxed text-sand/78">{t.about.body}</p>
+        <p className="mt-6 max-w-[34rem] text-[clamp(1rem,1.15vw,1.15rem)] leading-relaxed text-mist/78">{t.about.body}</p>
       </div>
     </section>
   );

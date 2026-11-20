@@ -116,9 +116,9 @@ export function Services() {
                         {s.title}
                       </span>
                       <span className="label col-span-2 hidden muted md:block">{t.ui.serviceFilters[categoryOf(s.num)]}</span>
-                      <span aria-hidden="true" className="relative col-span-1 ms-auto size-4 self-center">
+                      <span aria-hidden="true" className="relative col-span-1 ms-auto size-4 self-center transition-transform duration-500 group-aria-expanded:rotate-45">
                         <span className="absolute inset-x-0 top-1/2 h-px bg-current" />
-                        <span className="absolute inset-y-0 start-1/2 w-px bg-current transition-transform duration-500 group-aria-expanded:rotate-90 group-aria-expanded:scale-y-0" />
+                        <span className="absolute inset-y-0 start-1/2 w-px bg-current" />
                       </span>
                     </button>
                     <div id={panel} role="region" aria-label={s.title} className="expander" data-open={expanded || undefined}>

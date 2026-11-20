@@ -64,7 +64,7 @@ export function AltitudeMeter() {
         <span className="absolute inset-y-0 start-1/2 w-px bg-current opacity-20" />
         <span className="absolute inset-0 opacity-35 [background:repeating-linear-gradient(to_bottom,currentColor_0_1px,transparent_1px_10px)] [mask-image:linear-gradient(90deg,transparent_30%,#000_30%,#000_70%,transparent_70%)]" />
         <span ref={marker} className="absolute inset-x-0 top-0 block h-full">
-          <span className="absolute -start-1 top-0 block h-[2px] w-5 -translate-y-1/2 bg-ember" />
+          <span className="absolute -start-1 top-0 block h-[2px] w-5 -translate-y-1/2 bg-accent" />
         </span>
       </div>
     </div>

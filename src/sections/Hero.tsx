@@ -64,14 +64,13 @@ export function Hero() {
     >
       <div className="flex flex-1 flex-col justify-start px-[var(--gutter)] pt-[clamp(6.5rem,16vh,10rem)] landscape:justify-center landscape:pt-[5rem]">
         <div className="max-w-[min(48rem,54vw)] portrait:max-w-none">
-          <p data-hero-in className="label flex items-center gap-3 text-sand/65">
-            <span aria-hidden="true" className="h-px w-8 shrink-0 bg-ember" />
+          <p data-hero-in className="label flex items-center gap-3 text-mist/65">
             {t.hero.tagline}
           </p>
           <h1 id="hero-title" ref={title} className="display hero-title mt-6 text-balance">
             {t.hero.headline}
           </h1>
-          <p data-hero-in className="mt-7 max-w-[33rem] text-[clamp(0.95rem,1.05vw,1.0625rem)] leading-relaxed text-sand/72">
+          <p data-hero-in className="mt-7 max-w-[33rem] text-[clamp(0.95rem,1.05vw,1.0625rem)] leading-relaxed text-mist/72">
             {t.hero.subheadline}
           </p>
           <div data-hero-in className="mt-9 flex flex-wrap gap-3">
@@ -102,11 +101,11 @@ export function Hero() {
 function ScrollHint({ label }: { label: string }) {
   return (
     <div data-hero-in aria-hidden="true" className="pointer-events-none absolute end-[var(--gutter)] bottom-24 flex items-center gap-3 max-md:hidden">
-      <span className="label text-sand/60">{label}</span>
-      <span className="relative block h-10 w-px overflow-hidden bg-sand/15">
-        <span className="absolute inset-x-0 top-0 h-1/2 animate-[scrollcue_2.2s_var(--ease-in-out-quart)_infinite] bg-sand motion-reduce:animate-none" />
+      <span className="label text-mist/60">{label}</span>
+      <span className="relative block h-10 w-px overflow-hidden bg-mist/15">
+        <span className="absolute inset-x-0 top-0 h-1/2 animate-[scrollcue_2.2s_var(--ease-in-out-quart)_infinite] bg-mist motion-reduce:animate-none" />
       </span>
-      <span className="label text-sand/60">↓</span>
+      <span className="label text-mist/60">↓</span>
     </div>
   );
 }
@@ -115,7 +114,7 @@ function ScrollHint({ label }: { label: string }) {
 function PillarsBar({ pillars }: { pillars: string[] }) {
   const run = [...pillars, ...pillars];
   return (
-    <div data-hero-in className="relative border-t border-sand/10 bg-night/30 backdrop-blur-[2px]">
+    <div data-hero-in className="relative border-t border-mist/10 bg-night/30 backdrop-blur-[2px]">
       <ul className="sr-only">
         {pillars.map((p) => (
           <li key={p}>{p}</li>
@@ -127,8 +126,8 @@ function PillarsBar({ pillars }: { pillars: string[] }) {
             <div key={half} className="flex shrink-0 items-center">
               {run.map((p, i) => (
                 <span key={`${half}-${i}`} className="flex items-center">
-                  <span className="font-display px-7 text-[clamp(1rem,1.4vw,1.25rem)] font-medium whitespace-nowrap text-sand/85">{p}</span>
-                  <span className="text-[0.7rem] text-ember">✦</span>
+                  <span className="font-display px-7 text-[clamp(1rem,1.4vw,1.25rem)] font-medium whitespace-nowrap text-mist/85">{p}</span>
+                  <span className="text-[0.7rem] text-accent">✦</span>
                 </span>
               ))}
             </div>

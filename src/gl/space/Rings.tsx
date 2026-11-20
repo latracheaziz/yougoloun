@@ -15,10 +15,10 @@ const Y = new Vector3(0, 1, 0);
 
 /** Ring order = cornerstone order in content: Performance, Strategy, Production, Growth. */
 const RINGS: { color: Token; normal: Vector3; speed: number; phase: number }[] = [
-  { color: 'ember', normal: new Vector3(0.12, 1, 0.08), speed: 0.07, phase: 0.1 },
-  { color: 'sand', normal: new Vector3(0.75, 0.62, 0.2), speed: -0.055, phase: 0.45 },
-  { color: 'glow', normal: new Vector3(-0.68, 0.5, 0.52), speed: 0.06, phase: 0.7 },
-  { color: 'haze', normal: new Vector3(0.18, 0.42, -0.9), speed: -0.075, phase: 0.25 },
+  { color: 'blue', normal: new Vector3(0.12, 1, 0.08), speed: 0.07, phase: 0.1 },
+  { color: 'green', normal: new Vector3(0.75, 0.62, 0.2), speed: -0.055, phase: 0.45 },
+  { color: 'blueLight', normal: new Vector3(-0.68, 0.5, 0.52), speed: 0.06, phase: 0.7 },
+  { color: 'greenLight', normal: new Vector3(0.18, 0.42, -0.9), speed: -0.075, phase: 0.25 },
 ];
 
 /** Final normals: four great circles that all contain Hail's direction, 45° apart → they meet above Hail. */
@@ -87,7 +87,7 @@ export function Rings() {
   });
 
   const sparkAt = useMemo(() => HAIL_LOCAL.clone().multiplyScalar(RING_RADIUS), []);
-  const sparkColor = useMemo(() => token('glow'), []);
+  const sparkColor = useMemo(() => token('accentLight'), []);
 
   return (
     <group>

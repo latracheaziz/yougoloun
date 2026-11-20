@@ -34,14 +34,14 @@ export const space = {
 export const dive = {
   /** 0..1 — full-screen cloud white-out, noise-dissolved. */
   cover: 0,
-  coverColor: new Color(1, 0.97, 0.93),
+  coverColor: new Color(1, 1, 1),
   /** 0..1 — radial speed streaks. */
   streaks: 0,
   /** Distance travelled through the cloud stack (layer units). */
   cloudTravel: 0,
   clouds: 0,
-  cloudLit: new Color(1.3, 1.12, 0.95),
-  cloudShade: new Color(0.52, 0.36, 0.32),
+  cloudLit: new Color(1.22, 1.24, 1.28),
+  cloudShade: new Color(0.42, 0.48, 0.6),
   /** Camera shake amplitude (radians). */
   shake: 0,
 };

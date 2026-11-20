@@ -33,14 +33,19 @@ export const light = {
   band: '#1D1C45',
 };
 
-/** Space / golden-hour part — the only place orange lives. */
+/**
+ * Space part (hero → dive). No orange anywhere on the site: the accents are the logo's blues,
+ * so this part follows the brand palette too.
+ */
 export const space = {
   night: '#05070D',
   deep: '#0B1B3A',
-  sand: '#E8D3B0',
-  ember: '#FF6B2C',
-  granite: '#3A2E2A',
-  glow: '#FFC46B',
+  /** text over space: cool off-white */
+  mist: '#EEF0F5',
+  /** accents over space (section numbers, highlights, terminator, arcs) */
+  accent: brand.blue,
+  /** soft highlights (city lights, sun flare, glows) */
+  accentLight: brand.blueLight,
   /** atmosphere blue (3D only) */
   haze: '#6FA6FF',
 };

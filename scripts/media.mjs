@@ -25,9 +25,10 @@ async function brand([studio, social, analytics]) {
 
 /** Placeholder art per project, in its accent palette, clearly marked as a placeholder. */
 const PROJECTS = {
-  hajiss: { bg: ['#2A1A12', '#6B4226', '#C08A5B'], accent: '#E7C9A0', title: 'Hajiss Cafe', motif: 'steam' },
-  ghalia: { bg: ['#1C0F0B', '#3B2219', '#7A4A2E'], accent: '#D4AF6A', title: 'Ghalia Chocolate', motif: 'facets' },
-  odun: { bg: ['#2B0E06', '#8A2A0E', '#E8571E'], accent: '#FFC08A', title: 'Odun Pide', motif: 'embers' },
+  // brand palette only (src/config/palette.ts): blue, green, navy
+  hajiss: { bg: ['#0F3550', '#2C7DB5', '#6CC4EE'], accent: '#DFF1FB', title: 'Hajiss Cafe', motif: 'steam' },
+  ghalia: { bg: ['#1C3511', '#5E8F33', '#9CC566'], accent: '#EEF6E2', title: 'Ghalia Chocolate', motif: 'facets' },
+  odun: { bg: ['#14142E', '#2B2A5C', '#3A9AD3'], accent: '#CFEAF8', title: 'Odun Pide', motif: 'embers' },
 };
 
 function motif(kind, accent) {

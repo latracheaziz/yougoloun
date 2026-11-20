@@ -50,7 +50,7 @@ export function Earth({ children }: { children?: ReactNode }) {
   const geometry = useMemo(() => new SphereGeometry(1, segments, Math.round(segments / 2)), [segments]);
 
   const materials = useMemo(() => {
-    const twilight = token('ember');
+    const twilight = token('accent');
     const nightRim = token('deep').multiplyScalar(4);
     const earth = new ShaderMaterial({
       vertexShader: sphereVert,
@@ -65,7 +65,7 @@ export function Earth({ children }: { children?: ReactNode }) {
         uAtmosphereDay: { value: token('haze') },
         uAtmosphereTwilight: { value: twilight },
         uAtmosphereNight: { value: nightRim },
-        uCityLights: { value: token('glow') },
+        uCityLights: { value: token('accentLight') },
         uNightLights: { value: 1 },
         uCloudOffset: { value: 0 },
         uNormalStrength: { value: 0.85 },

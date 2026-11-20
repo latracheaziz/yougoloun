@@ -2,6 +2,7 @@
  * Configuration of the light site (after the clouds). No copy here — copy lives in content/*.
  */
 import type { ProjectSlug } from '@content/types';
+import { brand, light } from './palette';
 
 // ── Services ────────────────────────────────────────────────────────────────────────
 export type ServiceCategory = 'growth' | 'brand' | 'content';
@@ -40,11 +41,14 @@ export const servicePreviews: Record<string, { image: keyof typeof brandImages; 
 };
 
 // ── Portfolio ───────────────────────────────────────────────────────────────────────
-/** Each project's own accent + tint, and its image (placeholders until the client sends photos). */
+/**
+ * Each project wears one colour of the brand palette (no orange anywhere). `ink` is the text colour on
+ * the card (always navy ink); `accent` only colours tags and borders. Images are placeholders.
+ */
 export const projects: Record<ProjectSlug, { accent: string; tint: string; ink: string; image: string }> = {
-  hajiss: { accent: '#8A5A3B', tint: '#EADFD3', ink: '#2A1A12', image: '/media/work/hajiss/cover.webp' },
-  ghalia: { accent: '#A9823F', tint: '#E9E1CF', ink: '#1C0F0B', image: '/media/work/ghalia/cover.webp' },
-  odun: { accent: '#E2541B', tint: '#F4DED3', ink: '#2B0E06', image: '/media/work/odun/cover.webp' },
+  hajiss: { accent: brand.blue, tint: '#E3F2FA', ink: light.ink, image: '/media/work/hajiss/cover.webp' },
+  ghalia: { accent: brand.green, tint: '#EDF5E4', ink: light.ink, image: '/media/work/ghalia/cover.webp' },
+  odun: { accent: brand.navy, tint: '#E6E6F0', ink: light.ink, image: '/media/work/odun/cover.webp' },
 };
 
 // ── Platforms marquee (brand names, not translated) ────────────────────────────────
