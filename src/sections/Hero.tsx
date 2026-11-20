@@ -75,7 +75,7 @@ export function Hero() {
             {t.hero.subheadline}
           </p>
           <div data-hero-in className="mt-9 flex flex-wrap gap-3">
-            <a href={whatsappLink(t.ui.whatsappMessage)} target="_blank" rel="noopener noreferrer" className="btn btn-primary">
+            <a href={whatsappLink(t.ui.whatsappMessage)} target="_blank" rel="noopener noreferrer" className="btn btn-navy ring-1 ring-white/20">
               {t.hero.actions.primary}
               <span aria-hidden="true">↗</span>
             </a>
