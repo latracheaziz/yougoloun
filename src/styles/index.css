@@ -334,15 +334,7 @@ html[lang='ar'] {
 .site-header[data-scrolled] .glass {
   opacity: 1;
 }
-/* The header CTA is ember over space, brand gradient over the light site. */
-.site-header[data-tone='light'] .btn-primary,
-.site-header[data-tone='light'] .btn-primary:hover {
-  background-image: var(--p-gradient-brand);
-  color: var(--color-ink);
-}
-.site-header[data-tone='light'] .btn-primary:hover {
-  filter: brightness(1.06) saturate(1.1);
-}
+/* The header CTA is navy with white text on every background (client request). */
 
 /* ───────────────────────── Journey layout ─────────────────────────
    .track  = invisible scroll spacer (height = timeline length)

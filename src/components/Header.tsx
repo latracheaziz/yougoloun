@@ -121,7 +121,7 @@ export function Header() {
               {t.ui.switchLang.short}
             </Link>
             <Magnetic className="max-sm:hidden">
-              <a href={whatsappLink(t.ui.whatsappMessage)} target="_blank" rel="noopener noreferrer" data-cursor="talk" className="btn btn-primary">
+              <a href={whatsappLink(t.ui.whatsappMessage)} target="_blank" rel="noopener noreferrer" data-cursor="talk" className="btn btn-navy ring-1 ring-white/20">
                 {t.nav.cta.short}
               </a>
             </Magnetic>
