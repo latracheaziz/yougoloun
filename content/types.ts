@@ -1,0 +1,113 @@
+/**
+ * Shape of all site copy. `en.ts` and `ar.ts` must both satisfy `Content`,
+ * so a missing or extra string in one language is a type error.
+ *
+ * Source of truth: docs/yougoloun-content.pdf. Everything is copied verbatim,
+ * except the `ui` and `seo` blocks, which are NOT in the PDF and need review.
+ */
+export type Lang = 'ar' | 'en';
+export type Dir = 'rtl' | 'ltr';
+
+/** Sections reachable from the menu (ids are the same in both languages). */
+export type NavTarget = 'home' | 'about' | 'services' | 'portfolio' | 'process' | 'faq' | 'contact';
+export type CornerstoneKey = 'performance' | 'strategy' | 'production' | 'growth';
+export type ProjectSlug = 'hajiss' | 'ghalia' | 'odun';
+
+export interface Content {
+  lang: Lang;
+  dir: Dir;
+  brand: { name: string; nameAlt: string };
+
+  /** PDF §1 */
+  nav: {
+    items: { target: NavTarget; label: string }[];
+    privacy: string;
+    /** "Let's Talk / Book a Strategy Call" */
+    cta: { short: string; long: string };
+  };
+
+  /** PDF §2 */
+  hero: {
+    tagline: string;
+    headline: string;
+    subheadline: string;
+    actions: { primary: string; secondary: string };
+    pillars: string[];
+  };
+
+  /** PDF §3 */
+  about: { title: string; label?: string; body: string };
+
+  /** PDF §4 */
+  cornerstones: {
+    title: string;
+    /** "We operate at the intersection…" split at the em dash for layout. */
+    statement: { lead: string; emphasis: string };
+    items: { key: CornerstoneKey; title: string; /** English term shown in the AR copy */ term?: string; body: string }[];
+  };
+
+  /** PDF §5 */
+  positioning: {
+    label: string;
+    title: string;
+    items: { num: string; from: string; to: string; body: string }[];
+  };
+
+  /** PDF §6 */
+  services: {
+    title: string;
+    label: string;
+    items: { num: string; title: string; body: string }[];
+  };
+
+  /** PDF §7 — "Scope" lists are split on commas into tags (same words). */
+  portfolio: {
+    title: string;
+    label?: string;
+    scopeLabel: string;
+    items: { slug: ProjectSlug; name: string; nameAlt: string; description: string; scope: string[] }[];
+  };
+
+  /** PDF §8 */
+  process: {
+    title: string;
+    label: string;
+    stepLabel: string;
+    steps: { num: string; title: string; body: string }[];
+  };
+
+  /** PDF §9 */
+  faq: { title: string; label: string; items: { q: string; a: string }[] };
+
+  /** PDF §10 */
+  contact: {
+    headline: string;
+    body: string;
+    labels: { email: string; phone: string; location: string };
+    location: string;
+    copyright: string;
+  };
+
+  /** ⚠ NOT FROM THE PDF — interface microcopy. Review before launch. */
+  ui: {
+    skipToContent: string;
+    scrollHint: string;
+    menu: string;
+    close: string;
+    switchLang: { label: string; short: string; ariaLabel: string };
+    cursor: { view: string; drag: string; talk: string };
+    altitude: string;
+    localTime: string;
+    sound: { on: string; off: string };
+    whatsapp: string;
+    /** Pre-filled WhatsApp message for "Book a Strategy Call". */
+    whatsappMessage: string;
+    loading: string;
+    hailLabel: string;
+    earthCredit: string;
+    notFound: { title: string; back: string };
+  };
+
+  /** ⚠ NOT FROM THE PDF — meta tags composed from PDF phrases. Review before launch. */
+  seo: { title: string; description: string; ogLocale: string };
+}

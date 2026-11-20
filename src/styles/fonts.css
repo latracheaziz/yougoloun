@@ -1,0 +1,33 @@
+/* Self-hosted fonts. Browsers only download a file when a glyph from its unicode-range is rendered. */
+
+/* Arabic display (variable) · Arabic body · Latin body · mono labels — OFL, via Fontsource */
+@import '@fontsource-variable/alexandria/index.css';
+@import '@fontsource/ibm-plex-sans-arabic/400.css';
+@import '@fontsource/ibm-plex-sans-arabic/500.css';
+@import '@fontsource/ibm-plex-sans/400.css';
+@import '@fontsource/ibm-plex-sans/500.css';
+@import '@fontsource/ibm-plex-mono/400.css';
+@import '@fontsource/ibm-plex-mono/500.css';
+
+/* Latin display — Clash Display (Indian Type Foundry / Fontshare, free for commercial use) */
+@font-face {
+  font-family: 'Clash Display';
+  src: url('../assets/fonts/clash-display-500.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Clash Display';
+  src: url('../assets/fonts/clash-display-600.woff2') format('woff2');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Clash Display';
+  src: url('../assets/fonts/clash-display-700.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}

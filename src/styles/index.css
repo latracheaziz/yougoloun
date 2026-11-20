@@ -1,0 +1,240 @@
+@import './fonts.css';
+@import 'tailwindcss';
+
+/* ───────────────────────── Design tokens (single source for HTML + WebGL) ─────────────────────────
+   The WebGL layer reads these same variables at runtime (src/gl/palette.ts).
+   `static` = always emit the variables, even if no utility uses them. */
+@theme static {
+  --color-night: #05070d;
+  --color-deep: #0b1b3a;
+  --color-sand: #e8d3b0;
+  --color-ember: #ff6b2c;
+  --color-granite: #3a2e2a;
+  --color-glow: #ffc46b;
+  /* atmosphere blue for the day-side limb of the Earth (3D only) */
+  --color-haze: #6fa6ff;
+
+  --font-display: 'Clash Display', 'Alexandria Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-body: 'IBM Plex Sans', 'IBM Plex Sans Arabic', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', monospace;
+
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out-quart: cubic-bezier(0.76, 0, 0.24, 1);
+}
+
+/* Arabic pages swap the families; Latin runs inside Arabic text fall back gracefully. */
+html[lang='ar'] {
+  --font-display: 'Alexandria Variable', 'Clash Display', ui-sans-serif, system-ui, sans-serif;
+  --font-body: 'IBM Plex Sans Arabic', 'IBM Plex Sans', ui-sans-serif, system-ui, sans-serif;
+}
+
+@layer base {
+  :root {
+    /* Height of one "stage" (a full screen). JS pins it in px so mobile URL-bar resizes don't jump. */
+    --stage-h: 100svh;
+    --gutter: clamp(1.25rem, 4vw, 3.5rem);
+    color-scheme: dark;
+  }
+
+  html {
+    background: var(--color-night);
+    color: var(--color-sand);
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    font-variant-numeric: lining-nums;
+  }
+
+  body {
+    margin: 0;
+    background: var(--color-night);
+    overflow-x: clip;
+  }
+
+  ::selection {
+    background: var(--color-ember);
+    color: var(--color-night);
+  }
+
+  :focus-visible {
+    outline: 1.5px solid var(--color-glow);
+    outline-offset: 4px;
+    border-radius: 2px;
+  }
+
+  /* Lenis */
+  html.lenis,
+  html.lenis body {
+    height: auto;
+  }
+  .lenis:not(.lenis-autoToggle).lenis-stopped {
+    overflow: clip;
+  }
+  .lenis.lenis-smooth [data-lenis-prevent] {
+    overscroll-behavior: contain;
+  }
+}
+
+@layer components {
+  /* Display type: tight tracking for Latin only — letter-spacing breaks Arabic joining. */
+  .display {
+    font-family: var(--font-display);
+    font-weight: 600;
+    line-height: 0.92;
+    letter-spacing: -0.035em;
+    word-spacing: 0.08em;
+  }
+  .display:lang(ar) {
+    font-weight: 700;
+    line-height: 1.18;
+    letter-spacing: 0;
+    word-spacing: normal;
+  }
+
+  /* Small mono labels: coordinates, section numbers, tags. */
+  .label {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    line-height: 1.4;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    font-variant-numeric: tabular-nums;
+  }
+  .label:lang(ar) {
+    font-family: var(--font-body);
+    letter-spacing: 0;
+    font-size: 0.8125rem;
+  }
+
+  /* Buttons */
+  .btn {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    min-height: 3rem;
+    padding: 0.85rem 1.5rem;
+    border-radius: 999px;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    transition:
+      background-color 0.5s var(--ease-out-expo),
+      color 0.5s var(--ease-out-expo),
+      border-color 0.5s var(--ease-out-expo);
+  }
+  .btn:lang(ar) {
+    font-family: var(--font-body);
+    font-size: 0.9375rem;
+    font-weight: 500;
+    letter-spacing: 0;
+  }
+  .btn-primary {
+    background: var(--color-ember);
+    color: var(--color-night);
+  }
+  .btn-primary:hover {
+    background: var(--color-glow);
+  }
+  .btn-ghost {
+    border: 1px solid color-mix(in oklab, var(--color-sand) 28%, transparent);
+    background: color-mix(in oklab, var(--color-night) 55%, transparent);
+    color: var(--color-sand);
+    backdrop-filter: blur(10px);
+  }
+  .btn-ghost:hover {
+    border-color: var(--color-sand);
+  }
+
+  .hero-title {
+    font-size: clamp(3.5rem, 9.6vw, 11.25rem);
+  }
+  .hero-title:lang(ar) {
+    font-size: clamp(2.75rem, 6.6vw, 7.5rem);
+  }
+}
+
+/* ───────────────────────── Journey layout ─────────────────────────
+   .track  = invisible scroll spacer (height = timeline length)
+   .stage  = full-screen layer pinned over the canvas, faded by scroll progress
+   Without JS (html:not(.js)) stages fall back to normal document flow. */
+.track {
+  display: none;
+}
+.js .track {
+  display: block;
+  pointer-events: none;
+}
+.js .stage {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  height: var(--stage-h);
+  opacity: calc(var(--in, 0) * (1 - var(--out, 0)));
+  transform: translate3d(0, calc((1 - var(--in, 0)) * 3.5vh - var(--out, 0) * 3.5vh), 0);
+  pointer-events: none;
+  will-change: opacity, transform;
+}
+.js .stage[data-active] {
+  pointer-events: auto;
+}
+.stage {
+  min-height: var(--stage-h);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .js .stage {
+    transform: none;
+  }
+}
+
+/* Film grain over everything (HTML + WebGL). */
+.grain {
+  position: fixed;
+  inset: -50%;
+  z-index: 40;
+  pointer-events: none;
+  opacity: 0.07;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 1.4 -0.2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  animation: grain 0.9s steps(6) infinite;
+}
+@keyframes grain {
+  0% { transform: translate(0, 0); }
+  20% { transform: translate(-4%, 3%); }
+  40% { transform: translate(3%, -5%); }
+  60% { transform: translate(-6%, -2%); }
+  80% { transform: translate(5%, 4%); }
+  100% { transform: translate(0, 0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .grain { animation: none; }
+}
+
+/* Marquee — direction follows the reading direction. */
+.marquee {
+  --marquee-duration: 38s;
+  display: flex;
+  width: max-content;
+  animation: marquee var(--marquee-duration) linear infinite;
+}
+[dir='rtl'] .marquee {
+  animation-name: marquee-rtl;
+}
+@keyframes marquee {
+  to { transform: translate3d(-50%, 0, 0); }
+}
+@keyframes marquee-rtl {
+  to { transform: translate3d(50%, 0, 0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .marquee { animation: none; }
+}
+
+@keyframes scrollcue {
+  from { transform: translateY(-110%); }
+  to { transform: translateY(220%); }
+}
