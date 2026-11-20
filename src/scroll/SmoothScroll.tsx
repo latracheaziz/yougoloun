@@ -10,12 +10,24 @@ gsap.registerPlugin(ScrollTrigger);
 
 let lenis: Lenis | null = null;
 
-/** Scroll so a section's content is fully revealed. */
-export function scrollToSection(id: SectionId, opts: { immediate?: boolean } = {}) {
-  const i = sectionIds.indexOf(id);
-  if (i < 0) return;
-  const enter = timeline.sections[i].content.enter;
-  const y = (journey.starts[i] ?? 0) + (journey.lengths[i] ?? 0) * (enter ? enter[1] + 0.01 : 0);
+/** The Lenis instance (null with reduced motion). */
+export const getLenis = () => lenis;
+
+/**
+ * Scroll to a section: a space track (so its content is fully revealed) or any element id
+ * of the light document.
+ */
+export function scrollToSection(id: string, opts: { immediate?: boolean } = {}) {
+  const i = sectionIds.indexOf(id as SectionId);
+  let y: number;
+  if (i >= 0) {
+    const enter = timeline.sections[i].content.enter;
+    y = (journey.starts[i] ?? 0) + (journey.lengths[i] ?? 0) * (enter ? enter[1] + 0.01 : 0);
+  } else {
+    const el = document.getElementById(id);
+    if (!el) return;
+    y = el.getBoundingClientRect().top + window.scrollY;
+  }
   if (lenis) lenis.scrollTo(y, { immediate: opts.immediate, duration: 1.6 });
   else window.scrollTo({ top: y, behavior: opts.immediate ? 'instant' : 'smooth' });
 }
@@ -80,8 +92,8 @@ export function SmoothScroll() {
     document.addEventListener('focusin', onFocusIn);
 
     // Deep link (#services …) on first load.
-    const hash = decodeURIComponent(window.location.hash.slice(1)) as SectionId;
-    if (sectionIds.includes(hash)) requestAnimationFrame(() => scrollToSection(hash, { immediate: true }));
+    const hash = decodeURIComponent(window.location.hash.slice(1));
+    if (hash && document.getElementById(hash)) setTimeout(() => scrollToSection(hash, { immediate: true }), 50);
 
     return () => {
       off?.();

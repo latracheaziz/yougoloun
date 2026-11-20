@@ -57,6 +57,7 @@ export function Hero() {
       ref={root}
       id="home"
       data-stage="home"
+      data-tone="dark"
       aria-labelledby="hero-title"
       className="stage flex flex-col"
       style={{ '--in': 1 } as CSSProperties}

@@ -1,18 +1,24 @@
 # YOUGOLOUN (يقولون) — website
 
-Cinematic, scroll-driven 3D site for a digital marketing & growth agency in Hail, KSA.
-Concept: "Moving Brands Forward" — the camera travels from Earth in space → the Gulf → a dive through
-the clouds → Hail (Aja & Salma mountains, Nafud dunes) → back to space. يقولون = "they say".
+Site for a digital marketing & growth agency in Hail, KSA. يقولون = "they say".
+Two parts, one page:
+1. **Space (cinematic, WebGL):** Earth in space → the Gulf (city arcs, "they say" words) → four cornerstone rings
+   meeting above Hail → a dive into the clouds until the screen is white.
+2. **Light site (editorial, document scroll):** the cloud white becomes the paper background; a payoff
+   ("27.5219° N · 41.6907° E — حائل / Hail, Saudi Arabia"), then positioning, services, platforms, portfolio,
+   process, FAQ, contact.
 
 ## Commands
 - `npm run dev` — Vite dev server
 - `npm run build` — typecheck + production build
 - `npm run typecheck`
 - `npm run check` — **phase gate**: boots Vite, opens /ar and /en (desktop + mobile) in headless Edge/Chrome,
-  scrolls every section, fails on any console error, writes screenshots to `.check/`. Use `-- --quick` for the hero only.
-- `npm run moments` — screenshots of the key journey moments at exact scroll positions (desktop + mobile) + contact
-  sheets in `.check/moments/`. Flags: `--all` (every scene), `--lang=en`, `--reduced`, `--fps`, `--query=nofx|tier=low`.
-- `npm run textures` — (re)download + compress Earth maps into `public/textures/earth/{hd,sd}` (`-- --force` to re-encode)
+  scrolls every section, fails on any console error, writes screenshots to `.check/`. `-- --quick` = hero only.
+- `npm run moments` — key-moment screenshots (desktop + mobile, AR + EN) + contact sheets in `.check/moments/`.
+  Flags: `--all`, `--lang=en`, `--reduced`, `--fps`, `--query=nofx|tier=low`. Moments are listed at the top of the script.
+- `npm run textures` — (re)download + compress Earth maps into `public/textures/earth/{hd,sd}`.
+- `npm run media -- --brand <studio> <social> <analytics>` — optimize client images into `public/media/brand/`;
+  `npm run media -- --placeholders` — regenerate portfolio placeholders in `public/media/work/`.
 - Dev-only URL switches: `?nofx` (no postprocessing), `?tier=low|medium|high` (force a quality tier).
 
 ## Stack
@@ -22,70 +28,80 @@ Vite 8 (Rolldown) · React 19 · TypeScript 7 · React Router 8 · three r187 ·
 ## Copy — single source of truth
 - All text comes from `docs/yougoloun-content.pdf` → `content/en.ts` and `content/ar.ts` (shape: `content/types.ts`).
   **Never hardcode copy in components** and never rewrite PDF copy.
-- `ui` and `seo` blocks are NOT from the PDF (flagged in the files) — interface microcopy, needs client review.
+- `ui` and `seo` blocks are NOT from the PDF (flagged) — interface microcopy. `ui.arrival` and
+  `ui.serviceFilters` categories were specified by the client.
 - Arabic was repaired from PDF extraction damage (lam-alef, mirrored brackets, detached diacritics). Keep it that way.
 - Confirmed decisions: email `yougoloun@natheelco.com`; "Odun Pide" in both languages; default language `ar`;
-  "Book a Strategy Call" → WhatsApp with a per-language message; SEO titles in `seo` blocks approved by the client.
+  "Book a Strategy Call" → WhatsApp with a per-language message; SEO titles approved by the client.
+- Non-copy config of the light site (service categories + preview crops, project accents, platforms):
+  `src/config/light.ts`.
 
-## Layout model (important)
-- `src/config/timeline.ts` holds **every scroll timing**. Each section owns a *track* of `length` vh; tracks are
-  back-to-back, so total scroll = Σ lengths (+ footer). Mobile multiplies lengths by `mobileScale`.
-- `src/scroll/Tracks.tsx` renders invisible spacer tracks. Each section's HTML is a **fixed full-screen stage**
-  (`.stage[data-stage=id]`) faded in/out by its `content.enter/exit` ranges (CSS vars `--in` / `--out`).
-  Without JS (`html:not(.js)`) stages fall back to normal flow.
-- `src/scroll/journey.ts` — mutable per-frame scroll state (`journey.p[i]` = local progress of section i).
-  Read it in `useFrame` / DOM listeners; don't put it in React state.
-- Navigation: `scrollToSection(id)` from `src/scroll/SmoothScroll.tsx` (Lenis). Focus inside a hidden stage scrolls to it.
+## Page model (important)
+- **Space part** — `src/config/timeline.ts` holds every scroll timing of the 3D journey: 4 tracks (home, about,
+  cornerstones, positioning = the dive). Each track is an invisible spacer (`src/scroll/Tracks.tsx`); each section's
+  HTML is a **fixed full-screen stage** (`.stage[data-stage]`) faded by its `content.enter/exit` ranges.
+  `src/scroll/journey.ts` holds per-frame progress (`journey.p[i]`) — read it in listeners/useFrame, not React state.
+- **Cloud → paper** — the dive's cover stays total from `positioning.keys.cover`; `PaperLayer` (fixed, between canvas
+  and stages) fades to `#F5F3EF` over `keys.paper`, so the tone-mapped/vignetted WebGL white becomes exact paper.
+  The light document starts right after the last track; its first block (`Arrival`) has a transparent top fading to
+  paper, so it slides over the white-out with no edge. The positioning track keeps full length on phones for this.
+- **Canvas lifecycle** (`useCanvasLifecycle` in `src/pages/Home.tsx`): paused (`frameloop="never"`) once past
+  `keys.paper[1]`, unmounted 4 s later, re-mounted when scrolling back up (hidden behind paper until `glReady`).
+- **Light part** — normal document flow in `src/sections/light/*`, sticky only where it helps (process cards).
+- Navigation: `scrollToSection(id)` (Lenis) works for track ids and any element id. Active section: tracks in the
+  space part, an IntersectionObserver for light sections.
+- Header tone: every stage/section declares `data-tone="dark|light"` (the dive title flips to light as the clouds
+  brighten); the header probes what's under it and switches text colour + glass. Hides on scroll down.
 
-## WebGL
-- One fixed `<Canvas>` (`src/gl/Experience.tsx`), lazy-loaded after first paint. One WebGL context for the whole site.
-- **`src/gl/Director.tsx` is the film editor.** Every frame it maps the scroll position to a camera shot and world
-  state — a pure function of scroll (no lag). Story coordinate `G = sectionIndex + p`. Shots are keyframed on `G`:
-  `SPACE_KEYS` (globe framing: planet offset, camera distance, lat/lon facing the camera, sun) and `HAIL_KEYS`
-  (position/target poses over the terrain). The dive is procedural (`diveShot`). Tweak framing there; tweak *timing*
-  in `timeline.ts`. Only the RTL mirror and the portrait/landscape blend are damped.
-- Two worlds share the canvas, one visible at a time (`world.current`): **space** (Earth, arcs, whispers, rings, Hail
-  beacon, flare) and **hail** (terrain, sky dome, pin, sand). They swap behind a full cloud **cover**
-  (`positioning.keys.worldSwap`, `contact.keys.worldSwap`) — `src/gl/dive/` (cloud layers + transition pass).
-- World state lives in mutable objects in `src/gl/state.ts` (`space`, `dive`, `hail`, `sky`), read in `useFrame`.
-- Globe orientation: nested roll(Z) ⊃ tilt(X) ⊃ spin(Y); `spinToFace(lon)` + `tilt = lat` faces a point to +Z.
-  Lat/lon convention in `src/gl/geo.ts` (matches three's SphereGeometry UVs). Things on the globe (arcs, rings,
-  beacon) are children of `<Earth>` in geographic coordinates.
-- Hail terrain: `src/gl/hail/terrainGen.ts` (pure, procedural Aja / Salma / Nafud / basin, baked golden-hour shadows)
-  runs in a Web Worker; `HailWorld` is a lazy chunk mounted ~1 s after load. +X east, −Z north, 1 unit ≈ 20 m, pin at origin.
-  Golden hour → night colours come from tokens in `src/gl/hail/palette.ts`.
-- `prefers-reduced-motion`: no dive/shake/streaks/cloud layers — static shots with a plain cross-fade through the cover.
-- Shaders are `.glsl/.vert/.frag` files imported with `?raw` from `src/gl/shaders/`. Output linear HDR; end with
-  `#include <tonemapping_fragment>` + `#include <colorspace_fragment>`. Renderer is `flat`; tone mapping is the last
-  postprocessing effect (ACES).
-- Colours: CSS tokens in `src/styles/index.css` (`@theme static`) are the single source; WebGL reads them via
-  `token()` in `src/gl/palette.ts`.
-- Quality: `src/config/quality.ts` tiers (high/medium/low: DPR cap, render scale, bloom levels, particle budgets);
-  texture set (hd/sd) fixed at start-up; drei `PerformanceMonitor` steps tiers at runtime but never above the device's
-  start tier. Postprocessing is the biggest GPU cost (measure with `npm run moments -- --fps --query=nofx`).
+## WebGL (space part)
+- One fixed `<Canvas>` (`src/gl/Experience.tsx`), lazy-loaded after first paint.
+- **`src/gl/Director.tsx`** maps scroll → camera shot + world state (pure function of scroll). Story coordinate
+  `G = sectionIndex + p`; shots keyframed in `KEYS`; the fall is procedural (`diveShot`). Tweak framing there,
+  timing in `timeline.ts`. Only the RTL mirror and the portrait/landscape blend are damped.
+- World state: mutable objects in `src/gl/state.ts` (`space`, `dive`). Globe children (arcs, whispers, rings,
+  beacon) live in geographic coordinates inside `<Earth>`; lat/lon convention in `src/gl/geo.ts`.
+- Shaders: `src/gl/shaders/*` imported with `?raw`; output linear HDR, end with tonemapping + colorspace chunks.
+- Colours: CSS tokens (`@theme static`) are the single source; WebGL reads them via `token()` (`src/gl/palette.ts`).
+- Quality tiers in `src/config/quality.ts` (DPR cap, render scale, bloom levels, particles); `PerformanceMonitor`
+  steps down at runtime. Postprocessing is the main GPU cost.
+- Small extra WebGL: `src/gl/MiniGlobe.tsx` (dotted globe in Contact, own lazy chunk, mounted near view) and
+  `src/interaction/distort.ts` (ONE raw WebGL2 canvas for portfolio hover distortion, attached only while hovering).
+- `prefers-reduced-motion`: no dive/shake/streaks/cloud layers — static shot + plain fade to white.
 
 ## Design system
-- Palette: night `#05070D`, deep `#0B1B3A`, sand `#E8D3B0`, ember `#FF6B2C`, granite `#3A2E2A`, glow `#FFC46B` (+ haze `#6FA6FF`, 3D only).
-- Fonts (self-hosted): Clash Display (Latin display), Alexandria (Arabic display), IBM Plex Sans / Sans Arabic (body),
-  IBM Plex Mono (labels). Arabic pages swap `--font-display` / `--font-body`.
-- `.display` huge titles (tight tracking for Latin only), `.label` small mono caps, `.btn .btn-primary/.btn-ghost`.
-- Film grain is a CSS overlay (`.grain`), not a postprocessing pass.
+**Space part:** night `#05070D`, deep `#0B1B3A`, sand `#E8D3B0`, ember `#FF6B2C`, glow `#FFC46B` (+ haze, 3D only).
+
+**Light site** (wrapper `.light`; never give it a background — the Arrival top must stay transparent):
+- Colours: paper `#F5F3EF` (`bg-paper`), paper-2 `#EBE7E0`, ink `#0E0E10` (`text-ink`), **ember is the only accent**.
+  Muted text = ink 58% (`.muted`), dividers = ink 12% (`.hairline` + `border-*`). No desert colours, no beige text.
+- Grid: `.shell` (gutter + max 1680px) + `.grid-12`; sections use `.section-y`; thin dividers between rows.
+- Type: `.display` (Clash Display / Alexandria) for headlines, `.h-section` for section titles, `.label` for small mono
+  caps; `SectionMark` = "05 / 09 — label".
+- Components: `.chip` (filters, aria-pressed), `.btn` + `.btn-primary` (ember) / `.btn-ink` / `.btn-line`,
+  `.expander` (grid 0fr→1fr height animation; toggle with `data-open`). ⚠ don't name a class `collapse` (Tailwind utility).
+- Dark band: Contact + Footer use `bg-ink text-paper` with `.tone-dark` and `data-tone="dark"` — the story ends in "space".
+- Portfolio cards wear their project's accent (`projects` in `src/config/light.ts`).
+- Interactions: `Cursor` (dot + ring; `data-cursor="view|drag|talk"` shows a labelled disc), `Magnetic` wrapper,
+  `useReveal(scope)` → `[data-reveal="lines"]` (line-by-line masks; words in Arabic) and `[data-reveal="up"]`.
+  All respect reduced motion.
+- Fonts (self-hosted): Clash Display, Alexandria, IBM Plex Sans / Sans Arabic, IBM Plex Mono.
 
 ## Arabic / RTL rules
-- `<html lang dir>` is set per route (`/ar` rtl, `/en` ltr). Use logical properties (`ps-`, `ms-`, `start-`, `end-`).
+- `<html lang dir>` per route (`/ar` rtl, `/en` ltr). Use logical properties (`ps-`, `ms-`, `start-`, `end-`).
 - **No letter-spacing on Arabic** (breaks joining) — rules use `:lang(ar)`. Give Latin snippets inside Arabic `lang="en"`.
-- **Never split Arabic into characters** (SplitText `type: 'lines,words'` only).
-- Western digits in both languages (as in the PDF); wrap coordinates/phone/email in `dir="ltr"`.
-- Mirror horizontal motion with `dirSign(dir)`; the 3D layout mirrors via `useApp().dir`.
+- **Never split Arabic into characters** (SplitText `lines,words` only).
+- Western digits in both languages; wrap coordinates/phone/email in `dir="ltr"`. Mirror arrows with `rtl:-scale-x-100`.
+- Horizontal scrollers: `scrollBy` in physical pixels (next = −width in RTL).
 
 ## Placeholders / TODO
-- `src/config/site.ts`: domain (`url`), phone/WhatsApp number.
-- Logo: typeset `Wordmark` until the official SVG arrives. Project photos: placeholders (Phase 3).
-- `THREE.Clock` deprecation warning comes from R3F internals (not our code) — ignored by `npm run check` (client OK).
+- `src/config/site.ts`: domain (`url`), phone/WhatsApp number. Logo: typeset `Wordmark` until the SVG arrives.
+- Portfolio images: placeholders in `public/media/work/*/cover.webp`.
+- Privacy Policy page + footer link (Phase 4). Loader (Phase 4).
+- `THREE.Clock` deprecation warning comes from R3F internals — ignored by `npm run check` (client OK).
 
 ## Phases
 1. ✅ Setup, content (EN/AR), Earth hero
-2. ✅ Scroll camera journey (Earth → GCC → dive → Hail → back to space), altitude meter
-3. All content sections wired to the journey
-4. Micro-interactions, loader, menu, page transitions, Privacy Policy
+2. ✅ Space camera journey
+3. ✅ Redesign: space part ends in the clouds → light editorial site (all content sections, interactions)
+4. Loader, page transitions, Privacy Policy, sound toggle
 5. Responsive, performance, accessibility, SEO (prerender, JSON-LD `ProfessionalService`), polish

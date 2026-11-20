@@ -106,6 +106,11 @@ export interface Content {
     hailLabel: string;
     earthCredit: string;
     notFound: { title: string; back: string };
+    /** Payoff shown as the clouds clear (wording given by the client). */
+    arrival: { place: string };
+    /** Services filter chips (categories defined by the client). */
+    serviceFilters: { all: string; growth: string; brand: string; content: string };
+    carousel: { previous: string; next: string };
   };
 
   /** ⚠ NOT FROM THE PDF — meta tags composed from PDF phrases. Review before launch. */

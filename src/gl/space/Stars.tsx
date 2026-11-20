@@ -4,11 +4,10 @@ import { AdditiveBlending, BufferAttribute, BufferGeometry, Color, ShaderMateria
 import starsVert from '../shaders/stars.vert?raw';
 import starsFrag from '../shaders/stars.frag?raw';
 import { token } from '../palette';
-import { sky } from '../state';
 import { useApp } from '@/store/app';
 import { qualityPresets } from '@/config/quality';
 
-/** Normal of the galactic plane — shared with the night-sky Milky Way glow (skydome.frag). */
+/** Normal of the galactic plane (stars bunch up along it). */
 export const GALACTIC_NORMAL = new Vector3(0.84, 0.3, 0.45).normalize();
 
 /** Deterministic PRNG so the sky is identical on every visit and every quality tier. */
@@ -75,7 +74,7 @@ export function Stars() {
         transparent: true,
         depthWrite: false,
         blending: AdditiveBlending,
-        uniforms: { uTime: { value: 0 }, uPixelRatio: { value: 1 }, uIntensity: { value: 1.5 }, uHorizonFade: { value: 0 } },
+        uniforms: { uTime: { value: 0 }, uPixelRatio: { value: 1 }, uIntensity: { value: 1.5 } },
       }),
     [],
   );
@@ -87,10 +86,7 @@ export function Stars() {
   useFrame(({ clock, viewport, camera }) => {
     material.uniforms.uTime.value = clock.elapsedTime;
     material.uniforms.uPixelRatio.value = viewport.dpr;
-    material.uniforms.uIntensity.value = 1.5 * sky.stars;
-    material.uniforms.uHorizonFade.value = sky.horizonFade;
     if (ref.current) {
-      ref.current.visible = sky.stars > 0.002;
       ref.current.position.copy(camera.position);
     }
   });

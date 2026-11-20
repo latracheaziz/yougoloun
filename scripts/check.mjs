@@ -114,6 +114,12 @@ async function main() {
             await page.waitForTimeout(1300);
             await page.screenshot({ path: path.join(OUT, `${tag}-${String(i).padStart(2, '0')}-${s.id}.png`) });
           }
+          for (const id of ['statements', 'services', 'portfolio', 'process', 'faq', 'contact']) {
+            i++;
+            await page.evaluate((id) => window.scrollTo(0, document.getElementById(id).getBoundingClientRect().top + window.scrollY), id);
+            await page.waitForTimeout(1300);
+            await page.screenshot({ path: path.join(OUT, `${tag}-${String(i).padStart(2, '0')}-${id}.png`) });
+          }
           await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
           await page.waitForTimeout(1300);
           await page.screenshot({ path: path.join(OUT, `${tag}-99-footer.png`) });

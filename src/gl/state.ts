@@ -1,16 +1,9 @@
 import { Color, Vector3 } from 'three';
 
 /**
- * Mutable state of the three worlds. The Director writes it every frame from the scroll
+ * Mutable state of the space journey. The Director writes it every frame from the scroll
  * journey; scene components read it in useFrame. No React re-renders involved.
  */
-export type World = 'space' | 'hail';
-
-export const world = {
-  current: 'space' as World,
-  /** Set once the Hail terrain has been generated (worker) and uploaded. */
-  hailReady: false,
-};
 
 /**
  * SPACE — Earth, arcs, rings, beacon.
@@ -24,8 +17,6 @@ export const space = {
   roll: 0,
   /** World-space direction *towards* the sun. */
   sunDirection: new Vector3(-0.8, 0.32, -0.5).normalize(),
-  /** World-space unit vector from the Earth's centre to Hail (computed by the Director). */
-  hailDirection: new Vector3(0, 0, 1),
   cloudOffset: 0,
   nightLights: 1,
   flare: 1,
@@ -39,47 +30,18 @@ export const space = {
   beacon: 0,
 };
 
-/** DIVE — clouds, streaks, cover (the transition mask that hides the world swap). */
+/** DIVE — cloud layers, streaks, and the cover that turns the screen white. */
 export const dive = {
-  /** 0..1 — full-screen cloud whiteout, noise-dissolved. 1 hides everything. */
+  /** 0..1 — full-screen cloud white-out, noise-dissolved. */
   cover: 0,
-  coverColor: new Color(1, 0.95, 0.88),
+  coverColor: new Color(1, 0.97, 0.93),
   /** 0..1 — radial speed streaks. */
   streaks: 0,
   /** Distance travelled through the cloud stack (layer units). */
   cloudTravel: 0,
   clouds: 0,
-  cloudLit: new Color(1, 0.95, 0.9),
-  cloudShade: new Color(0.7, 0.55, 0.5),
+  cloudLit: new Color(1.3, 1.12, 0.95),
+  cloudShade: new Color(0.52, 0.36, 0.32),
   /** Camera shake amplitude (radians). */
   shake: 0,
-};
-
-/** HAIL — terrain, sky, pin. Colours are recomputed from `night` every frame. */
-export const hail = {
-  /** 0 = golden hour, 1 = night. */
-  night: 0,
-  lightDirection: new Vector3(-0.78, 0.15, -0.6).normalize(),
-  sunDirection: new Vector3(-0.78, 0.15, -0.6).normalize(),
-  lightColor: new Color(),
-  skyZenith: new Color(),
-  skyHorizon: new Color(),
-  skyGround: new Color(),
-  sunColor: new Color(),
-  ambientSky: new Color(),
-  ambientGround: new Color(),
-  /** 0..1 — pin drop animation progress (bounce included). */
-  pinDrop: 0,
-  /** Ground height at the pin (from the terrain generator). */
-  groundAtPin: 0,
-  sand: 1,
-  /** Extra fog multiplier (portfolio haze). */
-  haze: 1,
-};
-
-/** Shared starfield. */
-export const sky = {
-  stars: 1,
-  /** 1 = hide stars below the horizon (Hail world). */
-  horizonFade: 0,
 };

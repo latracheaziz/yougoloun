@@ -179,6 +179,9 @@ export const ar: Content = {
     hailLabel: 'حائل، المملكة العربية السعودية',
     earthCredit: 'خامات الأرض: Solar System Scope (CC BY 4.0)',
     notFound: { title: 'الصفحة غير موجودة', back: 'العودة إلى الرئيسية' },
+    arrival: { place: 'حائل' },
+    serviceFilters: { all: 'الكل', growth: 'النمو', brand: 'العلامة التجارية', content: 'المحتوى' },
+    carousel: { previous: 'المشروع السابق', next: 'المشروع التالي' },
   },
 
   // ⚠ ليس من ملف المحتوى — العنوان معتمد من العميل

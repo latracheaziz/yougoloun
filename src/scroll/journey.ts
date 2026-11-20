@@ -22,8 +22,10 @@ export const journey = {
   index: 0,
   /** Local progress 0..1 of every section (clamped: past sections = 1, future = 0). */
   p: new Float32Array(sectionIds.length),
-  /** 0..1 across all tracks (footer excluded). */
+  /** 0..1 across all tracks. */
   global: 0,
+  /** Scroll position (px) where the space part ends and the light document begins. */
+  tracksEnd: 0,
 };
 
 /** Local progress of a section by id. */
@@ -65,9 +67,13 @@ export function update(y: number, velocity = 0) {
   journey.index = index;
   const end = (journey.starts[n - 1] ?? 0) + (journey.lengths[n - 1] ?? 0);
   journey.global = end > 0 ? Math.min(1, Math.max(0, y / end)) : 0;
+  journey.tracksEnd = end;
 
-  const active = sectionIds[index];
-  if (useApp.getState().activeSection !== active) useApp.getState().setActiveSection(active);
+  // inside the space part the active section is the current track; the light part sets its own
+  if (y < end - journey.stageH * 0.5) {
+    const active = sectionIds[index];
+    if (useApp.getState().activeSection !== active) useApp.getState().setActiveSection(active);
+  }
   listeners.forEach((fn) => fn());
 }
 

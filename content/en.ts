@@ -171,6 +171,9 @@ export const en: Content = {
     hailLabel: 'Hail, KSA',
     earthCredit: 'Earth textures: Solar System Scope (CC BY 4.0)',
     notFound: { title: 'Page not found', back: 'Back to home' },
+    arrival: { place: 'Hail, Saudi Arabia' },
+    serviceFilters: { all: 'All', growth: 'Growth', brand: 'Brand', content: 'Content' },
+    carousel: { previous: 'Previous project', next: 'Next project' },
   },
 
   // ⚠ NOT FROM THE PDF — title approved by the client

@@ -17,7 +17,7 @@ import earthFrag from '../shaders/earth.frag?raw';
 import cloudsFrag from '../shaders/clouds.frag?raw';
 import atmosphereFrag from '../shaders/atmosphere.frag?raw';
 import { token } from '../palette';
-import { space, world } from '../state';
+import { space } from '../state';
 import { useApp } from '@/store/app';
 import { qualityPresets } from '@/config/quality';
 
@@ -120,8 +120,6 @@ export function Earth({ children }: { children?: ReactNode }) {
 
   useFrame(() => {
     if (!root.current || !roll.current || !tilt.current || !spin.current) return;
-    root.current.visible = world.current === 'space';
-    if (!root.current.visible) return;
     root.current.position.copy(space.earthPosition);
     roll.current.rotation.z = space.roll;
     tilt.current.rotation.x = space.tilt;

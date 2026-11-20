@@ -11,7 +11,8 @@
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
     "check": "node scripts/check.mjs",
-    "moments": "node scripts/moments.mjs"
+    "moments": "node scripts/moments.mjs",
+    "media": "node scripts/media.mjs"
   },
   "keywords": [],
   "author": "",

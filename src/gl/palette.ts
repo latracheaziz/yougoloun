@@ -1,6 +1,6 @@
 import { Color } from 'three';
 
-export type Token = 'night' | 'deep' | 'sand' | 'ember' | 'granite' | 'glow' | 'haze';
+export type Token = 'night' | 'deep' | 'sand' | 'ember' | 'granite' | 'glow' | 'haze' | 'paper' | 'ink';
 
 const cache = new Map<Token, Color>();
 

@@ -1,6 +1,5 @@
 import { create } from 'zustand';
 import type { Dir, Lang } from '@content/types';
-import type { SectionId } from '@/config/timeline';
 import { detectDevice, tierOrder, type QualityTier, type TextureSet } from '@/config/quality';
 
 /** Low-frequency app state (React re-renders on change). Per-frame scroll data lives in scroll/journey.ts. */
@@ -17,10 +16,15 @@ interface AppState {
   stepTier: (delta: 1 | -1) => void;
   setTier: (tier: QualityTier) => void;
 
-  activeSection: SectionId;
-  setActiveSection: (id: SectionId) => void;
+  /** Section currently on screen: a space track id, or a light section id (see NavTarget). */
+  activeSection: string;
+  setActiveSection: (id: string) => void;
 
   reducedMotion: boolean;
+
+  /** The WebGL canvas is mounted and has its globe ready (the paper layer may reveal it). */
+  glReady: boolean;
+  setGlReady: (ready: boolean) => void;
 }
 
 const device = detectDevice();
@@ -47,4 +51,7 @@ export const useApp = create<AppState>((set, get) => ({
   setActiveSection: (id) => set({ activeSection: id }),
 
   reducedMotion: reduced,
+
+  glReady: false,
+  setGlReady: (glReady) => set({ glReady }),
 }));

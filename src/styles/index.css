@@ -14,6 +14,11 @@
   /* atmosphere blue for the day-side limb of the Earth (3D only) */
   --color-haze: #6fa6ff;
 
+  /* LIGHT SITE (after the clouds): paper + ink, ember is the only accent */
+  --color-paper: #f5f3ef;
+  --color-paper-2: #ebe7e0;
+  --color-ink: #0e0e10;
+
   --font-display: 'Clash Display', 'Alexandria Variable', ui-sans-serif, system-ui, sans-serif;
   --font-body: 'IBM Plex Sans', 'IBM Plex Sans Arabic', ui-sans-serif, system-ui, sans-serif;
   --font-mono: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', monospace;
@@ -155,6 +160,128 @@ html[lang='ar'] {
   .hero-title:lang(ar) {
     font-size: clamp(2.75rem, 6.6vw, 7.5rem);
   }
+
+  /* ── LIGHT SITE ─────────────────────────────────────────────────────────────── */
+  /* no background here: the first light block has a transparent top over the white-out */
+  .light {
+    color: var(--color-ink);
+    --line: color-mix(in oklab, var(--color-ink) 12%, transparent);
+    --muted: color-mix(in oklab, var(--color-ink) 58%, transparent);
+  }
+  .light ::selection {
+    background: var(--color-ink);
+    color: var(--color-paper);
+  }
+  .light :focus-visible {
+    outline-color: var(--color-ember);
+  }
+  .shell {
+    padding-inline: var(--gutter);
+    margin-inline: auto;
+    max-width: 1680px;
+  }
+  .grid-12 {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: clamp(1rem, 2vw, 2rem);
+  }
+  .section-y {
+    padding-block: clamp(5.5rem, 13vw, 11rem);
+  }
+  .hairline {
+    border-color: var(--line);
+  }
+  .muted {
+    color: var(--muted);
+  }
+  .h-section {
+    font-size: clamp(2.5rem, 6.4vw, 6.5rem);
+  }
+  .h-section:lang(ar) {
+    font-size: clamp(2.1rem, 5vw, 5rem);
+  }
+  .btn-ink {
+    background: var(--color-ink);
+    color: var(--color-paper);
+  }
+  .btn-ink:hover {
+    background: var(--color-ember);
+    color: var(--color-ink);
+  }
+  .btn-line {
+    border: 1px solid currentColor;
+  }
+  .btn-line:hover {
+    background: var(--color-ink);
+    border-color: var(--color-ink);
+    color: var(--color-paper);
+  }
+  .tone-dark .btn-line:hover {
+    background: var(--color-paper);
+    border-color: var(--color-paper);
+    color: var(--color-ink);
+  }
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 2.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+    transition: background-color 0.4s var(--ease-out-expo), color 0.4s var(--ease-out-expo), border-color 0.4s var(--ease-out-expo);
+  }
+  .chip:hover {
+    border-color: var(--color-ink);
+  }
+  .chip[aria-pressed='true'] {
+    background: var(--color-ink);
+    border-color: var(--color-ink);
+    color: var(--color-paper);
+  }
+
+  /* Height-animating collapse (accordions, service rows): grid 0fr → 1fr. */
+  .expander {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 0.6s var(--ease-out-expo);
+  }
+  .expander > * {
+    min-height: 0;
+    overflow: hidden;
+  }
+  .expander[data-open] {
+    grid-template-rows: 1fr;
+  }
+
+  /* Text revealed line by line (SplitText masks); hidden until JS animates it. */
+  .js [data-reveal] {
+    visibility: hidden;
+  }
+}
+
+/* Header tone: light text over space, dark text over clouds and paper. */
+.site-header {
+  --h-fg: var(--color-sand);
+  --h-glass: color-mix(in oklab, var(--color-night) 40%, transparent);
+  color: var(--h-fg);
+  transition: transform 0.6s var(--ease-out-expo), color 0.4s ease;
+}
+.site-header[data-tone='light'] {
+  --h-fg: var(--color-ink);
+  --h-glass: color-mix(in oklab, var(--color-paper) 72%, transparent);
+}
+.site-header[data-hidden] {
+  transform: translateY(-110%);
+}
+.site-header .glass {
+  background: var(--h-glass);
+  backdrop-filter: blur(14px) saturate(1.2);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+.site-header[data-scrolled] .glass {
+  opacity: 1;
 }
 
 /* ───────────────────────── Journey layout ─────────────────────────
@@ -237,4 +364,96 @@ html[lang='ar'] {
 @keyframes scrollcue {
   from { transform: translateY(-110%); }
   to { transform: translateY(220%); }
+}
+
+/* ───────────────────────── Custom cursor ───────────────────────── */
+.has-cursor,
+.has-cursor * {
+  cursor: none !important;
+}
+.cursor-dot,
+.cursor-ring {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 60;
+  pointer-events: none;
+  visibility: hidden;
+  opacity: 0;
+  border-radius: 999px;
+}
+.cursor-dot {
+  width: 6px;
+  height: 6px;
+  margin: -3px 0 0 -3px;
+  background: #fff;
+  mix-blend-mode: difference;
+}
+.cursor-ring {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  margin: -17px 0 0 -17px;
+  border: 1px solid #fff;
+  mix-blend-mode: difference;
+  transition:
+    width 0.45s var(--ease-out-expo),
+    height 0.45s var(--ease-out-expo),
+    margin 0.45s var(--ease-out-expo),
+    background-color 0.3s ease,
+    border-color 0.3s ease,
+    scale 0.3s ease;
+}
+.cursor-ring[data-state='hover'] {
+  width: 62px;
+  height: 62px;
+  margin: -31px 0 0 -31px;
+}
+.cursor-ring[data-state='label'] {
+  width: 92px;
+  height: 92px;
+  margin: -46px 0 0 -46px;
+  background: var(--color-ember);
+  border-color: var(--color-ember);
+  mix-blend-mode: normal;
+}
+.cursor-ring[data-down] {
+  scale: 0.86;
+}
+.cursor-label {
+  color: var(--color-ink);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.cursor-ring[data-state='label'] .cursor-label {
+  opacity: 1;
+}
+
+/* Dive title: sand → ink as the clouds brighten, with a matching scrim. */
+.dive-title {
+  --ink: 0;
+  color: color-mix(in oklab, var(--color-sand), var(--color-ink) calc(var(--ink) * 100%));
+}
+.dive-scrim {
+  position: absolute;
+  inset: -3.5rem -5rem;
+  pointer-events: none;
+  background:
+    radial-gradient(closest-side, color-mix(in oklab, var(--color-night) calc((1 - var(--ink)) * 55%), transparent), transparent),
+    radial-gradient(closest-side, color-mix(in oklab, var(--color-paper) calc(var(--ink) * 78%), transparent), transparent);
+  filter: blur(12px);
+}
+
+/* Altitude meter: dark glass over space, light glass over the clouds. */
+.altimeter {
+  color: var(--color-sand);
+  background: color-mix(in oklab, var(--color-night) 45%, transparent);
+  border-color: color-mix(in oklab, var(--color-sand) 12%, transparent);
+  transition: color 0.4s ease, background-color 0.4s ease, border-color 0.4s ease;
+}
+.altimeter[data-tone='light'] {
+  color: var(--color-ink);
+  background: color-mix(in oklab, var(--color-paper) 60%, transparent);
+  border-color: color-mix(in oklab, var(--color-ink) 12%, transparent);
 }
