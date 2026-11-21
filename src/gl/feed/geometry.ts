@@ -1,5 +1,7 @@
 import {
+  BufferAttribute,
   BufferGeometry,
+  Color,
   CylinderGeometry,
   ExtrudeGeometry,
   LatheGeometry,
@@ -10,6 +12,7 @@ import {
   Vector2,
 } from 'three';
 import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js';
+import { token, type Token } from '../palette';
 
 /**
  * Geometry for the social-media world, built procedurally (no model files):
@@ -27,12 +30,34 @@ function cached<T extends BufferGeometry>(key: string, make: () => T): T {
   return g;
 }
 
-const extrude = (shape: Shape, depth: number, bevel: number, curveSegments = 24, bevelSegments = 5) => {
+const extrude = (shape: Shape, depth: number, bevel: number, curveSegments = 40, bevelSegments = 8) => {
   const g = new ExtrudeGeometry(shape, { depth, bevelEnabled: true, bevelThickness: bevel, bevelSize: bevel, bevelSegments, curveSegments });
   g.center();
   g.computeVertexNormals();
   return g;
 };
+
+/**
+ * Bake a diagonal gradient (light top-left → deep bottom-right, like the logo) into vertex colours.
+ * Used with glossy(…, { gradient: true }) (vertexColors).
+ */
+function gradient<T extends BufferGeometry>(g: T, from: Token, to: Token): T {
+  g.computeBoundingBox();
+  const b = g.boundingBox!;
+  const pos = g.attributes.position;
+  const a = token(from);
+  const z = token(to);
+  const c = new Color();
+  const colors = new Float32Array(pos.count * 3);
+  for (let i = 0; i < pos.count; i++) {
+    const u = (pos.getX(i) - b.min.x) / (b.max.x - b.min.x || 1);
+    const v = (b.max.y - pos.getY(i)) / (b.max.y - b.min.y || 1);
+    c.copy(a).lerp(z, Math.min(1, Math.max(0, u * 0.45 + v * 0.75 - 0.1)));
+    colors.set([c.r, c.g, c.b], i * 3);
+  }
+  g.setAttribute('color', new BufferAttribute(colors, 3));
+  return g;
+}
 
 /** Speech bubble outline: rounded rectangle with a tail at the bottom (-1 = left, 1 = right). */
 export function bubbleShape(w: number, h: number, r: number, tail: 1 | -1) {
@@ -65,8 +90,8 @@ export function bubbleShape(w: number, h: number, r: number, tail: 1 | -1) {
 
 /** The logo's bubbles (blue front-left, green behind-right) and the small comment bubble. */
 export const geo = {
-  bubbleBlue: () => cached('bubbleBlue', () => extrude(bubbleShape(1.3, 1.0, 0.3, -1), 0.26, 0.09, 48, 10)),
-  bubbleGreen: () => cached('bubbleGreen', () => extrude(bubbleShape(1.12, 0.86, 0.26, 1), 0.22, 0.08, 48, 10)),
+  bubbleBlue: () => cached('bubbleBlue', () => gradient(extrude(bubbleShape(1.3, 1.0, 0.3, -1), 0.26, 0.09, 64, 12), 'blue', 'blueDeep')),
+  bubbleGreen: () => cached('bubbleGreen', () => gradient(extrude(bubbleShape(1.12, 0.86, 0.26, 1), 0.22, 0.08, 64, 12), 'green', 'greenDeep')),
   comment: () => cached('comment', () => extrude(bubbleShape(0.5, 0.38, 0.13, -1), 0.1, 0.045)),
   miniBubble: () => cached('miniBubble', () => extrude(bubbleShape(0.24, 0.18, 0.07, -1), 0.05, 0.025, 10)),
 
@@ -80,8 +105,11 @@ export const geo = {
       s.quadraticCurveTo(0.16, -0.36, 0.36, -0.18);
       s.bezierCurveTo(0.54, -0.02, 0.6, 0.25, 0.4, 0.4);
       s.bezierCurveTo(0.24, 0.52, 0, 0.42, 0, 0.22);
-      return extrude(s, 0.14, 0.07);
+      return extrude(s, 0.14, 0.07, 56, 10);
     }),
+
+  /** Heart with the brand gradient baked in (blue → green). */
+  heartGradient: () => cached('heartGradient', () => gradient(geo.heart().clone(), 'blueLight', 'green')),
 
   /** Growth arrow (up-right). */
   arrow: () =>
@@ -118,7 +146,7 @@ export const geo = {
         [0.07, -0.32], [0.1, -0.3], [0.12, -0.12], [0.2, 0.1], [0.32, 0.3], [0.36, 0.34],
         [0.35, 0.37], [0.31, 0.36], [0.2, 0.18], [0.1, -0.06], [0.08, -0.26], [0.05, -0.32],
       ].map(([x, y]) => new Vector2(x, y));
-      const g = new LatheGeometry(pts, 48);
+      const g = new LatheGeometry(pts, 96);
       g.computeVertexNormals();
       return g;
     }),
@@ -130,15 +158,15 @@ export const geo = {
         [0, 0.34], [0.05, 0.33], [0.06, 0.29], [0.13, 0.25], [0.18, 0.14], [0.2, -0.02], [0.24, -0.14],
         [0.3, -0.2], [0.3, -0.24], [0, -0.24],
       ].map(([x, y]) => new Vector2(x, y));
-      const g = new LatheGeometry(pts, 48);
+      const g = new LatheGeometry(pts, 96);
       g.computeVertexNormals();
       return g;
     }),
 
   /** "#" — two horizontal and two slanted vertical bars. */
-  hashBar: () => cached('hashBar', () => new RoundedBoxGeometry(0.62, 0.11, 0.11, 3, 0.05)),
+  hashBar: () => cached('hashBar', () => new RoundedBoxGeometry(0.62, 0.11, 0.11, 6, 0.05)),
 
-  phoneBody: () => cached('phoneBody', () => new RoundedBoxGeometry(0.64, 1.3, 0.07, 4, 0.035)),
+  phoneBody: () => cached('phoneBody', () => new RoundedBoxGeometry(0.64, 1.3, 0.07, 8, 0.035)),
   /** Rounded screen with 0..1 UVs (ShapeGeometry UVs are in shape units, remapped here). */
   phoneScreen: () =>
     cached('phoneScreen', () => {
@@ -162,16 +190,16 @@ export const geo = {
     }),
   notch: () => cached('notch', () => new RoundedBoxGeometry(0.2, 0.05, 0.01, 2, 0.02)),
 
-  bar: (h: number) => cached(`bar${h}`, () => new RoundedBoxGeometry(0.16, h, 0.16, 3, 0.04)),
-  camBody: () => cached('camBody', () => new RoundedBoxGeometry(0.78, 0.52, 0.34, 4, 0.08)),
-  camTop: () => cached('camTop', () => new RoundedBoxGeometry(0.26, 0.12, 0.22, 3, 0.04)),
-  cylinder: (r: number, h: number) => cached(`cyl${r}-${h}`, () => new CylinderGeometry(r, r, h, 48, 1)),
-  sphere: (r: number) => cached(`sph${r}`, () => new SphereGeometry(r, 32, 16)),
-  torus: (r: number, t: number) => cached(`tor${r}-${t}`, () => new TorusGeometry(r, t, 24, 96)),
+  bar: (h: number) => cached(`bar${h}`, () => new RoundedBoxGeometry(0.16, h, 0.16, 6, 0.04)),
+  camBody: () => cached('camBody', () => new RoundedBoxGeometry(0.78, 0.52, 0.34, 8, 0.08)),
+  camTop: () => cached('camTop', () => new RoundedBoxGeometry(0.26, 0.12, 0.22, 6, 0.04)),
+  cylinder: (r: number, h: number) => cached(`cyl${r}-${h}`, () => new CylinderGeometry(r, r, h, 64, 1)),
+  sphere: (r: number) => cached(`sph${r}`, () => new SphereGeometry(r, 48, 24)),
+  torus: (r: number, t: number) => cached(`tor${r}-${t}`, () => new TorusGeometry(r, t, 32, 128)),
   /** Thin orbit ring for the cornerstones. */
   orbit: () => cached('orbit', () => new TorusGeometry(1.5, 0.006, 6, 160)),
   /** Mic for the logo bubble: capsule + stand. */
-  micHead: () => cached('micHead', () => new RoundedBoxGeometry(0.16, 0.3, 0.12, 4, 0.06)),
-  micArc: () => cached('micArc', () => new TorusGeometry(0.14, 0.018, 12, 40, Math.PI)),
+  micHead: () => cached('micHead', () => new RoundedBoxGeometry(0.16, 0.3, 0.12, 8, 0.06)),
+  micArc: () => cached('micArc', () => new TorusGeometry(0.14, 0.018, 16, 64, Math.PI)),
   micWave: (h: number) => cached(`wave${h}`, () => new RoundedBoxGeometry(0.035, h, 0.03, 2, 0.015)),
 };

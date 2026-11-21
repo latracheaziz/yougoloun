@@ -19,12 +19,16 @@ export interface QualityPreset {
   transmission: boolean;
   /** Particle budget multiplier for dive clouds, sand, embers… */
   particles: number;
+  /** MSAA samples of the postprocessing composer (smooth edges on the glossy objects). */
+  msaa: number;
 }
 
 export const qualityPresets: Record<QualityTier, QualityPreset> = {
-  high: { maxDpr: 2, renderScale: 1, bloomLevels: 7, earthSegments: 160, stars: 7000, bloom: true, chromaticAberration: true, transmission: true, particles: 1 },
-  medium: { maxDpr: 1.5, renderScale: 0.85, bloomLevels: 6, earthSegments: 128, stars: 4500, bloom: true, chromaticAberration: false, transmission: false, particles: 0.65 },
-  low: { maxDpr: 1.25, renderScale: 0.72, bloomLevels: 5, earthSegments: 80, stars: 2600, bloom: true, chromaticAberration: false, transmission: false, particles: 0.4 },
+  // Resolution is never scaled below the screen's own (that read as "low quality"); the tiers trade
+  // DPR above 1.5, bloom levels, stars, particles and MSAA instead.
+  high: { maxDpr: 2, renderScale: 1, bloomLevels: 6, earthSegments: 160, stars: 4000, bloom: true, chromaticAberration: false, transmission: true, particles: 1, msaa: 8 },
+  medium: { maxDpr: 1.75, renderScale: 1, bloomLevels: 5, earthSegments: 128, stars: 3000, bloom: true, chromaticAberration: false, transmission: false, particles: 0.65, msaa: 4 },
+  low: { maxDpr: 1.5, renderScale: 1, bloomLevels: 4, earthSegments: 80, stars: 1800, bloom: true, chromaticAberration: false, transmission: false, particles: 0.4, msaa: 4 },
 };
 
 export const tierOrder: QualityTier[] = ['low', 'medium', 'high'];

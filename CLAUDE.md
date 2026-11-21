@@ -84,8 +84,11 @@ Vite 8 (Rolldown) · React 19 · TypeScript 7 · React Router 8 · three r187 ·
   Background: `src/gl/space/Nebula.tsx` (brand sky sphere) + `Stars.tsx`. Phone screens use `brandImages`/`feedPosts`.
 - Shaders: `src/gl/shaders/*` imported with `?raw`; output linear HDR, end with tonemapping + colorspace chunks.
 - Colours: values in `src/config/palette.ts` (single source); WebGL reads them via `token()` (`src/gl/palette.ts`).
-- Quality tiers in `src/config/quality.ts` (DPR cap, render scale, bloom levels, particles); `PerformanceMonitor`
-  steps down at runtime. Postprocessing is the main GPU cost.
+- Quality tiers in `src/config/quality.ts` (DPR cap, bloom levels, stars, particles, MSAA); `PerformanceMonitor`
+  steps down at runtime. **Never scale the render below the screen resolution and keep MSAA + clear-coat on every
+  tier** — the client saw renderScale < 1 / no AA / Standard materials as "low quality". Bloom only catches real
+  highlights (threshold 0.95); no chromatic aberration. Logo bubbles + blue heart carry a baked vertex-colour
+  gradient (`gradient()` in geometry.ts, `glossy(…, { gradient: true })`).
 - Small extra WebGL: `src/gl/MiniGlobe.tsx` (dotted globe in Contact, own lazy chunk, mounted near view) and
   `src/interaction/distort.ts` (ONE raw WebGL2 canvas for portfolio hover distortion, attached only while hovering).
 - `prefers-reduced-motion`: no dive/shake/streaks/cloud layers — static shot + plain fade to white.

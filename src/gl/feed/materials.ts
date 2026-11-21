@@ -9,20 +9,21 @@ import { token, type Token } from '../palette';
 
 const cache = new Map<string, Material>();
 
-export function glossy(name: Token | 'white', cheap = false, emissive = 0): MeshStandardMaterial {
-  const key = `${name}-${cheap}-${emissive}`;
+export function glossy(name: Token | 'white', cheap = false, emissive = 0, opts: { gradient?: boolean } = {}): MeshStandardMaterial {
+  const key = `${name}-${cheap}-${emissive}-${opts.gradient ? 'g' : ''}`;
   let m = cache.get(key) as MeshStandardMaterial | undefined;
   if (!m) {
-    const color = name === 'white' ? new Color('#F4F7FB') : token(name);
+    const color = opts.gradient ? new Color(1, 1, 1) : name === 'white' ? new Color('#F4F7FB') : token(name);
     const base = {
       color,
-      roughness: name === 'white' ? 0.32 : 0.24,
+      vertexColors: !!opts.gradient,
+      roughness: name === 'white' ? 0.3 : 0.2,
       metalness: 0,
-      envMapIntensity: 1.15,
+      envMapIntensity: 1.0,
       emissive: color.clone().multiplyScalar(emissive),
       side: DoubleSide,
     };
-    m = cheap ? new MeshStandardMaterial(base) : new MeshPhysicalMaterial({ ...base, clearcoat: 1, clearcoatRoughness: 0.08 });
+    m = cheap ? new MeshStandardMaterial(base) : new MeshPhysicalMaterial({ ...base, clearcoat: 1, clearcoatRoughness: 0.04, specularIntensity: 0.6 });
     cache.set(key, m);
   }
   return m;

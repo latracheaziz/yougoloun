@@ -1,5 +1,5 @@
 import { useMemo, useRef, type ComponentType, type ReactNode } from 'react';
-import { useFrame } from '@react-three/fiber';
+import { useFrame, useThree } from '@react-three/fiber';
 import { useTexture } from '@react-three/drei';
 import { Euler, MathUtils, SRGBColorSpace, Vector2, Vector3, type Camera as ThreeCamera, type Group, type Mesh, type MeshBasicMaterial, type Texture } from 'three';
 import { feed } from '../state';
@@ -156,12 +156,15 @@ const CORNER: { C: ComponentType<{ cheap: boolean }>; ring: Token }[] = [
   { C: Camera, ring: 'blueLight' },
   { C: Growth, ring: 'greenLight' },
 ];
-const SCREENS = [brandImages.social, feedPosts[0].image, brandImages.studio, feedPosts[1].image, brandImages.analytics];
+/** Full-size images (the -sm variants looked soft on the phone screens). */
+const full = (src: string) => src.replace('-sm.webp', '.webp');
+const SCREENS = [full(brandImages.social), feedPosts[0].image, full(brandImages.studio), feedPosts[1].image, full(brandImages.analytics)];
 
 /** Fit an image into the phone screen (cover, centred). */
-function coverFit(tex: Texture, screenAspect = 0.58 / 1.24) {
+function coverFit(tex: Texture, anisotropy: number, screenAspect = 0.58 / 1.24) {
   const t = tex.clone();
   t.colorSpace = SRGBColorSpace;
+  t.anisotropy = anisotropy;
   const img = tex.image as { width: number; height: number } | undefined;
   const aspect = img ? img.width / img.height : 1;
   if (aspect > screenAspect) {
@@ -186,10 +189,11 @@ function Slot({ children, slotRef }: { children: ReactNode; slotRef: (g: Group |
 export function World() {
   const tier = useApp((s) => s.tier);
   const reduced = useApp((s) => s.reducedMotion);
-  const cheap = tier === 'low';
+  const cheap = false; // clear-coat on every tier: it is what makes the objects read as real
   const icons = tier === 'low' ? ICONS.slice(0, 6) : ICONS;
   const textures = useTexture(SCREENS);
-  const screens = useMemo(() => textures.map((t) => coverFit(t)), [textures]);
+  const maxAnisotropy = useThree((s) => s.gl.capabilities.getMaxAnisotropy());
+  const screens = useMemo(() => textures.map((t) => coverFit(t, Math.min(8, maxAnisotropy))), [textures, maxAnisotropy]);
   const ringMaterials = useMemo(() => CORNER.map(({ ring }) => glow(ring).clone()), []);
 
   const root = useRef<Group>(null);

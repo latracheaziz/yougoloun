@@ -46,7 +46,7 @@ interface Shot {
   camZP: number;
   fov: number;
 }
-const HERO: Shot = { ex: 1.6, ey: -0.05, exP: 0, eyP: -1.9, camZ: 6.1, camZP: 8.8, fov: 35 };
+const HERO: Shot = { ex: 1.6, ey: -0.05, exP: 0, eyP: -2.3, camZ: 6.1, camZP: 9.6, fov: 35 };
 const ABOUT: Shot = { ex: 1.5, ey: 0.2, exP: 0, eyP: 1.35, camZ: 6.8, camZP: 10.2, fov: 35 };
 const ABOUT_HOLD: Shot = { ...ABOUT, camZ: 6.5, camZP: 9.8 };
 const CORNER: Shot = { ex: 1.55, ey: 0.2, exP: 0, eyP: 2.9, camZ: 8.0, camZP: 12.6, fov: 35 };

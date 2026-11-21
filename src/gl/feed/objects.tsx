@@ -26,8 +26,8 @@ export function LogoMark({ cheap }: Props) {
   const front = 0.12 + 0.13 + 0.09;
   return (
     <group>
-      <mesh geometry={geo.bubbleGreen()} material={glossy('green', cheap)} position={[0.3, -0.16, -0.2]} />
-      <mesh geometry={geo.bubbleBlue()} material={glossy('blue', cheap)} position={[-0.12, 0.08, 0.12]} />
+      <mesh geometry={geo.bubbleGreen()} material={glossy('green', cheap, 0, { gradient: true })} position={[0.3, -0.16, -0.2]} />
+      <mesh geometry={geo.bubbleBlue()} material={glossy('blue', cheap, 0, { gradient: true })} position={[-0.12, 0.08, 0.12]} />
       <group position={[-0.12, 0.13, front]}>
         <mesh geometry={geo.micHead()} material={white} position={[0, 0.06, 0]} />
         <mesh geometry={geo.micArc()} material={white} position={[0, 0.0, 0]} rotation={[0, 0, PI]} />
@@ -44,6 +44,8 @@ export function LogoMark({ cheap }: Props) {
 }
 
 export function Heart({ cheap, color = 'blue' }: Props & { color?: Token }) {
+  // the blue heart wears the brand gradient, the others a solid brand colour
+  if (color === 'blue') return <mesh geometry={geo.heartGradient()} material={glossy('blue', cheap, 0, { gradient: true })} />;
   return <mesh geometry={geo.heart()} material={glossy(color, cheap)} />;
 }
 
