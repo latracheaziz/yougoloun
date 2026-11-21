@@ -55,3 +55,12 @@ export const projects: Record<ProjectSlug, { accent: string; tint: string; ink: 
 
 // ── Platforms marquee (brand names, not translated) ────────────────────────────────
 export const platforms = ['Meta', 'TikTok', 'Snapchat', 'Google', 'Salla', 'Zid', 'Shopify'] as const;
+
+// ── Studio feed (the agency's own campaign creatives, public/media/feed) ───────────
+/** Order = deck order. `blur`: tiny blurred copy that fills the frame around non-square posts. Alts in ui.feed.posts. */
+export const feedPosts = [
+  { image: '/media/feed/growth.webp', blur: '/media/feed/growth-blur.webp' },
+  { image: '/media/feed/dialogue.webp', blur: '/media/feed/dialogue-blur.webp' },
+  { image: '/media/feed/voice-app.webp', blur: '/media/feed/voice-app-blur.webp' },
+  { image: '/media/feed/workspace.webp', blur: '/media/feed/workspace-blur.webp' },
+] as const;

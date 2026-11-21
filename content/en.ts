@@ -187,6 +187,19 @@ export const en: Content = {
       funnel: ['Reach', 'Engagement', 'Conversion', 'Loyalty'],
       hint: 'Tap to react',
     },
+    feed: {
+      title: 'Fresh from our studio',
+      hint: 'Drag a card to browse',
+      open: 'View creative',
+      previous: 'Previous creative',
+      next: 'Next creative',
+      posts: [
+        'Yougoloun ad creative: marketing that makes a difference in your numbers',
+        'Yougoloun creative: managing and integrating smart conversations with confidence',
+        'Yougoloun creative: your smart partner for voice conversations',
+        'Yougoloun creative: transform your office into a sustainable workspace',
+      ],
+    },
   },
 
   // ⚠ NOT FROM THE PDF — title approved by the client

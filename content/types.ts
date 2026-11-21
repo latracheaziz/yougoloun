@@ -126,6 +126,15 @@ export interface Content {
       funnel: readonly string[];
       hint: string;
     };
+    /** Studio feed: a swipeable deck of the agency's own creatives. `posts` = image alts, in feedPosts order. */
+    feed: {
+      title: string;
+      hint: string;
+      open: string;
+      previous: string;
+      next: string;
+      posts: readonly string[];
+    };
   };
 
   /** ⚠ NOT FROM THE PDF — meta tags composed from PDF phrases. Review before launch. */

@@ -24,9 +24,9 @@ const ICONS = {
   trend: 'M2.5 17.5l6.5-6.5 4 4 8.5-8.5M15.5 6.5h6v6',
   star: 'M12 2.8l2.8 5.8 6.4.9-4.6 4.5 1.1 6.3-5.7-3-5.7 3 1.1-6.3-4.6-4.5 6.4-.9z',
 } as const;
-type IconName = keyof typeof ICONS;
+export type IconName = keyof typeof ICONS;
 
-function Icon({ name, className = 'size-5', filled = false }: { name: IconName; className?: string; filled?: boolean }) {
+export function Icon({ name, className = 'size-5', filled = false }: { name: IconName; className?: string; filled?: boolean }) {
   return (
     <svg aria-hidden="true" viewBox="0 0 24 24" className={`shrink-0 ${className}`}>
       <path

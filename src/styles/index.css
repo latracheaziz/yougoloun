@@ -607,3 +607,29 @@ html[lang='ar'] {
   .buzz-dot, .buzz-bob, .buzz-waves, .buzz-pulse, .buzz-blink, .buzz-heart, .buzz-toast { animation: none; }
   .buzz-like, .buzz-float { animation: none; opacity: 0; }
 }
+
+/* Studio feed: story progress + lightbox */
+.feed-progress {
+  animation-name: feed-progress;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+}
+@keyframes feed-progress {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+.feed-lightbox {
+  animation: feed-lightbox 0.35s var(--ease-out-expo) both;
+}
+.feed-lightbox img {
+  animation: feed-lightbox-img 0.6s var(--ease-out-expo) both;
+}
+@keyframes feed-lightbox {
+  from { opacity: 0; }
+}
+@keyframes feed-lightbox-img {
+  from { transform: translateY(24px) scale(0.96); opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .feed-lightbox, .feed-lightbox img { animation: none; }
+}
