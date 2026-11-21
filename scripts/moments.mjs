@@ -30,11 +30,14 @@ const langs = (arg('lang') ?? 'ar,en').split(',');
 const KEY = [
   ['1-dive-clouds', { track: 'positioning', p: 0.44 }],
   ['2-clouds-to-paper', { track: 'positioning', p: 0.72 }],
-  ['3-arrival', { selector: '#statements', vh: -0.98 }],
+  ['3-arrival', { selector: '#statements', vh: -0.9 }],
+  ['3b-statements', { selector: '#statements', vh: 1.4 }],
   ['4-services', { selector: '#services', vh: 0.62 }, { hover: '#services li:nth-child(4) button', tap: '#services li:nth-child(4) button' }],
-  ['5-portfolio', { selector: '#portfolio', vh: 0.12 }, { hover: '#portfolio article:first-of-type img' }],
+  ['5-portfolio', { selector: '#portfolio', vh: 0.02 }, { hover: '#portfolio article:first-of-type img' }],
+  ['5b-portfolio-scrolled', { selector: '#portfolio', vh: 0.9 }],
   ['6-process', { selector: '#process', vh: 2.05 }],
-  ['7-contact', { selector: '#contact', vh: 0.7 }],
+  ['7-contact', { selector: '#contact', vh: 0.02 }],
+  ['7b-contact-details', { selector: '#contact', vh: 0.9 }],
 ];
 const SPACE = [
   ['0a-hero', { track: 'home', p: 0 }],

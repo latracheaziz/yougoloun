@@ -182,6 +182,8 @@ export const ar: Content = {
     arrival: { place: 'حائل' },
     serviceFilters: { all: 'الكل', growth: 'النمو', brand: 'العلامة التجارية', content: 'المحتوى' },
     carousel: { previous: 'المشروع السابق', next: 'المشروع التالي' },
+    mapLabels: { aja: 'جبال أجا', salma: 'جبال سلمى', nafud: 'النفود' },
+    visitSite: 'زيارة الموقع',
   },
 
   // ⚠ ليس من ملف المحتوى — العنوان معتمد من العميل

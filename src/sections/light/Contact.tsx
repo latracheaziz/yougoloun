@@ -5,6 +5,7 @@ import { Magnetic } from '@/interaction/Magnetic';
 import { mailtoLink, site, whatsappLink } from '@/config/site';
 import { SectionMark } from '@/components/SectionMark';
 import { HailClock } from '@/components/HailClock';
+import { CtaMarquee } from './CtaMarquee';
 
 // Small interactive globe (drag to rotate, Hail glowing) — its own lazy chunk, mounted near view.
 const MiniGlobe = lazy(() => import('@/gl/MiniGlobe'));
@@ -29,6 +30,7 @@ export function Contact() {
 
   return (
     <section ref={root} id="contact" data-tone="dark" aria-labelledby="contact-title" className="tone-dark band relative overflow-hidden">
+      <CtaMarquee />
       <div className="shell section-y">
         <SectionMark n={9} label={contactLabel} variant="brand" className="text-paper/70" />
         <h2 id="contact-title" data-reveal="lines" className="display mt-8 max-w-[15ch] text-[clamp(2.75rem,8vw,8.5rem)] text-balance">

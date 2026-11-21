@@ -5,6 +5,7 @@ import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { AltitudeMeter } from '@/components/AltitudeMeter';
 import { Cursor } from '@/interaction/Cursor';
+import { ScrollProgress } from '@/components/ScrollProgress';
 import { SmoothScroll } from '@/scroll/SmoothScroll';
 import { Tracks } from '@/scroll/Tracks';
 import { PaperLayer } from '@/scroll/PaperLayer';
@@ -132,6 +133,7 @@ export default function Home() {
       <Footer />
       <AltitudeMeter />
       <Cursor />
+      <ScrollProgress />
       <div className="grain" aria-hidden="true" />
       <SmoothScroll />
     </>

@@ -43,11 +43,13 @@ export const servicePreviews: Record<string, { image: keyof typeof brandImages; 
 // ── Portfolio ───────────────────────────────────────────────────────────────────────
 /**
  * Each project wears one colour of the brand palette (no orange anywhere). `ink` is the text colour on
- * the card (always navy ink); `accent` only colours tags and borders. Images are placeholders.
+ * the card (always navy ink); `accent` only colours tags and borders.
+ * `url`: the project's live website — its card image is a screenshot of it (`npm run capture-sites`).
+ * Projects without a website keep a placeholder image.
  */
-export const projects: Record<ProjectSlug, { accent: string; tint: string; ink: string; image: string }> = {
-  hajiss: { accent: brand.blue, tint: '#E3F2FA', ink: light.ink, image: '/media/work/hajiss/cover.webp' },
-  ghalia: { accent: brand.green, tint: '#EDF5E4', ink: light.ink, image: '/media/work/ghalia/cover.webp' },
+export const projects: Record<ProjectSlug, { accent: string; tint: string; ink: string; image: string; url?: string }> = {
+  hajiss: { accent: brand.blue, tint: '#E3F2FA', ink: light.ink, image: '/media/work/hajiss/cover.webp', url: 'https://www.hajiss.com/' },
+  ghalia: { accent: brand.green, tint: '#EDF5E4', ink: light.ink, image: '/media/work/ghalia/cover.webp', url: 'https://www.ghaliachocolate.com/' },
   odun: { accent: brand.navy, tint: '#E6E6F0', ink: light.ink, image: '/media/work/odun/cover.webp' },
 };
 

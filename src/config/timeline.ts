@@ -61,11 +61,13 @@ export const timeline = {
     },
     {
       id: 'positioning', // PDF §5 title — the dive into the clouds
-      length: 200,
+      // 170vh: the arrival map starts rising (and drawing) at p = 1 − 100/170 ≈ 0.41, while the
+      // clouds close, so the white-out is never an empty screen
+      length: 170,
       // full length on phones too: the light document starts rising at p = 1 − 100/length,
       // so a shorter track would bring it up before the clouds are white
       scaleOnMobile: false,
-      content: { enter: [0, 0.06], exit: [0.6, 0.76] },
+      content: { enter: [0, 0.06], exit: [0.48, 0.58] },
       keys: {
         /** p at which the cloud cover is total (and stays total). */
         cover: 0.55,

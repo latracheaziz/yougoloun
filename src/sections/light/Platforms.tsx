@@ -15,14 +15,25 @@ export function Platforms() {
     if (!el || reduced) return;
     const tween = gsap.fromTo(el, { xPercent: 0 }, { xPercent: dir === 'rtl' ? 50 : -50, duration: 36, ease: 'none', repeat: -1 });
     let speed = 1;
+    let skew = 0;
+    let hovered = false;
+    const section = el.parentElement!;
+    const enter = () => (hovered = true);
+    const leave = () => (hovered = false);
+    section.addEventListener('pointerenter', enter);
+    section.addEventListener('pointerleave', leave);
     const tick = () => {
-      const target = 1 + Math.min(Math.abs(journey.velocity) * 0.12, 5);
+      const target = hovered ? 0.2 : 1 + Math.min(Math.abs(journey.velocity) * 0.12, 5);
       speed += (target - speed) * 0.08;
       tween.timeScale(speed);
+      skew += (gsap.utils.clamp(-10, 10, -journey.velocity * 0.35) - skew) * 0.12;
+      gsap.set(el, { skewX: skew });
     };
     gsap.ticker.add(tick);
     return () => {
       gsap.ticker.remove(tick);
+      section.removeEventListener('pointerenter', enter);
+      section.removeEventListener('pointerleave', leave);
       tween.kill();
     };
   }, [reduced, dir]);

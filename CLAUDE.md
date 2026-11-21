@@ -17,6 +17,8 @@ Two parts, one page:
 - `npm run moments` — key-moment screenshots (desktop + mobile, AR + EN) + contact sheets in `.check/moments/`.
   Flags: `--all`, `--lang=en`, `--reduced`, `--fps`, `--query=nofx|tier=low`. Moments are listed at the top of the script.
 - `npm run textures` — (re)download + compress Earth maps into `public/textures/earth/{hd,sd}`.
+- `npm run capture-sites` — screenshot the live client sites (hajiss.com, ghaliachocolate.com; cookie banners are
+  rejected/closed, never accepted) into `public/media/work/{hajiss,ghalia}/cover.webp`. Re-run when those sites change.
 - `npm run media -- --brand <studio> <social> <analytics>` — optimize client images into `public/media/brand/`;
   `npm run media -- --placeholders` — regenerate portfolio placeholders in `public/media/work/`.
 - Dev-only URL switches: `?nofx` (no postprocessing), `?tier=low|medium|high` (force a quality tier).
@@ -47,7 +49,14 @@ Vite 8 (Rolldown) · React 19 · TypeScript 7 · React Router 8 · three r187 ·
   paper, so it slides over the white-out with no edge. The positioning track keeps full length on phones for this.
 - **Canvas lifecycle** (`useCanvasLifecycle` in `src/pages/Home.tsx`): paused (`frameloop="never"`) once past
   `keys.paper[1]`, unmounted 4 s later, re-mounted when scrolling back up (hidden behind paper until `glReady`).
-- **Light part** — normal document flow in `src/sections/light/*`, sticky only where it helps (process cards).
+- **Light part** — normal document flow in `src/sections/light/*`. Order: `Arrival` (Hail topo map draws itself
+  during the white-out, pin drop, coords scramble; map geometry in `topo.ts`) → `Statements` (pinned, word fill) →
+  Services → Platforms → `Portfolio` (pinned horizontal track on desktop, swipe on mobile) → Process (sticky cards) →
+  FAQ → Contact (`CtaMarquee` band + mini globe). `ScrollProgress` = gradient bar after the space part.
+- **Pinning = CSS sticky, not GSAP `pin`** (pin-spacers break in this layout): give the section extra height, make an
+  inner frame `sticky top-0 h-[100svh]`, drive the animation with a scrub ScrollTrigger `top top → bottom bottom`.
+- Portfolio cards with a `url` (`src/config/light.ts`) show the real site screenshot and link to it (new tab);
+  Odun Pide has no site → placeholder.
 - Navigation: `scrollToSection(id)` (Lenis) works for track ids and any element id. Active section: tracks in the
   space part, an IntersectionObserver for light sections.
 - Header tone: every stage/section declares `data-tone="dark|light"` (the dive title flips to light as the clouds

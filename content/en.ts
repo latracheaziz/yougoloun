@@ -174,6 +174,8 @@ export const en: Content = {
     arrival: { place: 'Hail, Saudi Arabia' },
     serviceFilters: { all: 'All', growth: 'Growth', brand: 'Brand', content: 'Content' },
     carousel: { previous: 'Previous project', next: 'Next project' },
+    mapLabels: { aja: 'AJA', salma: 'SALMA', nafud: 'NAFUD' },
+    visitSite: 'Visit website',
   },
 
   // ⚠ NOT FROM THE PDF — title approved by the client

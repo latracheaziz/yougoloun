@@ -107,7 +107,7 @@ export function Services() {
                       aria-controls={panel}
                       onClick={() => setOpen(open === s.num ? null : s.num)}
                       onPointerEnter={(e) => e.pointerType === 'mouse' && hoverRow(s.num)}
-                      className="group relative grid-12 w-full items-baseline py-[clamp(1.1rem,2vw,1.75rem)] text-start before:absolute before:-start-4 before:top-1/2 before:h-10 before:w-1 before:-translate-y-1/2 before:scale-y-0 before:rounded-full before:bg-[image:var(--p-gradient-brand)] before:transition-transform before:duration-500 aria-expanded:before:scale-y-100"
+                      className="group relative isolate grid-12 w-full items-baseline py-[clamp(1.1rem,2vw,1.75rem)] text-start after:absolute after:-inset-x-4 after:inset-y-0 after:-z-10 after:origin-left after:scale-x-0 after:rounded-xl after:bg-[linear-gradient(90deg,color-mix(in_oklab,var(--color-blue)_12%,transparent),color-mix(in_oklab,var(--color-green)_6%,transparent))] after:transition-transform after:duration-700 after:ease-[var(--ease-out-expo)] hover:after:scale-x-100 aria-expanded:after:scale-x-100 rtl:after:origin-right before:absolute before:-start-4 before:top-1/2 before:h-10 before:w-1 before:-translate-y-1/2 before:scale-y-0 before:rounded-full before:bg-[image:var(--p-gradient-brand)] before:transition-transform before:duration-500 aria-expanded:before:scale-y-100"
                     >
                       <span lang="en" className="col-span-2 font-mono text-sm text-ink/60 transition-colors duration-300 group-aria-expanded:text-link md:col-span-1">
                         {s.num}

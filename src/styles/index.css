@@ -514,3 +514,19 @@ html[lang='ar'] {
   background: color-mix(in oklab, var(--color-paper) 60%, transparent);
   border-color: color-mix(in oklab, var(--color-ink) 12%, transparent);
 }
+
+/* Arrival map: radar sweep + ripples around Hail */
+.arrival-radar {
+  animation: arrival-radar 6s linear infinite;
+}
+@keyframes arrival-radar {
+  to { transform: rotate(360deg); }
+}
+.arrival-ripple {
+  animation: arrival-ripple 2.7s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+  opacity: 0;
+}
+@keyframes arrival-ripple {
+  0% { transform: scale(0.2); opacity: 0.9; }
+  100% { transform: scale(2.6); opacity: 0; }
+}

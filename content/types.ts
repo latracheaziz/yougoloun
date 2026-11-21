@@ -111,6 +111,9 @@ export interface Content {
     /** Services filter chips (categories defined by the client). */
     serviceFilters: { all: string; growth: string; brand: string; content: string };
     carousel: { previous: string; next: string };
+    /** Place names on the arrival map. */
+    mapLabels: { aja: string; salma: string; nafud: string };
+    visitSite: string;
   };
 
   /** ⚠ NOT FROM THE PDF — meta tags composed from PDF phrases. Review before launch. */
