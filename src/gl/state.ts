@@ -1,33 +1,36 @@
-import { Color, Vector3 } from 'three';
+import { Color, Vector2, Vector3 } from 'three';
 
 /**
- * Mutable state of the space journey. The Director writes it every frame from the scroll
+ * Mutable state of the 3D journey. The Director writes it every frame from the scroll
  * journey; scene components read it in useFrame. No React re-renders involved.
  */
 
 /**
- * SPACE — Earth, arcs, rings, beacon.
- * Globe orientation is a nested rotation: roll(Z) ⊃ tilt(X) ⊃ spin(Y);
- * spin = spinToFace(lon) and tilt = lat bring (lat, lon) to face +Z.
+ * FEED — the social-media world (logo bubbles, phones, reactions, the four cornerstone objects).
+ * Every object blends between four formations with the weights in `w` (they sum to 1).
  */
-export const space = {
-  earthPosition: new Vector3(1.05, -0.32, 0),
-  spin: 0,
-  tilt: 0.42,
-  roll: 0,
-  /** World-space direction *towards* the sun. */
-  sunDirection: new Vector3(-0.8, 0.32, -0.5).normalize(),
-  cloudOffset: 0,
-  nightLights: 1,
-  flare: 1,
-  /** Arcs from GCC/MENA cities to Hail. draw 0..1 (staggered draw-on), opacity 0..1. */
-  arcs: { draw: 0, opacity: 0 },
-  /** "They say" word particles converging on Hail, 0..1. */
-  whispers: 0,
-  /** Four cornerstone rings: per-ring reveal 0..1, then intersect 0..1 (all meet above Hail). */
-  rings: { reveal: [0, 0, 0, 0], intersect: 0, opacity: 0 },
-  /** Glowing marker on Hail, 0..1. */
-  beacon: 0,
+export const feed = {
+  /** Where the subject sits in world space (beside the text; mirrored in RTL). */
+  anchor: new Vector3(1.05, 0, 0),
+  /** Story coordinate: section index + local progress. */
+  G: 0,
+  /** +1 LTR, -1 RTL (damped, so a language switch glides). */
+  side: 1,
+  /** 0 portrait → 1 landscape (damped). */
+  land: 1,
+  /** Smoothed pointer, -1..1 (y up). */
+  pointer: new Vector2(),
+  /** Pointer in NDC, raw (for hover pushes). */
+  pointerRaw: new Vector2(-9, -9),
+  /** Formation weights. */
+  w: { hero: 1, about: 0, corner: 0, dive: 0 },
+  /** About: comment bubbles flowing from the phones into the logo, 0..1. */
+  chatter: 0,
+  /** Cornerstones: per-object reveal 0..1, then meet 0..1 (they gather round the logo). */
+  reveal: [0, 0, 0, 0],
+  meet: 0,
+  /** Signed scroll velocity, smoothed (objects spin with it). */
+  velocity: 0,
 };
 
 /** DIVE — cloud layers, streaks, and the cover that turns the screen white. */

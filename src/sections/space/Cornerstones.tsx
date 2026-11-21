@@ -5,12 +5,12 @@ import { journey, onJourney, sectionIndex } from '@/scroll/journey';
 import { rangeProgress, sectionConfig } from '@/config/timeline';
 
 const KEYS = sectionConfig('cornerstones').keys;
-/** Same order and colours as the 3D rings (gl/space/Rings.tsx). */
+/** Same order and colours as the 3D objects' orbit rings (gl/feed/World.tsx, CORNER). */
 const RING_COLORS = ['var(--color-blue)', 'var(--color-green)', 'var(--color-blue-light)', 'var(--color-green-light)'];
 
 /**
- * PDF §4 — each cornerstone lights up with its orbital ring; when the rings meet above Hail,
- * the statement "We operate at the intersection…" appears.
+ * PDF §4 — each cornerstone lights up as its 3D object pops onto its orbit; when the orbits merge
+ * around the logo, the statement "We operate at the intersection…" appears.
  */
 export function Cornerstones() {
   const t = useContent();

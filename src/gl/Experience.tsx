@@ -3,20 +3,17 @@ import { Canvas } from '@react-three/fiber';
 import { PerformanceMonitor } from '@react-three/drei';
 import { Director } from './Director';
 import { Effects } from './Effects';
-import { Earth } from './space/Earth';
 import { Stars } from './space/Stars';
 import { Nebula } from './space/Nebula';
-import { SunFlare } from './space/SunFlare';
-import { Arcs } from './space/Arcs';
-import { Whispers } from './space/Whispers';
-import { Rings } from './space/Rings';
-import { HailBeacon } from './space/HailBeacon';
+import { World } from './feed/World';
+import { Lights } from './feed/Lights';
+import { Burst } from './feed/Burst';
 import { Dive } from './dive/Dive';
 import { token } from './palette';
 import { useApp } from '@/store/app';
 import { qualityPresets } from '@/config/quality';
 
-/** Flags the canvas as ready once the globe (textures included) has mounted. */
+/** Flags the canvas as ready once the world (phone-screen textures included) has mounted. */
 function ReadySignal() {
   useEffect(() => {
     const id = requestAnimationFrame(() => useApp.getState().setGlReady(true));
@@ -59,15 +56,11 @@ export default function Experience({ active = true }: { active?: boolean }) {
       <Nebula />
       <Stars />
       <Suspense fallback={null}>
-        <Earth>
-          <Arcs />
-          <Whispers />
-          <Rings />
-          <HailBeacon />
-        </Earth>
+        <Lights />
+        <World />
         <ReadySignal />
       </Suspense>
-      <SunFlare />
+      <Burst />
       <Dive />
       {!noFx && <Effects />}
     </Canvas>

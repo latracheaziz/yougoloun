@@ -9,7 +9,7 @@ import { whatsappLink } from '@/config/site';
 
 gsap.registerPlugin(SplitText, useGSAP);
 
-/** PDF §2 — hero over the Earth. */
+/** PDF §2 — hero over the 3D logo and its social icons. */
 export function Hero() {
   const t = useContent();
   const reducedMotion = useApp((s) => s.reducedMotion);

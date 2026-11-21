@@ -1,5 +1,5 @@
 /**
- * YOUGOLOUN — scroll timeline of the SPACE part (hero → Gulf → rings → dive into the clouds).
+ * YOUGOLOUN — scroll timeline of the 3D part (hero → about → cornerstones → dive into the clouds).
  * Every scroll timing of the 3D journey lives in this file.
  *
  * HOW IT WORKS
@@ -36,22 +36,22 @@ export const timeline = {
 
   sections: [
     {
-      id: 'home', // PDF §2 — Earth in space
+      id: 'home', // PDF §2 — the logo bubbles among glossy social icons
       length: 100,
       content: { enter: null, exit: [0.3, 0.8] },
       keys: {
-        /** Earth starts turning toward the Gulf as the hero text leaves. */
-        earthTurn: [0.35, 1],
+        /** The world re-forms into the About formation (phones fan out) as the hero text leaves. */
+        toAbout: [0.35, 1],
       },
     },
     {
-      id: 'about', // PDF §3 — turning to the Gulf
+      id: 'about', // PDF §3 — phones fan out, comments fly from them into the logo
       length: 120,
       content: fade,
-      keys: { faceGulf: [0, 0.45], arcs: [0.2, 0.75], whispers: [0.35, 1] },
+      keys: { fan: [0, 0.45], chatter: [0.25, 1] },
     },
     {
-      id: 'cornerstones', // PDF §4 — four orbital rings
+      id: 'cornerstones', // PDF §4 — four objects (chart, target, camera, arrow) on orbits that merge
       length: 200,
       content: fade,
       keys: {
@@ -60,7 +60,7 @@ export const timeline = {
       },
     },
     {
-      id: 'positioning', // PDF §5 title — the dive into the clouds
+      id: 'positioning', // PDF §5 title — the dive into the logo and the clouds
       // 170vh: the arrival map starts rising (and drawing) at p = 1 − 100/170 ≈ 0.41, while the
       // clouds close, so the white-out is never an empty screen
       length: 170,

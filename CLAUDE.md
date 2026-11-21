@@ -2,8 +2,10 @@
 
 Site for a digital marketing & growth agency in Hail, KSA. يقولون = "they say".
 Two parts, one page:
-1. **Space (cinematic, WebGL):** Earth in space → the Gulf (city arcs, "they say" words) → four cornerstone rings
-   meeting above Hail → a dive into the clouds until the screen is white.
+1. **3D part (cinematic, WebGL, bright brand-blue sky):** a social-media world — the logo's two speech bubbles as
+   glossy 3D objects among phones, hearts, comments, megaphone, bell… → About: phones fan out, comment bubbles fly
+   into the logo → four cornerstone objects (chart, target, camera, growth arrow) on orbits that merge round the logo
+   → a dive into the logo and the clouds until the screen is white. (The Earth was removed at the client's request.)
 2. **Light site (editorial, document scroll, brand blue/green/navy):** the cloud white becomes the paper background; a payoff
    ("27.5219° N · 41.6907° E — حائل / Hail, Saudi Arabia"), then positioning, services, platforms, portfolio,
    process, FAQ, contact.
@@ -16,7 +18,8 @@ Two parts, one page:
   scrolls every section, fails on any console error, writes screenshots to `.check/`. `-- --quick` = hero only.
 - `npm run moments` — key-moment screenshots (desktop + mobile, AR + EN) + contact sheets in `.check/moments/`.
   Flags: `--all`, `--lang=en`, `--reduced`, `--fps`, `--query=nofx|tier=low`. Moments are listed at the top of the script.
-- `npm run textures` — (re)download + compress Earth maps into `public/textures/earth/{hd,sd}`.
+- `npm run textures` — (re)download Earth maps. Only `public/textures/earth/sd/ocean.webp` is still used (land mask
+  of the Contact mini globe); the other maps were deleted with the Earth — don't re-add them.
 - `npm run capture-sites` — screenshot the live client sites (hajiss.com, ghaliachocolate.com; cookie banners are
   rejected/closed, never accepted) into `public/media/work/{hajiss,ghalia}/cover.webp`. Re-run when those sites change.
 - `npm run media -- --brand <studio> <social> <analytics>` — optimize client images into `public/media/brand/`;
@@ -70,8 +73,15 @@ Vite 8 (Rolldown) · React 19 · TypeScript 7 · React Router 8 · three r187 ·
 - **`src/gl/Director.tsx`** maps scroll → camera shot + world state (pure function of scroll). Story coordinate
   `G = sectionIndex + p`; shots keyframed in `KEYS`; the fall is procedural (`diveShot`). Tweak framing there,
   timing in `timeline.ts`. Only the RTL mirror and the portrait/landscape blend are damped.
-- World state: mutable objects in `src/gl/state.ts` (`space`, `dive`). Globe children (arcs, whispers, rings,
-  beacon) live in geographic coordinates inside `<Earth>`; lat/lon convention in `src/gl/geo.ts`.
+- World state: mutable objects in `src/gl/state.ts` (`feed`, `dive`). The Director writes formation weights
+  `feed.w = {hero, about, corner, dive}` (sum 1) + `reveal/meet/chatter`; the subject sits at `feed.anchor`.
+- **`src/gl/feed/`** — the social-media world, all procedural (no model files): `geometry.ts` (extruded speech
+  bubbles, heart, arrow, lathe megaphone/bell, rounded boxes — cached), `materials.ts` (clear-coated `glossy(token)`,
+  Standard on the low tier), `objects.tsx` (LogoMark with live mic waveform, icons, cornerstone objects, Phone with a
+  screen texture), `World.tsx` (every object = weighted blend of formation functions + idle float + spin from scroll
+  velocity + push/spin away from the pointer; local x mirrored in RTL), `Chatter.tsx` (instanced comment bubbles,
+  phones → logo), `Burst.tsx` (click/tap → glossy hearts), `Lights.tsx` (Lightformer studio env map, no HDR download).
+  Background: `src/gl/space/Nebula.tsx` (brand sky sphere) + `Stars.tsx`. Phone screens use `brandImages`/`feedPosts`.
 - Shaders: `src/gl/shaders/*` imported with `?raw`; output linear HDR, end with tonemapping + colorspace chunks.
 - Colours: values in `src/config/palette.ts` (single source); WebGL reads them via `token()` (`src/gl/palette.ts`).
 - Quality tiers in `src/config/quality.ts` (DPR cap, render scale, bloom levels, particles); `PerformanceMonitor`
@@ -122,7 +132,7 @@ Tailwind tokens in `src/styles/index.css` (`@theme`) only point at them; WebGL r
 - `THREE.Clock` deprecation warning comes from R3F internals — ignored by `npm run check` (client OK).
 
 ## Phases
-1. ✅ Setup, content (EN/AR), Earth hero
+1. ✅ Setup, content (EN/AR), hero (Earth, later replaced by the social-media world)
 2. ✅ Space camera journey
 3. ✅ Redesign: space part ends in the clouds → light editorial site (all content sections, interactions)
 4. Loader, page transitions, Privacy Policy, sound toggle

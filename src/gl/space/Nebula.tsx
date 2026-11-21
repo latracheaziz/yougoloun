@@ -4,16 +4,16 @@ import { BackSide, Mesh, ShaderMaterial, SphereGeometry, Vector3 } from 'three';
 import nebulaVert from '../shaders/nebula.vert?raw';
 import nebulaFrag from '../shaders/nebula.frag?raw';
 import { token } from '../palette';
-import { space } from '../state';
+import { feed } from '../state';
 
 const UP = new Vector3();
 const RIGHT = new Vector3();
 const onScreen = new Vector3();
-const toEarth = new Vector3();
+const toSubject = new Vector3();
 
 /**
  * The sky behind the stars — not black: a navy base with a brand-blue nebula that always glows
- * around the Earth and a brand-green cloud beneath it. A camera-following sphere (drawn first).
+ * around the subject (the logo world) and a brand-green cloud beneath it. A camera-following sphere (drawn first).
  */
 export function Nebula() {
   const geometry = useMemo(() => new SphereGeometry(300, 32, 16), []);
@@ -42,13 +42,13 @@ export function Nebula() {
   useFrame(({ camera }) => {
     ref.current?.position.copy(camera.position);
     const u = material.uniforms;
-    toEarth.copy(space.earthPosition).sub(camera.position).normalize();
-    u.uBlueDir.value.copy(toEarth);
+    toSubject.copy(feed.anchor).sub(camera.position).normalize();
+    u.uBlueDir.value.copy(toSubject);
     // green: below the Earth, pulled towards the middle of the screen (so the planet never hides it)
     UP.set(0, 1, 0).applyQuaternion(camera.quaternion);
     RIGHT.set(1, 0, 0).applyQuaternion(camera.quaternion);
-    const side = Math.sign(onScreen.copy(space.earthPosition).project(camera).x) || 1;
-    u.uGreenDir.value.copy(toEarth).addScaledVector(UP, -0.6).addScaledVector(RIGHT, -side * 0.75).normalize();
+    const side = Math.sign(onScreen.copy(feed.anchor).project(camera).x) || 1;
+    u.uGreenDir.value.copy(toSubject).addScaledVector(UP, -0.6).addScaledVector(RIGHT, -side * 0.75).normalize();
   });
 
   return <mesh ref={ref} geometry={geometry} material={material} renderOrder={-100} frustumCulled={false} />;

@@ -1,7 +1,7 @@
 import { useContent } from '@/i18n/LangContext';
 import { SectionMark } from '@/components/SectionMark';
 
-/** PDF §3 — over the globe turning to the Gulf (arcs + "they say" words are in the 3D). */
+/** PDF §3 — over the phones fanning out (the "they say" comment bubbles are in the 3D). */
 export function About() {
   const t = useContent();
   return (

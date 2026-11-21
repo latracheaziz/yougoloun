@@ -3,7 +3,6 @@ import { useContent } from '@/i18n/LangContext';
 import { useApp } from '@/store/app';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
-import { AltitudeMeter } from '@/components/AltitudeMeter';
 import { Cursor } from '@/interaction/Cursor';
 import { ScrollProgress } from '@/components/ScrollProgress';
 import { SmoothScroll } from '@/scroll/SmoothScroll';
@@ -135,7 +134,6 @@ export default function Home() {
       </main>
 
       <Footer />
-      <AltitudeMeter />
       <Cursor />
       <ScrollProgress />
       <div className="grain" aria-hidden="true" />
