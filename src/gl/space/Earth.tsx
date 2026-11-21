@@ -51,7 +51,7 @@ export function Earth({ children }: { children?: ReactNode }) {
 
   const materials = useMemo(() => {
     const twilight = token('accent');
-    const nightRim = token('deep').multiplyScalar(4);
+    const nightRim = token('deep').multiplyScalar(3);
     const earth = new ShaderMaterial({
       vertexShader: sphereVert,
       fragmentShader: earthFrag,

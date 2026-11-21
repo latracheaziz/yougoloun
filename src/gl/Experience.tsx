@@ -5,6 +5,7 @@ import { Director } from './Director';
 import { Effects } from './Effects';
 import { Earth } from './space/Earth';
 import { Stars } from './space/Stars';
+import { Nebula } from './space/Nebula';
 import { SunFlare } from './space/SunFlare';
 import { Arcs } from './space/Arcs';
 import { Whispers } from './space/Whispers';
@@ -55,6 +56,7 @@ export default function Experience({ active = true }: { active?: boolean }) {
     >
       <PerformanceMonitor flipflops={3} onIncline={() => stepTier(1)} onDecline={() => stepTier(-1)} onFallback={() => setTier('low')} />
       <Director />
+      <Nebula />
       <Stars />
       <Suspense fallback={null}>
         <Earth>

@@ -18,7 +18,7 @@ export function Effects() {
     <EffectComposer multisampling={0} enableNormalPass={false}>
       <Bloom mipmapBlur levels={bloomLevels} luminanceThreshold={0.82} luminanceSmoothing={0.3} intensity={0.85} radius={0.72} />
       <ChromaticAberration offset={caOffset} radialModulation modulationOffset={0.35} />
-      <Vignette offset={0.26} darkness={0.78} />
+      <Vignette offset={0.34} darkness={0.42} />
       <ToneMapping mode={ToneMappingMode.ACES_FILMIC} />
     </EffectComposer>
   );

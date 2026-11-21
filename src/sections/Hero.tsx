@@ -127,7 +127,7 @@ function PillarsBar({ pillars }: { pillars: string[] }) {
               {run.map((p, i) => (
                 <span key={`${half}-${i}`} className="flex items-center">
                   <span className="font-display px-7 text-[clamp(1rem,1.4vw,1.25rem)] font-medium whitespace-nowrap text-mist/85">{p}</span>
-                  <span className="text-[0.7rem] text-accent">✦</span>
+                  <span className="text-[0.7rem] text-green-light">✦</span>
                 </span>
               ))}
             </div>

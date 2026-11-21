@@ -38,16 +38,17 @@ export const light = {
  * so this part follows the brand palette too.
  */
 export const space = {
-  night: '#05070D',
-  deep: '#0B1B3A',
+  /** base of the sky: a bright brand navy (not black); the 3D nebula adds blue/green light on top */
+  night: '#0A1A3C',
+  deep: '#12346A',
   /** text over space: cool off-white */
   mist: '#EEF0F5',
   /** accents over space (section numbers, highlights, terminator, arcs) */
   accent: brand.blue,
   /** soft highlights (city lights, sun flare, glows) */
   accentLight: brand.blueLight,
-  /** atmosphere blue (3D only) */
-  haze: '#6FA6FF',
+  /** atmosphere blue (3D only) — the logo's light blue */
+  haze: brand.blueLight,
 };
 
 export const gradients = {

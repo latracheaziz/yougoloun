@@ -80,7 +80,7 @@ export function Cornerstones() {
         <p ref={statement} className="mt-7 text-[clamp(1.05rem,1.35vw,1.3rem)] leading-snug text-mist/85" style={{ opacity: 0 }}>
           {t.cornerstones.statement.lead}
           <br />
-          <strong className="font-display font-semibold text-accent">{t.cornerstones.statement.emphasis}</strong>
+          <strong className="bg-[image:var(--p-gradient-brand)] bg-[length:100%_3px] bg-bottom bg-no-repeat pb-1 font-display font-semibold text-mist">{t.cornerstones.statement.emphasis}</strong>
         </p>
       </div>
     </section>

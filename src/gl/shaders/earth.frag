@@ -34,13 +34,13 @@ void main() {
 
   // Day side
   vec3 day = texture2D(uDay, vUv).rgb;
-  vec3 dayColor = day * (0.015 + 1.12 * max(sunDetail, 0.0));
+  vec3 dayColor = day * (0.05 + 1.3 * max(sunDetail, 0.0));
 
   // Night side: drop the map's blue base, keep warm city lights
   vec3 nightTex = texture2D(uNight, vUv).rgb;
   float lum = dot(nightTex, vec3(0.2126, 0.7152, 0.0722));
   float cities = smoothstep(0.06, 0.55, lum);
-  vec3 nightColor = nightTex * 0.06 + uCityLights * pow(cities, 1.5) * 3.4 * uNightLights;
+  vec3 nightColor = nightTex * 0.1 + uAtmosphereDay * 0.045 + uCityLights * pow(cities, 1.5) * 3.4 * uNightLights;
 
   vec3 color = mix(nightColor, dayColor, dayMix);
 

@@ -4,7 +4,7 @@ import type { ReactNode } from 'react';
 export const SECTION_TOTAL = 9;
 
 /**
- * `space`: accent number over space.
+ * `space`: number in a brand-gradient bubble over the (bright blue) sky; label at 70%.
  * `brand`: the number sits in a small speech bubble filled with the brand gradient (light site + navy band).
  */
 export function SectionMark({ n, label, className = '', variant = 'space' }: { n: number; label?: ReactNode; className?: string; variant?: 'space' | 'brand' }) {
@@ -16,7 +16,7 @@ export function SectionMark({ n, label, className = '', variant = 'space' }: { n
           {number}
         </span>
       ) : (
-        <span lang="en" dir="ltr" className="text-accent">
+        <span lang="en" dir="ltr" className="bubble bg-brand-gradient px-2.5 py-1 text-ink">
           {number}
         </span>
       )}
