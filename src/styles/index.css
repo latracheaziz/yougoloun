@@ -530,3 +530,80 @@ html[lang='ar'] {
   0% { transform: scale(0.2); opacity: 0.9; }
   100% { transform: scale(2.6); opacity: 0; }
 }
+
+/* ───────────────────────── Buzz ("word of mouth" interlude) ───────────────────────── */
+.buzz-dot {
+  animation: buzz-dot 1.2s ease-in-out infinite;
+}
+@keyframes buzz-dot {
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.45; }
+  30% { transform: translateY(-35%); opacity: 1; }
+}
+.buzz-bob {
+  animation: buzz-bob 5s ease-in-out infinite;
+}
+@keyframes buzz-bob {
+  0%, 100% { transform: translateY(0) rotate(-4deg); }
+  50% { transform: translateY(-10px) rotate(4deg); }
+}
+.buzz-waves {
+  animation: buzz-waves 1.6s ease-out infinite;
+}
+@keyframes buzz-waves {
+  0% { opacity: 0; scale: 0.6; }
+  40% { opacity: 1; }
+  100% { opacity: 0; scale: 1.5; }
+}
+.buzz-pulse {
+  animation: buzz-pulse 2s ease-out infinite;
+}
+@keyframes buzz-pulse {
+  0% { transform: scale(0.5); opacity: 0.5; }
+  100% { transform: scale(1.6); opacity: 0; }
+}
+.buzz-blink {
+  animation: buzz-blink 1.2s steps(2) infinite;
+}
+@keyframes buzz-blink {
+  50% { opacity: 0.2; }
+}
+/* the post's double-tap heart + the action heart beating with it */
+.buzz-like {
+  animation: buzz-like 4s var(--ease-out-expo) infinite;
+}
+@keyframes buzz-like {
+  0%, 8% { transform: scale(0); opacity: 0; }
+  16% { transform: scale(1.15); opacity: 1; }
+  22% { transform: scale(0.95); }
+  30% { transform: scale(1); opacity: 1; }
+  44%, 100% { transform: scale(1.3); opacity: 0; }
+}
+.buzz-heart {
+  display: inline-block;
+  animation: buzz-heart 4s ease-out infinite;
+}
+@keyframes buzz-heart {
+  0%, 12%, 30%, 100% { transform: scale(1); }
+  18% { transform: scale(1.35); }
+}
+/* live reactions rising from the phone */
+.buzz-float {
+  opacity: 0;
+  animation: buzz-float 3.3s ease-out infinite;
+}
+@keyframes buzz-float {
+  0% { transform: translate(-50%, 0) scale(0.4); opacity: 0; }
+  12% { opacity: 1; }
+  50% { transform: translate(calc(-50% + var(--drift, 10px)), -120px) scale(1); }
+  100% { transform: translate(calc(-50% - var(--drift, 10px)), -250px) scale(0.85); opacity: 0; }
+}
+.buzz-toast {
+  animation: buzz-toast 0.7s var(--ease-out-expo) both;
+}
+@keyframes buzz-toast {
+  from { transform: translateY(-14px) scale(0.96); opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .buzz-dot, .buzz-bob, .buzz-waves, .buzz-pulse, .buzz-blink, .buzz-heart, .buzz-toast { animation: none; }
+  .buzz-like, .buzz-float { animation: none; opacity: 0; }
+}

@@ -161,7 +161,7 @@ export const en: Content = {
     menu: 'Menu',
     close: 'Close',
     switchLang: { label: 'العربية', short: 'AR', ariaLabel: 'التبديل إلى العربية' },
-    cursor: { view: 'View', drag: 'Drag', talk: 'Talk' },
+    cursor: { view: 'View', drag: 'Drag', talk: 'Talk', react: 'React' },
     altitude: 'Altitude',
     localTime: 'Local time in Hail',
     sound: { on: 'Sound on', off: 'Sound off' },
@@ -176,6 +176,17 @@ export const en: Content = {
     carousel: { previous: 'Previous project', next: 'Next project' },
     mapLabels: { aja: 'AJA', salma: 'SALMA', nafud: 'NAFUD' },
     visitSite: 'Visit website',
+    buzz: {
+      word: 'They say',
+      hashtag: '#Yougoloun',
+      handle: '@yougoloun',
+      live: 'Live',
+      growth: 'Growth',
+      funnelTitle: 'Funnel',
+      notifications: ['New follower', 'New order', 'New message', 'You were mentioned'],
+      funnel: ['Reach', 'Engagement', 'Conversion', 'Loyalty'],
+      hint: 'Tap to react',
+    },
   },
 
   // ⚠ NOT FROM THE PDF — title approved by the client

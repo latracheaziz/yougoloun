@@ -95,7 +95,7 @@ export interface Content {
     menu: string;
     close: string;
     switchLang: { label: string; short: string; ariaLabel: string };
-    cursor: { view: string; drag: string; talk: string };
+    cursor: { view: string; drag: string; talk: string; react: string };
     altitude: string;
     localTime: string;
     sound: { on: string; off: string };
@@ -114,6 +114,18 @@ export interface Content {
     /** Place names on the arrival map. */
     mapLabels: { aja: string; salma: string; nafud: string };
     visitSite: string;
+    /** "Word of mouth" interlude (agency identity visuals): short interface labels. */
+    buzz: {
+      word: string;
+      hashtag: string;
+      handle: string;
+      live: string;
+      growth: string;
+      funnelTitle: string;
+      notifications: readonly string[];
+      funnel: readonly string[];
+      hint: string;
+    };
   };
 
   /** ⚠ NOT FROM THE PDF — meta tags composed from PDF phrases. Review before launch. */

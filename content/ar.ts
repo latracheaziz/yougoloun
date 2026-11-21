@@ -169,7 +169,7 @@ export const ar: Content = {
     menu: 'القائمة',
     close: 'إغلاق',
     switchLang: { label: 'English', short: 'EN', ariaLabel: 'Switch to English' },
-    cursor: { view: 'عرض', drag: 'اسحب', talk: 'تحدث' },
+    cursor: { view: 'عرض', drag: 'اسحب', talk: 'تحدث', react: 'تفاعل' },
     altitude: 'الارتفاع',
     localTime: 'التوقيت المحلي في حائل',
     sound: { on: 'تشغيل الصوت', off: 'إيقاف الصوت' },
@@ -184,6 +184,17 @@ export const ar: Content = {
     carousel: { previous: 'المشروع السابق', next: 'المشروع التالي' },
     mapLabels: { aja: 'جبال أجا', salma: 'جبال سلمى', nafud: 'النفود' },
     visitSite: 'زيارة الموقع',
+    buzz: {
+      word: 'يقولون',
+      hashtag: '#يقولون',
+      handle: '@yougoloun',
+      live: 'مباشر',
+      growth: 'النمو',
+      funnelTitle: 'مسار العميل',
+      notifications: ['متابع جديد', 'طلب جديد', 'رسالة جديدة', 'تمت الإشارة إليك'],
+      funnel: ['الوصول', 'التفاعل', 'التحويل', 'الولاء'],
+      hint: 'اضغط للتفاعل',
+    },
   },
 
   // ⚠ ليس من ملف المحتوى — العنوان معتمد من العميل

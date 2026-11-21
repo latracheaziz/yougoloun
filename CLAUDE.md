@@ -51,7 +51,8 @@ Vite 8 (Rolldown) · React 19 · TypeScript 7 · React Router 8 · three r187 ·
   `keys.paper[1]`, unmounted 4 s later, re-mounted when scrolling back up (hidden behind paper until `glReady`).
 - **Light part** — normal document flow in `src/sections/light/*`. Order: `Arrival` (Hail topo map draws itself
   during the white-out, pin drop, coords scramble; map geometry in `topo.ts`) → `Statements` (pinned, word fill) →
-  Services → Platforms → `Portfolio` (pinned horizontal track on desktop, swipe on mobile) → Process (sticky cards) →
+  Services → Platforms → `Buzz` ("word of mouth" agency-identity interlude: typing name, live post with reactions,
+  growth chart, funnel, notifications, click-to-react burst; labels in `ui.buzz`; no section number) → `Portfolio` (pinned horizontal track on desktop, swipe on mobile) → Process (sticky cards) →
   FAQ → Contact (`CtaMarquee` band + mini globe). `ScrollProgress` = gradient bar after the space part.
 - **Pinning = CSS sticky, not GSAP `pin`** (pin-spacers break in this layout): give the section extra height, make an
   inner frame `sticky top-0 h-[100svh]`, drive the animation with a scrub ScrollTrigger `top top → bottom bottom`.

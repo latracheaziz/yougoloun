@@ -33,6 +33,8 @@ const KEY = [
   ['3-arrival', { selector: '#statements', vh: -0.9 }],
   ['3b-statements', { selector: '#statements', vh: 1.4 }],
   ['4-services', { selector: '#services', vh: 0.62 }, { hover: '#services li:nth-child(4) button', tap: '#services li:nth-child(4) button' }],
+  ['4b-buzz', { selector: '#buzz', vh: 0.12 }],
+  ['4c-buzz-lower', { selector: '#buzz', vh: 0.85 }],
   ['5-portfolio', { selector: '#portfolio', vh: 0.02 }, { hover: '#portfolio article:first-of-type img' }],
   ['5b-portfolio-scrolled', { selector: '#portfolio', vh: 0.9 }],
   ['6-process', { selector: '#process', vh: 2.05 }],

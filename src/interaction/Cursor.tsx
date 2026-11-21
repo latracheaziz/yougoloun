@@ -4,7 +4,7 @@ import { useContent } from '@/i18n/LangContext';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { useApp } from '@/store/app';
 
-type Mode = 'view' | 'drag' | 'talk';
+type Mode = 'view' | 'drag' | 'talk' | 'react';
 
 /**
  * Custom cursor: a dot + a ring that grows over anything clickable, and becomes a labelled
@@ -30,7 +30,7 @@ export function Cursor() {
     const ry = gsap.quickTo(ring.current, 'y', { duration: lag, ease: 'power3.out' });
     let shown = false;
 
-    const labels: Record<Mode, string> = { view: t.ui.cursor.view, drag: t.ui.cursor.drag, talk: t.ui.cursor.talk };
+    const labels: Record<Mode, string> = { view: t.ui.cursor.view, drag: t.ui.cursor.drag, talk: t.ui.cursor.talk, react: t.ui.cursor.react };
     const onMove = (e: PointerEvent) => {
       if (e.pointerType !== 'mouse') return;
       if (!shown) {

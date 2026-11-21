@@ -19,6 +19,7 @@ import { Arrival } from '@/sections/light/Arrival';
 import { Statements } from '@/sections/light/Statements';
 import { Services } from '@/sections/light/Services';
 import { Platforms } from '@/sections/light/Platforms';
+import { Buzz } from '@/sections/light/Buzz';
 import { Portfolio } from '@/sections/light/Portfolio';
 import { Process } from '@/sections/light/Process';
 import { Faq } from '@/sections/light/Faq';
@@ -123,6 +124,7 @@ export default function Home() {
           <Statements />
           <Services />
           <Platforms />
+          <Buzz />
           <Portfolio />
           <Process />
           <Faq />
