@@ -23,7 +23,6 @@ export function DiveTitle() {
         const p = journey.p[sectionIndex.positioning];
         const ink = rangeProgress(p, KEYS.textToDark);
         el.style.setProperty('--ink', ink.toFixed(3));
-        el.dataset.tone = ink > 0.5 ? 'light' : 'dark';
       }),
     [],
   );
@@ -32,8 +31,8 @@ export function DiveTitle() {
     <section
       ref={root}
       id="positioning"
-      data-stage="positioning"
-      data-tone="dark"
+      data-stage="positioning" data-cursor="hold"
+      data-tone="light"
       aria-labelledby="positioning-title"
       className="dive-title stage flex items-end px-[var(--gutter)] pb-[clamp(5rem,13vh,9rem)]"
     >

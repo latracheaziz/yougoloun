@@ -95,7 +95,9 @@ export interface Content {
     menu: string;
     close: string;
     switchLang: { label: string; short: string; ariaLabel: string };
-    cursor: { view: string; drag: string; talk: string; react: string };
+    /** "Hold to awaken" hint in the hero (3D interaction; not from the PDF). */
+    holdHint: string;
+    cursor: { view: string; drag: string; talk: string; react: string; hold: string };
     altitude: string;
     localTime: string;
     sound: { on: string; off: string };

@@ -361,6 +361,45 @@ html[lang='ar'] {
 }
 .stage {
   min-height: var(--stage-h);
+  /* the 3D part is a bright sky: stage text uses ink (utilities read these variables) */
+  --color-mist: var(--color-ink);
+  --color-night: var(--color-paper);
+  color: var(--color-ink);
+}
+/* soft paper veil on the text side, so copy reads over the 3D world */
+.stage::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: linear-gradient(to right, color-mix(in oklab, var(--color-paper) 82%, transparent), color-mix(in oklab, var(--color-paper) 45%, transparent) 36%, transparent 60%);
+}
+[dir='rtl'] .stage::before {
+  background: linear-gradient(to left, color-mix(in oklab, var(--color-paper) 82%, transparent), color-mix(in oklab, var(--color-paper) 45%, transparent) 36%, transparent 60%);
+}
+/* later chapters: busier scenery behind the copy → a denser veil */
+#about.stage::before,
+#cornerstones.stage::before {
+  background: linear-gradient(to right, color-mix(in oklab, var(--color-paper) 92%, transparent), color-mix(in oklab, var(--color-paper) 72%, transparent) 34%, transparent 58%);
+}
+[dir='rtl'] #about.stage::before,
+[dir='rtl'] #cornerstones.stage::before {
+  background: linear-gradient(to left, color-mix(in oklab, var(--color-paper) 92%, transparent), color-mix(in oklab, var(--color-paper) 72%, transparent) 34%, transparent 58%);
+}
+@media (orientation: portrait) {
+  .stage::before,
+  [dir='rtl'] .stage::before {
+    background: linear-gradient(to bottom, color-mix(in oklab, var(--color-paper) 70%, transparent), color-mix(in oklab, var(--color-paper) 35%, transparent) 50%, transparent 72%);
+  }
+  #about.stage::before,
+  #cornerstones.stage::before,
+  #positioning.stage::before,
+  [dir='rtl'] #about.stage::before,
+  [dir='rtl'] #cornerstones.stage::before,
+  [dir='rtl'] #positioning.stage::before {
+    background: linear-gradient(to top, color-mix(in oklab, var(--color-paper) 82%, transparent), color-mix(in oklab, var(--color-paper) 45%, transparent) 45%, transparent 70%);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -485,6 +524,71 @@ html[lang='ar'] {
 }
 .cursor-ring[data-state='label'] .cursor-label {
   opacity: 1;
+}
+
+/* Hold to awaken (3D part): a light glass ring with a caption; a blue→green arc shows the charge
+   (--hold on <html>, 0..1, written every frame by src/interaction/hold.ts). */
+.cursor-ring[data-mode='hold'] {
+  width: 58px;
+  height: 58px;
+  margin: -29px 0 0 -29px;
+  border-radius: 999px;
+  border-color: color-mix(in oklab, #fff 75%, transparent);
+  background-image: none;
+  background-color: color-mix(in oklab, #fff 16%, transparent);
+  backdrop-filter: blur(2px);
+}
+.cursor-ring[data-mode='hold'] .cursor-label {
+  position: absolute;
+  top: calc(100% + 10px);
+  white-space: nowrap;
+  font-size: 0.6rem;
+}
+.cursor-ring[data-mode='hold']::before,
+.hold-ring::before {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border-radius: 999px;
+  background: conic-gradient(var(--color-blue) 0deg, var(--color-green) calc(var(--hold, 0) * 360deg), transparent calc(var(--hold, 0) * 360deg));
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2.5px));
+  mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2.5px));
+}
+.hold-hint {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.55rem 1.1rem 0.55rem 0.7rem;
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--color-paper) 55%, transparent);
+  backdrop-filter: blur(8px);
+  white-space: nowrap;
+}
+.hold-ring {
+  position: relative;
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  border: 1.5px solid color-mix(in oklab, var(--color-ink) 30%, transparent);
+}
+.hold-ring::after {
+  content: '';
+  position: absolute;
+  inset: 4px;
+  border-radius: 999px;
+  background: var(--p-gradient-brand);
+  animation: holdpulse 2.4s var(--ease-in-out-quart) infinite;
+}
+@keyframes holdpulse {
+  50% {
+    scale: 0.55;
+    opacity: 0.6;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hold-ring::after {
+    animation: none;
+  }
 }
 
 /* Dive title: mist → ink as the clouds brighten, with a matching scrim. */

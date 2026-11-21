@@ -43,8 +43,8 @@ export function Cornerstones() {
   return (
     <section
       id="cornerstones"
-      data-stage="cornerstones"
-      data-tone="dark"
+      data-stage="cornerstones" data-cursor="hold"
+      data-tone="light"
       aria-labelledby="cornerstones-title"
       className="stage flex items-end px-[var(--gutter)] pb-[clamp(4rem,10vh,7rem)]"
     >

@@ -17,9 +17,12 @@ Two parts, one page:
 - `npm run check` — **phase gate**: boots Vite, opens /ar and /en (desktop + mobile) in headless Edge/Chrome,
   scrolls every section, fails on any console error, writes screenshots to `.check/`. `-- --quick` = hero only.
 - `npm run moments` — key-moment screenshots (desktop + mobile, AR + EN) + contact sheets in `.check/moments/`.
-  Flags: `--all`, `--lang=en`, `--reduced`, `--fps`, `--query=nofx|tier=low`. Moments are listed at the top of the script.
+  Flags: `--all`, `--space` (3D journey only, densely sampled), `--lang=en`, `--reduced`, `--fps`,
+  `--query=nofx|tier=low` (use `tier=high` for 3D screenshots: headless WebGL is slow and would otherwise step down). Moments are listed at the top of the script.
 - `npm run textures` — (re)download Earth maps. Only `public/textures/earth/sd/ocean.webp` is still used (land mask
   of the Contact mini globe); the other maps were deleted with the Earth — don't re-add them.
+- `npm run world-assets` — download + optimise the CC0 assets of the 3D world (Poly Haven: sky HDRI + image, scanned
+  sandstone/plaster/paving, quiver tree + shrubs via gltf-transform) into `public/media/world/`. `-- --force` refetches.
 - `npm run capture-sites` — screenshot the live client sites (hajiss.com, ghaliachocolate.com; cookie banners are
   rejected/closed, never accepted) into `public/media/work/{hajiss,ghalia}/cover.webp`. Re-run when those sites change.
 - `npm run media -- --brand <studio> <social> <analytics>` — optimize client images into `public/media/brand/`;
@@ -73,19 +76,26 @@ Vite 8 (Rolldown) · React 19 · TypeScript 7 · React Router 8 · three r187 ·
 - **`src/gl/Director.tsx`** maps scroll → camera shot + world state (pure function of scroll). Story coordinate
   `G = sectionIndex + p`; shots keyframed in `KEYS`; the fall is procedural (`diveShot`). Tweak framing there,
   timing in `timeline.ts`. Only the RTL mirror and the portrait/landscape blend are damped.
-- World state: mutable objects in `src/gl/state.ts` (`feed`, `dive`). The Director writes formation weights
-  `feed.w = {hero, about, corner, dive}` (sum 1) + `reveal/meet/chatter`; the subject sits at `feed.anchor`.
-- **`src/gl/feed/`** — the social-media world, all procedural (no model files): `geometry.ts` (extruded speech
-  bubbles, heart, arrow, lathe megaphone/bell, rounded boxes — cached), `materials.ts` (clear-coated `glossy(token)`,
-  Standard on the low tier), `objects.tsx` (LogoMark with live mic waveform, icons, cornerstone objects, Phone with a
-  screen texture), `World.tsx` (every object = weighted blend of formation functions + idle float + spin from scroll
-  velocity + push/spin away from the pointer; local x mirrored in RTL), `Chatter.tsx` (instanced comment bubbles,
-  phones → logo), `Burst.tsx` (click/tap → glossy hearts), `Lights.tsx` (Lightformer studio env map, no HDR download).
-  Background: `src/gl/space/Nebula.tsx` (brand sky sphere) + `Stars.tsx`. Phone screens use `brandImages`/`feedPosts`.
+- World state: mutable objects in `src/gl/state.ts` (`world`, `dive`). The Director writes `world.G`, side/land,
+  pointer, `reveal/meet` (cornerstones) and the ribbon travel.
+- **`src/gl/world/`** — a sunlit place of conversation over a sea of clouds, all procedural (no model files):
+  `layout.ts` (every position, metres — the camera path is written against it), `Sky.tsx` (sky dome + `SUN_DIR`),
+  `World.tsx` (sun with a camera-following shadow frustum, hemisphere fill, the sky HDR as env map),
+  `Sky.tsx` (photographed sky graded to the brand blue; `SUN_DIR` measured on the photo — keep them in sync),
+  `Architecture.tsx` (hero island: blue/green bubble portals on a pool · walkway of arch frames with the agency's
+  creatives as lit prints · plaza of four arches (cornerstones) round the orb), `stone.ts` (scanned stone sampled
+  triplanar in world space — only the scan's DETAIL is used, colour comes from our palette: `wallStone` Hail
+  sandstone, `trimStone` limestone, `floorStone` travertine; no UVs, never stretches), `Plants.tsx` (real models,
+  placed from `PLANTS` in layout.ts), `Cypress.tsx` (instanced foliage cards), `ripples.ts` (pool normals),
+  `CloudSea.tsx`, `Ribbon.tsx` (name band; flips u where the print would read mirrored), `Voice.tsx` (hold to
+  awaken: burst of glossy hearts/comments + pool rings; charge in `src/interaction/hold.ts`, shown by the cursor's
+  `hold` mode and the hero's hint via `--hold`). **No orange**: the architecture is warm sand, not terracotta.
+  Glossy icon geometry/materials live in `src/gl/props/`.
 - Shaders: `src/gl/shaders/*` imported with `?raw`; output linear HDR, end with tonemapping + colorspace chunks.
 - Colours: values in `src/config/palette.ts` (single source); WebGL reads them via `token()` (`src/gl/palette.ts`).
-- Quality tiers in `src/config/quality.ts` (DPR cap, bloom levels, stars, particles, MSAA); `PerformanceMonitor`
-  steps down at runtime. **Never scale the render below the screen resolution and keep MSAA + clear-coat on every
+- Quality tiers in `src/config/quality.ts` (DPR cap, bloom levels, particles, MSAA, N8AO ambient occlusion);
+  `PerformanceMonitor` steps down at runtime (not when `?tier=` is forced in dev). Sun shadows on every tier.
+  Post: N8AO → bloom → Khronos Neutral tone mapping (keeps brand colours true) → slight contrast → vignette. **Never scale the render below the screen resolution and keep MSAA + clear-coat on every
   tier** — the client saw renderScale < 1 / no AA / Standard materials as "low quality". Bloom only catches real
   highlights (threshold 0.95); no chromatic aberration. Logo bubbles + blue heart carry a baked vertex-colour
   gradient (`gradient()` in geometry.ts, `glossy(…, { gradient: true })`).

@@ -56,8 +56,8 @@ export function Hero() {
     <section
       ref={root}
       id="home"
-      data-stage="home"
-      data-tone="dark"
+      data-stage="home" data-cursor="hold"
+      data-tone="light"
       aria-labelledby="hero-title"
       className="stage flex flex-col"
       style={{ '--in': 1 } as CSSProperties}
@@ -92,9 +92,22 @@ export function Hero() {
         </div>
       </div>
 
+      <HoldHint label={t.ui.holdHint} />
       <ScrollHint label={t.ui.scrollHint} />
       <PillarsBar pillars={t.hero.pillars} />
     </section>
+  );
+}
+
+/** "Hold to awaken" — the ring fills with the charge (--hold, set by src/interaction/hold.ts). */
+function HoldHint({ label }: { label: string }) {
+  return (
+    <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 bottom-24 flex justify-center max-md:bottom-[5.5rem]">
+      <div data-hero-in className="hold-hint">
+        <span className="hold-ring" />
+        <span className="label text-mist/75">{label}</span>
+      </div>
+    </div>
   );
 }
 

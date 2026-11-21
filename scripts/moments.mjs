@@ -3,6 +3,7 @@
 //
 // Usage: npm run moments                  (key moments, ar + en)
 //        npm run moments -- --all         (also the space-part scenes)
+//        npm run moments -- --space       (only the 3D journey, densely sampled)
 //        npm run moments -- --lang=en     (one language)
 //        npm run moments -- --reduced     (prefers-reduced-motion)
 //        npm run moments -- --fps         (rough frame-rate probe per moment)
@@ -17,6 +18,7 @@ const ROOT = path.resolve(import.meta.dirname, '..');
 const OUT = path.join(ROOT, '.check', 'moments');
 const arg = (name) => process.argv.find((a) => a.startsWith(`--${name}=`))?.split('=').slice(1).join('=');
 const all = process.argv.includes('--all');
+const space = process.argv.includes('--space');
 const reduced = process.argv.includes('--reduced');
 const fps = process.argv.includes('--fps');
 const query = arg('query') ?? '';
@@ -51,7 +53,21 @@ const SPACE = [
   ['0f-faq', { selector: '#faq', vh: 0.1 }],
   ['0g-footer', { selector: 'footer', vh: -0.2 }],
 ];
-const moments = all ? [...SPACE, ...KEY] : KEY;
+/** The 3D journey, densely sampled (--space). */
+const JOURNEY = [
+  ['s1-hero', { track: 'home', p: 0 }],
+  ['s1b-hero-burst', { track: 'home', p: 0 }, { burst: true }],
+  ['s2-hero-late', { track: 'home', p: 0.8 }],
+  ['s3-about-in', { track: 'about', p: 0.3 }],
+  ['s4-about', { track: 'about', p: 0.75 }],
+  ['s5-corner-in', { track: 'cornerstones', p: 0.15 }],
+  ['s6-corner-reveal', { track: 'cornerstones', p: 0.55 }],
+  ['s7-corner-meet', { track: 'cornerstones', p: 0.95 }],
+  ['s7b-corner-burst', { track: 'cornerstones', p: 0.95 }, { burst: true }],
+  ['s8-dive', { track: 'positioning', p: 0.2 }],
+  ['s9-dive-clouds', { track: 'positioning', p: 0.4 }],
+];
+const moments = space ? JOURNEY : all ? [...SPACE, ...KEY] : KEY;
 
 const viewports = {
   desktop: { viewport: { width: 1440, height: 900 }, deviceScaleFactor: 1 },
@@ -110,6 +126,25 @@ async function main() {
               await page.mouse.move(box.x + box.width * 0.45, box.y + box.height * 0.45, { steps: 8 });
               await page.waitForTimeout(900);
             }
+          } else if (action?.burst) {
+            // hold to awaken: press until the charge completes, then let ~24 frames of the burst play
+            const vp = page.viewportSize();
+            await page.mouse.move(vp.width * 0.72, vp.height * 0.45);
+            await page.mouse.down();
+            await page.waitForFunction(
+              () => {
+                const v = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--hold') || '0');
+                const w = window;
+                const done = (w.__peak ?? 0) > 0.9 && v < w.__peak;
+                w.__peak = Math.max(w.__peak ?? 0, v);
+                return done;
+              },
+              null,
+              { timeout: 60000, polling: 50 },
+            );
+            await page.mouse.up();
+            await page.evaluate(() => new Promise((res) => { let n = 0; const f = () => (++n >= 24 ? res() : requestAnimationFrame(f)); requestAnimationFrame(f); }));
+            await page.evaluate(() => (window.__peak = 0));
           } else if (action?.tap && size === 'mobile') {
             await page.locator(action.tap).first().tap();
             await page.waitForTimeout(900);

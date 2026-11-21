@@ -13,6 +13,8 @@ interface AppState {
   maxTier: QualityTier;
   textures: TextureSet;
   mobile: boolean;
+  /** Dev: the tier was forced with ?tier= — the PerformanceMonitor must not change it. */
+  tierLocked: boolean;
   stepTier: (delta: 1 | -1) => void;
   setTier: (tier: QualityTier) => void;
 
@@ -39,6 +41,7 @@ export const useApp = create<AppState>((set, get) => ({
   maxTier: device.tier,
   textures: device.textures,
   mobile: device.mobile,
+  tierLocked: device.locked,
   stepTier: (delta) => {
     const { tier, maxTier } = get();
     const max = tierOrder.indexOf(maxTier);

@@ -41,7 +41,7 @@ const extrude = (shape: Shape, depth: number, bevel: number, curveSegments = 40,
  * Bake a diagonal gradient (light top-left → deep bottom-right, like the logo) into vertex colours.
  * Used with glossy(…, { gradient: true }) (vertexColors).
  */
-function gradient<T extends BufferGeometry>(g: T, from: Token, to: Token): T {
+export function gradient<T extends BufferGeometry>(g: T, from: Token, to: Token): T {
   g.computeBoundingBox();
   const b = g.boundingBox!;
   const pos = g.attributes.position;

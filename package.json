@@ -13,7 +13,8 @@
     "check": "node scripts/check.mjs",
     "moments": "node scripts/moments.mjs",
     "media": "node scripts/media.mjs",
-    "capture-sites": "node scripts/capture-sites.mjs"
+    "capture-sites": "node scripts/capture-sites.mjs",
+    "world-assets": "node scripts/world-assets.mjs"
   },
   "keywords": [],
   "author": "",
