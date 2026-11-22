@@ -68,11 +68,12 @@ const JOURNEY = [
   ['s7c-planet-focus', { track: 'cornerstones', p: 0.8 }, { focus: 2 }],
   ['s8-dive', { track: 'positioning', p: 0.2 }],
   ['s9-dive-clouds', { track: 'positioning', p: 0.4 }],
-  // the 3D Hail arrival (230vh, right before #statements): progress p ↔ vh = -3.3 + 2.3p
-  ['h1-hail-topdown', { selector: '#statements', vh: -3.3 + 2.3 * 0.3 }],
-  ['h2-hail-rising', { selector: '#statements', vh: -3.3 + 2.3 * 0.5 }],
-  ['h3-hail-3d', { selector: '#statements', vh: -3.3 + 2.3 * 0.8 }],
-  ['h4-hail-wave', { selector: '#statements', vh: -3.3 + 2.3 * 0.8 }, { burst: true }],
+  // word of mouth (arrival, 320vh, right before #statements): progress p ↔ vh = -4.2 + 3.2p
+  ['w1-hail', { selector: '#statements', vh: -4.2 + 3.2 * 0.12 }],
+  ['w2-spreading', { selector: '#statements', vh: -4.2 + 3.2 * 0.35 }],
+  ['w3-cities', { selector: '#statements', vh: -4.2 + 3.2 * 0.58 }],
+  ['w4-region', { selector: '#statements', vh: -4.2 + 3.2 * 0.9 }],
+  ['w5-broadcast', { selector: '#statements', vh: -4.2 + 3.2 * 0.9 }, { burst: true }],
 ];
 const only = arg('only');
 const moments = (space ? JOURNEY : all ? [...SPACE, ...KEY] : KEY).filter(([name]) => !only || name.startsWith(only));

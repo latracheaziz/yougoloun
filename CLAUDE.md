@@ -60,8 +60,8 @@ Vite 8 (Rolldown) · React 19 · TypeScript 7 · React Router 8 · three r187 ·
   paper, so it slides over the white-out with no edge. The positioning track keeps full length on phones for this.
 - **Canvas lifecycle** (`useCanvasLifecycle` in `src/pages/Home.tsx`): paused (`frameloop="never"`) once past
   `keys.paper[1]`, unmounted 4 s later, re-mounted when scrolling back up (hidden behind paper until `glReady`).
-- **Light part** — normal document flow in `src/sections/light/*`. Order: `Arrival` (3D Hail relief, own lazy
-  canvas `src/gl/hail/`: top-down map → stands up in 3D, logo pin, reach arcs to GCC/MENA cities, drag/hover/hold) → `Statements` (pinned, word fill) →
+- **Light part** — normal document flow in `src/sections/light/*`. Order: `Arrival` (word of mouth spreading from
+  Hail across the peninsula, own lazy canvas `src/gl/spread/`) → `Statements` (pinned, word fill) →
   Services → Platforms → `Buzz` ("word of mouth" agency-identity interlude: typing name, live post with reactions,
   growth chart, funnel, notifications, click-to-react burst; labels in `ui.buzz`; no section number) → `Feed` (#studio, navy band: swipeable deck of the agency's own creatives from
   `public/media/feed`, story bars auto-advance, click = lightbox; `feedPosts` in `src/config/light.ts`, alts in
@@ -115,12 +115,13 @@ Vite 8 (Rolldown) · React 19 · TypeScript 7 · React Router 8 · three r187 ·
   tier** — the client saw renderScale < 1 / no AA / Standard materials as "low quality". Bloom only catches real
   highlights (threshold 0.95); no chromatic aberration. Logo bubbles + blue heart carry a baked vertex-colour
   gradient (`gradient()` in geometry.ts, `glossy(…, { gradient: true })`).
-- **Hail arrival** (`src/gl/hail/`, own lazy canvas mounted near view by `Arrival.tsx`): `terrain.ts` (height field
-  of Aja / Salma / the Nafud in map coords 1600×1000, Hail at the origin; `REACH` = real bearings + km to the GCC/MENA
-  cities from `site.hail`), `HailScene.tsx` (custom hill-shade shader — flat ground renders exactly as `light.paper`,
-  so the model is the page raised; contours from the real heights; glossy `LogoMark` pin; reach arcs; camera goes
-  top-down → tilted by scroll `link.p`; drag orbits, label hover lights a massif, hold sends a wave + arc pulses).
-  HTML labels are positioned by the scene each frame (`link.labels`). Its studio Lightformers light only the pin.
+- **Word of mouth** (arrival, `src/gl/spread/`, own lazy canvas mounted near view by `Arrival.tsx`, 320vh):
+  `crowd.ts` builds a crowd of dots on the real land (world mask `ocean.webp`, window lon 30.5–60 / lat 12–33.5)
+  and precomputes when the conversation reaches each person (Dijkstra from Hail over a neighbour graph with
+  random delays; each city hops to its 3 nearest cities after a delay). `WordOfMouth.tsx`: points + "who told
+  whom" lines + city-hop arcs, all driven by `front` (scroll); camera close on Hail → whole region; notification
+  bubbles (`ui.buzz.notifications`), funnel HUD (`ui.buzz.funnel`), city tags (`ui.arrival.cities`); cursor parts
+  the crowd, drag orbits, hold broadcasts a wave. ~100+ fps on an Intel iGPU.
 - Small extra WebGL: `src/gl/MiniGlobe.tsx` (dotted globe in Contact, own lazy chunk, mounted near view) and
   `src/interaction/distort.ts` (ONE raw WebGL2 canvas for portfolio hover distortion, attached only while hovering).
 - `prefers-reduced-motion`: no dive/shake/streaks/cloud layers — static shot + plain fade to white.
