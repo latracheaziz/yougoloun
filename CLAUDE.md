@@ -27,7 +27,12 @@ Two parts, one page:
   rejected/closed, never accepted) into `public/media/work/{hajiss,ghalia}/cover.webp`. Re-run when those sites change.
 - `npm run media -- --brand <studio> <social> <analytics>` — optimize client images into `public/media/brand/`;
   `npm run media -- --placeholders` — regenerate portfolio placeholders in `public/media/work/`.
-- Dev-only URL switches: `?nofx` (no postprocessing), `?tier=low|medium|high` (force a quality tier).
+- Dev-only URL switches: `?nofx` (no postprocessing), `?tier=low|medium|high` (force + lock a tier),
+  `?no=clouds,arch,plants,trees,voice,ribbon,sky,env,sun,shadows,planets,orb,water` (switch 3D layers off).
+- `npm run probe -- <track> <p> "<query>" …` — fps at one scroll position per URL variant, on this GPU
+  (`DPR=1.5`, `PREVIEW=1` for the production build). Close the site in your own browser while probing.
+- ⚠ Windows drive-letter case: `vite.config.ts` upper-cases the alias root (`fromRoot`). VS Code starts with
+  `c:\`, the rest of the toolchain uses `C:\`; mixed ids bundled React twice → production crashed on load.
 
 ## Stack
 Vite 8 (Rolldown) · React 19 · TypeScript 7 · React Router 8 · three r187 · @react-three/fiber 9 · drei 10 ·
@@ -55,8 +60,8 @@ Vite 8 (Rolldown) · React 19 · TypeScript 7 · React Router 8 · three r187 ·
   paper, so it slides over the white-out with no edge. The positioning track keeps full length on phones for this.
 - **Canvas lifecycle** (`useCanvasLifecycle` in `src/pages/Home.tsx`): paused (`frameloop="never"`) once past
   `keys.paper[1]`, unmounted 4 s later, re-mounted when scrolling back up (hidden behind paper until `glReady`).
-- **Light part** — normal document flow in `src/sections/light/*`. Order: `Arrival` (Hail topo map draws itself
-  during the white-out, pin drop, coords scramble; map geometry in `topo.ts`) → `Statements` (pinned, word fill) →
+- **Light part** — normal document flow in `src/sections/light/*`. Order: `Arrival` (3D Hail relief, own lazy
+  canvas `src/gl/hail/`: top-down map → stands up in 3D, logo pin, reach arcs to GCC/MENA cities, drag/hover/hold) → `Statements` (pinned, word fill) →
   Services → Platforms → `Buzz` ("word of mouth" agency-identity interlude: typing name, live post with reactions,
   growth chart, funnel, notifications, click-to-react burst; labels in `ui.buzz`; no section number) → `Feed` (#studio, navy band: swipeable deck of the agency's own creatives from
   `public/media/feed`, story bars auto-advance, click = lightbox; `feedPosts` in `src/config/light.ts`, alts in
@@ -90,15 +95,32 @@ Vite 8 (Rolldown) · React 19 · TypeScript 7 · React Router 8 · three r187 ·
   `CloudSea.tsx`, `Ribbon.tsx` (name band; flips u where the print would read mirrored), `Voice.tsx` (hold to
   awaken: burst of glossy hearts/comments + pool rings; charge in `src/interaction/hold.ts`, shown by the cursor's
   `hold` mode and the hero's hint via `--hold`). **No orange**: the architecture is warm sand, not terracotta.
+- **Gestures** (`src/interaction/hold.ts`, window listeners — stages are `pointer-events: none` over the canvas):
+  quick click → `pick` (scene raycasts it) · press that travels → drag to look (mouse; touch = scroll) · press that
+  stays → hold to awaken. `Planets.tsx`: the cornerstones lift off their plinths into tilted orbits round the orb
+  (merging into one ring at `meet`); hover → cursor 'view' (`setCursorOverride`), click → `useApp.focus` → the
+  Director flies to that planet (`world.focusW`) and `PlanetCard` (Cornerstones.tsx) opens; Esc / ✕ / empty click /
+  scroll close it. `ChapterRail` = numbered chapter stops on the end edge (labels `ui.rail`). Dev: `window.__app`
+  is the store (moments uses it for `{ focus: i }`).
   Glossy icon geometry/materials live in `src/gl/props/`.
 - Shaders: `src/gl/shaders/*` imported with `?raw`; output linear HDR, end with tonemapping + colorspace chunks.
 - Colours: values in `src/config/palette.ts` (single source); WebGL reads them via `token()` (`src/gl/palette.ts`).
-- Quality tiers in `src/config/quality.ts` (DPR cap, bloom levels, particles, MSAA, N8AO ambient occlusion);
-  `PerformanceMonitor` steps down at runtime (not when `?tier=` is forced in dev). Sun shadows on every tier.
-  Post: N8AO → bloom → Khronos Neutral tone mapping (keeps brand colours true) → slight contrast → vignette. **Never scale the render below the screen resolution and keep MSAA + clear-coat on every
+- Quality tiers in `src/config/quality.ts`; integrated GPUs (renderer string) start at 'medium'. Measured costs
+  on an Intel iGPU: the postprocessing composer (~40%), the stone shader, the shadow pass, mirror pools (a full
+  extra scene render each). So: composer (N8AO half-res → bloom → Neutral tone mapping → contrast → vignette) only
+  on 'high'; otherwise the renderer tone-maps itself (same Neutral curve) with native MSAA. One mirror pool at a
+  time, 'high' only. Shadow map refreshed at 30 Hz. Integrated GPUs: DPR cap 1.25 and 1× while scrolling
+  (`MotionDpr`, full sharpness ~0.35 s after it stops). Triplanar stone samples only contributing projections.
+  No `backdrop-filter` over the live canvas, no blend-mode grain, never write custom properties on <html> per frame. **Never scale the render below the screen resolution and keep MSAA + clear-coat on every
   tier** — the client saw renderScale < 1 / no AA / Standard materials as "low quality". Bloom only catches real
   highlights (threshold 0.95); no chromatic aberration. Logo bubbles + blue heart carry a baked vertex-colour
   gradient (`gradient()` in geometry.ts, `glossy(…, { gradient: true })`).
+- **Hail arrival** (`src/gl/hail/`, own lazy canvas mounted near view by `Arrival.tsx`): `terrain.ts` (height field
+  of Aja / Salma / the Nafud in map coords 1600×1000, Hail at the origin; `REACH` = real bearings + km to the GCC/MENA
+  cities from `site.hail`), `HailScene.tsx` (custom hill-shade shader — flat ground renders exactly as `light.paper`,
+  so the model is the page raised; contours from the real heights; glossy `LogoMark` pin; reach arcs; camera goes
+  top-down → tilted by scroll `link.p`; drag orbits, label hover lights a massif, hold sends a wave + arc pulses).
+  HTML labels are positioned by the scene each frame (`link.labels`). Its studio Lightformers light only the pin.
 - Small extra WebGL: `src/gl/MiniGlobe.tsx` (dotted globe in Contact, own lazy chunk, mounted near view) and
   `src/interaction/distort.ts` (ONE raw WebGL2 canvas for portfolio hover distortion, attached only while hovering).
 - `prefers-reduced-motion`: no dive/shake/streaks/cloud layers — static shot + plain fade to white.

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
 import { MeshReflectorMaterial, useTexture } from '@react-three/drei';
 import {
@@ -26,16 +26,18 @@ import { floorStone, trimStone, wallStone } from './stone';
 import { rippleNormals } from './ripples';
 import { Cypresses } from './Cypress';
 import { Plants } from './Plants';
+import { Planets } from './Planets';
 import { gradient } from '../props/geometry';
 import { glossy } from '../props/materials';
-import { Camera, Chart, Growth, Target } from '../props/objects';
 import { token, type Token } from '../palette';
 import { world } from '../state';
 import { hold } from '@/interaction/hold';
 import { brandImages, feedPosts } from '@/config/light';
 import { useApp } from '@/store/app';
+import { qualityPresets } from '@/config/quality';
 
 const { lerp, smoothstep } = MathUtils;
+const NO = new Set(import.meta.env.DEV ? (new URLSearchParams(window.location.search).get('no') ?? '').split(',') : []);
 
 // ── materials ───────────────────────────────────────────────────────────────────────
 const glaze = () =>
@@ -43,9 +45,15 @@ const glaze = () =>
 
 // ── water ───────────────────────────────────────────────────────────────────────────
 /** Pool water: wind ripples (normal map, drifting) + sky fresnel; a blurred mirror on the high tier. */
-function Water({ radius, y = 0.26 }: { radius: number; y?: number }) {
+function Water({ radius, y = 0.26, inView }: { radius: number; y?: number; inView: (G: number) => boolean }) {
   const tier = useApp((s) => s.tier);
-  const reflect = tier === 'high';
+  // a mirror re-renders the whole scene every frame: only on capable GPUs, and only for the pool in view
+  const [visible, setVisible] = useState(() => inView(world.G));
+  useFrame(() => {
+    const v = inView(world.G);
+    if (v !== visible) setVisible(v);
+  });
+  const reflect = qualityPresets[tier].reflector && visible;
   const normals = useMemo(() => {
     const t = rippleNormals().clone();
     t.repeat.set(radius / 2.2, radius / 2.2);
@@ -208,8 +216,6 @@ function Gallery({ plaster, base }: { plaster: Material; base: Material }) {
 // ── plaza: four doorway arches (the cornerstones), objects on plinths, the orb ─────────
 const ARCH = { W: 4.6, H: 6.8, w: 2.5, hIn: 5.0, depth: 0.95 };
 const RING_COLORS: Token[] = ['blue', 'green', 'blueLight', 'greenLight'];
-const OBJECTS = [Chart, Target, Camera, Growth];
-const easeBack = (x: number) => (x <= 0 ? 0 : 1 + 2.7 * Math.pow(x - 1, 3) + 1.7 * Math.pow(x - 1, 2));
 
 function Plaza({ plaster, trim }: { plaster: Material; trim: Material }) {
   const glowMats = useMemo(
@@ -223,19 +229,10 @@ function Plaza({ plaster, trim }: { plaster: Material; trim: Material }) {
   const cornice = useMemo(() => new BoxGeometry(ARCH.W + 0.34, 0.28, ARCH.depth + 0.3), []);
   const base = useMemo(() => new BoxGeometry(ARCH.W + 0.2, 0.26, ARCH.depth + 0.2), []);
   useEffect(() => () => (plinth.dispose(), plinthCap.dispose(), cornice.dispose(), base.dispose()), [plinth, plinthCap, cornice, base]);
-  const objRefs = useRef<(Group | null)[]>([]);
 
-  useFrame(({ clock }) => {
-    const t = useApp.getState().reducedMotion ? 0 : clock.elapsedTime;
+  useFrame(() => {
     world.reveal.forEach((r, i) => {
       glowMats[i].opacity = Math.min(1, r * 1.2) * lerp(0.55, 0.85, world.meet);
-      const g = objRefs.current[i];
-      if (g) {
-        g.scale.setScalar(Math.max(easeBack(r) * 1.25, 1e-4));
-        g.visible = r > 0.001;
-        g.rotation.y = t * 0.5 + i;
-        g.position.y = 1.25 + 0.75 + Math.sin(t * 1.1 + i) * 0.06;
-      }
     });
   });
 
@@ -247,7 +244,6 @@ function Plaza({ plaster, trim }: { plaster: Material; trim: Material }) {
         const ry = Math.atan2(-x, -z);
         const px = Math.cos(a) * (PLAZA.archRadius - 2.1);
         const pz = Math.sin(a) * (PLAZA.archRadius - 2.1);
-        const Obj = OBJECTS[i];
         return (
           <group key={i}>
             <group position={[x, 0, z]} rotation-y={ry}>
@@ -259,9 +255,6 @@ function Plaza({ plaster, trim }: { plaster: Material; trim: Material }) {
             </group>
             <mesh geometry={plinth} material={trim} position={[px, 0.625, pz]} castShadow receiveShadow />
             <mesh geometry={plinthCap} material={trim} position={[px, 1.25, pz]} castShadow receiveShadow />
-            <group ref={(g) => void (objRefs.current[i] = g)} position={[px, 2, pz]} visible={false}>
-              <Obj cheap={false} />
-            </group>
           </group>
         );
       })}
@@ -287,6 +280,10 @@ function Orb() {
     }
     if (ringRef.current) {
       ringRef.current.rotation.set(1.2 + Math.sin(t * 0.3) * 0.1, t * 0.4, 0.2);
+      // the cornerstone planets' orbits take over from the orb's own ring
+      const away = Math.min(1, world.reveal[0] * 1.6);
+      ringRef.current.scale.setScalar(Math.max(1 - away, 1e-4));
+      ringRef.current.visible = away < 0.999;
     }
   });
   return (
@@ -316,7 +313,7 @@ export function Architecture() {
         <Slab radius={HERO.radius} top={floor} side={plaster} />
         <Parapet radius={HERO.radius} gapAt={Math.PI} gap={heroGap} material={plaster} />
         <PoolRim radius={HERO.pool} material={trim} />
-        <Water radius={HERO.pool} />
+        <Water radius={HERO.pool} inView={(G) => G < 1.35} />
         <Portals />
       </group>
 
@@ -331,13 +328,14 @@ export function Architecture() {
         <Slab radius={PLAZA.radius} top={floor} side={plaster} />
         <Parapet radius={PLAZA.radius} gapAt={0} gap={plazaGap} material={plaster} />
         <PoolRim radius={PLAZA.pool} material={trim} />
-        <Water radius={PLAZA.pool} />
+        {!NO.has('water') && <Water radius={PLAZA.pool} inView={(G) => G > 1.65} />}
       </group>
       <Plaza plaster={plaster} trim={trim} />
-      <Orb />
+      {!NO.has('planets') && <Planets />}
+      {!NO.has('orb') && <Orb />}
 
-      <Cypresses />
-      <Plants />
+      {!NO.has('trees') && <Cypresses />}
+      {!NO.has('plants') && <Plants />}
     </group>
   );
 }

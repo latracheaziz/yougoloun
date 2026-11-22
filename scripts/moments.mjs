@@ -4,6 +4,7 @@
 // Usage: npm run moments                  (key moments, ar + en)
 //        npm run moments -- --all         (also the space-part scenes)
 //        npm run moments -- --space       (only the 3D journey, densely sampled)
+//        npm run moments -- --only=h      (only moments whose name starts with h)
 //        npm run moments -- --lang=en     (one language)
 //        npm run moments -- --reduced     (prefers-reduced-motion)
 //        npm run moments -- --fps         (rough frame-rate probe per moment)
@@ -64,10 +65,17 @@ const JOURNEY = [
   ['s6-corner-reveal', { track: 'cornerstones', p: 0.55 }],
   ['s7-corner-meet', { track: 'cornerstones', p: 0.95 }],
   ['s7b-corner-burst', { track: 'cornerstones', p: 0.95 }, { burst: true }],
+  ['s7c-planet-focus', { track: 'cornerstones', p: 0.8 }, { focus: 2 }],
   ['s8-dive', { track: 'positioning', p: 0.2 }],
   ['s9-dive-clouds', { track: 'positioning', p: 0.4 }],
+  // the 3D Hail arrival (230vh, right before #statements): progress p ↔ vh = -3.3 + 2.3p
+  ['h1-hail-topdown', { selector: '#statements', vh: -3.3 + 2.3 * 0.3 }],
+  ['h2-hail-rising', { selector: '#statements', vh: -3.3 + 2.3 * 0.5 }],
+  ['h3-hail-3d', { selector: '#statements', vh: -3.3 + 2.3 * 0.8 }],
+  ['h4-hail-wave', { selector: '#statements', vh: -3.3 + 2.3 * 0.8 }, { burst: true }],
 ];
-const moments = space ? JOURNEY : all ? [...SPACE, ...KEY] : KEY;
+const only = arg('only');
+const moments = (space ? JOURNEY : all ? [...SPACE, ...KEY] : KEY).filter(([name]) => !only || name.startsWith(only));
 
 const viewports = {
   desktop: { viewport: { width: 1440, height: 900 }, deviceScaleFactor: 1 },
@@ -126,6 +134,10 @@ async function main() {
               await page.mouse.move(box.x + box.width * 0.45, box.y + box.height * 0.45, { steps: 8 });
               await page.waitForTimeout(900);
             }
+          } else if (action?.focus !== undefined) {
+            // fly to a cornerstone planet (dev store handle), let ~40 frames of the flight play
+            await page.evaluate((i) => window.__app.getState().setFocus(i), action.focus);
+            await page.evaluate(() => new Promise((res) => { let n = 0; const f = () => (++n >= 40 ? res() : requestAnimationFrame(f)); requestAnimationFrame(f); }));
           } else if (action?.burst) {
             // hold to awaken: press until the charge completes, then let ~24 frames of the burst play
             const vp = page.viewportSize();
@@ -133,7 +145,8 @@ async function main() {
             await page.mouse.down();
             await page.waitForFunction(
               () => {
-                const v = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--hold') || '0');
+                const ring = document.querySelector('.cursor-ring') ?? document.querySelector('.hold-ring');
+                const v = parseFloat(ring?.style.getPropertyValue('--hold') || '0');
                 const w = window;
                 const done = (w.__peak ?? 0) > 0.9 && v < w.__peak;
                 w.__peak = Math.max(w.__peak ?? 0, v);

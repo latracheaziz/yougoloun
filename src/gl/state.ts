@@ -25,6 +25,9 @@ export const world = {
   ribbon: 0,
   /** 0..1 — "hold to awaken" charge (src/interaction/hold.ts, advanced by Voice.tsx). */
   charge: 0,
+  /** 0..1 — camera flown to a cornerstone planet (damped), and which one. */
+  focusW: 0,
+  focusIndex: 0,
 };
 
 /** DIVE — cloud layers, streaks, and the cover that turns the screen white. */

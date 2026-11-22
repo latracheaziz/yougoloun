@@ -14,7 +14,8 @@
     "moments": "node scripts/moments.mjs",
     "media": "node scripts/media.mjs",
     "capture-sites": "node scripts/capture-sites.mjs",
-    "world-assets": "node scripts/world-assets.mjs"
+    "world-assets": "node scripts/world-assets.mjs",
+    "probe": "node scripts/probe.mjs"
   },
   "keywords": [],
   "author": "",

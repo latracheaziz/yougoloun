@@ -127,7 +127,7 @@ function ScrollHint({ label }: { label: string }) {
 function PillarsBar({ pillars }: { pillars: string[] }) {
   const run = [...pillars, ...pillars];
   return (
-    <div data-hero-in className="relative border-t border-mist/10 bg-night/30 backdrop-blur-[2px]">
+    <div data-hero-in className="relative border-t border-mist/10 bg-night/60">
       <ul className="sr-only">
         {pillars.map((p) => (
           <li key={p}>{p}</li>

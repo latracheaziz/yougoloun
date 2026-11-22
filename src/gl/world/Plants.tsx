@@ -19,7 +19,8 @@ function useNormalised(kind: PlantKind) {
     scene.traverse((o) => {
       const m = o as Mesh;
       if (m.isMesh) {
-        m.castShadow = true;
+        // shrubs are small on screen: their shadow isn't worth drawing them twice
+        m.castShadow = kind === 'quiver';
         m.receiveShadow = true;
       }
     });

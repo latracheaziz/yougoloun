@@ -10,6 +10,7 @@ import { Voice } from './Voice';
 import { ORB, PORTAL_WINDOW_Y } from './layout';
 import { world } from '../state';
 import { useApp } from '@/store/app';
+import { qualityPresets } from '@/config/quality';
 
 /** Sun + sky light. The shadow frustum follows what the camera looks at. */
 function Sun() {
@@ -17,6 +18,7 @@ function Sun() {
   const target = useRef<Object3D>(null);
   const tier = useApp((s) => s.tier);
   const tmp = useMemo(() => new Vector3(), []);
+  const frame = useRef(0);
   useFrame(({ camera }) => {
     const l = light.current;
     if (!l || !target.current) return;
@@ -27,6 +29,9 @@ function Sun() {
     target.current.position.copy(tmp);
     l.position.copy(tmp).addScaledVector(SUN_DIR, 30);
     l.target = target.current;
+    // the shadow pass re-draws every caster: refresh it at 30 Hz (invisible in motion, half the cost)
+    l.shadow.autoUpdate = false;
+    if (frame.current++ % 2 === 0) l.shadow.needsUpdate = true;
   });
   return (
     <>
@@ -36,8 +41,8 @@ function Sun() {
         ref={light}
         intensity={3.4}
         color="#FFF3E4"
-        castShadow
-        shadow-mapSize={[tier === 'high' ? 2048 : 1024, tier === 'high' ? 2048 : 1024]}
+        castShadow={!NO.has('shadows')}
+        shadow-mapSize={[qualityPresets[tier].shadowMap, qualityPresets[tier].shadowMap]}
         shadow-bias={-0.0004}
         shadow-normalBias={0.035}
         shadow-radius={3}
@@ -52,6 +57,9 @@ function Sun() {
     </>
   );
 }
+
+/** Dev-only profiling: /en?no=clouds,arch,plants,trees,voice,ribbon,sky,shadows,env switches layers off. */
+const NO = new Set(import.meta.env.DEV ? (new URLSearchParams(window.location.search).get('no') ?? '').split(',') : []);
 
 /** The hero ribbon steps aside as the camera flies through the portal (it would fill the lens). */
 const heroRibbonVisible = () => 1 - MathUtils.smoothstep(world.G, 0.8, 1.02);
@@ -71,15 +79,15 @@ export function World() {
   return (
     <>
       <fog attach="fog" args={[HORIZON, 50, 210]} />
-      <SkyDome />
-      <Sun />
+      {!NO.has('sky') && <SkyDome />}
+      {!NO.has('sun') && <Sun />}
       {/* the same photographed sky lights the world (reflections, ambient) */}
-      <Environment files={SKY_HDR} environmentIntensity={0.55} />
-      <CloudSea />
-      <Architecture />
-      <Voice />
-      <Ribbon curve={heroRibbon} width={0.46} repeats={6} visible={heroRibbonVisible} />
-      <Ribbon curve={orbRibbon} width={0.38} repeats={4} visible={plazaRibbonVisible} />
+      {!NO.has('env') && <Environment files={SKY_HDR} environmentIntensity={0.55} />}
+      {!NO.has('clouds') && <CloudSea />}
+      {!NO.has('arch') && <Architecture />}
+      {!NO.has('voice') && <Voice />}
+      {!NO.has('ribbon') && <Ribbon curve={heroRibbon} width={0.46} repeats={6} visible={heroRibbonVisible} />}
+      {!NO.has('ribbon') && <Ribbon curve={orbRibbon} width={0.38} repeats={4} visible={plazaRibbonVisible} />}
     </>
   );
 }

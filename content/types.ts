@@ -97,6 +97,8 @@ export interface Content {
     switchLang: { label: string; short: string; ariaLabel: string };
     /** "Hold to awaken" hint in the hero (3D interaction; not from the PDF). */
     holdHint: string;
+    /** Chapter rail of the 3D journey (4 chapters, track order). */
+    rail: { label: string; chapters: string[] };
     cursor: { view: string; drag: string; talk: string; react: string; hold: string };
     altitude: string;
     localTime: string;
@@ -109,7 +111,8 @@ export interface Content {
     earthCredit: string;
     notFound: { title: string; back: string };
     /** Payoff shown as the clouds clear (wording given by the client). */
-    arrival: { place: string };
+    /** Arrival: the place name + the reach arcs' cities (src/gl/hail/terrain.ts REACH). */
+    arrival: { place: string; cities: Record<'riyadh' | 'jeddah' | 'dubai' | 'kuwait' | 'doha' | 'cairo', string> };
     /** Services filter chips (categories defined by the client). */
     serviceFilters: { all: string; growth: string; brand: string; content: string };
     carousel: { previous: string; next: string };

@@ -5,6 +5,7 @@ import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { Cursor } from '@/interaction/Cursor';
 import { ScrollProgress } from '@/components/ScrollProgress';
+import { ChapterRail } from '@/components/ChapterRail';
 import { SmoothScroll } from '@/scroll/SmoothScroll';
 import { Tracks } from '@/scroll/Tracks';
 import { PaperLayer } from '@/scroll/PaperLayer';
@@ -136,6 +137,7 @@ export default function Home() {
       <Footer />
       <Cursor />
       <ScrollProgress />
+      <ChapterRail />
       <div className="grain" aria-hidden="true" />
       <SmoothScroll />
     </>

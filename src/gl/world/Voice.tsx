@@ -164,7 +164,6 @@ export function Voice() {
           args={[g, materials[i], POOL / KINDS]}
           count={0}
           frustumCulled={false}
-          castShadow
         />
       ))}
       {ringMats.map((m, i) => (

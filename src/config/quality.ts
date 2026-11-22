@@ -1,39 +1,66 @@
 /**
- * Rendering quality tiers. The texture set (hd/sd) is chosen once at start-up;
- * drei's <PerformanceMonitor> can then step the tier down (DPR, effects, particles) at runtime.
+ * Rendering quality tiers. Chosen once at start-up from the device AND its GPU (integrated GPUs start at
+ * 'medium'); drei's <PerformanceMonitor> can then step the tier at runtime.
+ *
+ * The client saw renderScale < 1 / no AA / plain materials as "low quality", so every tier keeps the
+ * screen's resolution (up to the DPR cap), MSAA and clear-coat. The tiers trade the EXPENSIVE extras
+ * instead: mirror reflections (a whole extra scene render), ambient occlusion, shadow-map size, MSAA
+ * samples, bloom levels and particle counts.
  */
 export type QualityTier = 'high' | 'medium' | 'low';
 export type TextureSet = 'hd' | 'sd';
 
 export interface QualityPreset {
   maxDpr: number;
-  /** Multiplier on the device pixel ratio — the PerformanceMonitor's main lever on 1× screens. */
+  /** Multiplier on the device pixel ratio (kept at 1). */
   renderScale: number;
+  /**
+   * While the page scrolls, render at 1× density (restored ~0.35 s after it stops): smooth motion on
+   * integrated GPUs, every still frame at full sharpness. Off on the high tier.
+   */
+  motionDpr: boolean;
   /** Bloom mip levels (fewer = cheaper, tighter glow). */
   bloomLevels: number;
-  earthSegments: number;
-  stars: number;
-  bloom: boolean;
-  chromaticAberration: boolean;
-  /** MeshTransmissionMaterial for the services glass panel (Phase 3). */
-  transmission: boolean;
-  /** Particle budget multiplier for dive clouds, sand, embers… */
+  /** Particle budget multiplier: clouds, foliage cards, dive layers… */
   particles: number;
-  /** MSAA samples of the postprocessing composer (smooth edges on the glossy objects). */
+  /** MSAA samples of the postprocessing composer. */
   msaa: number;
-  /** Screen-space ambient occlusion (N8AO): grounds the architecture. */
-  ao: 'full' | 'half' | 'off';
+  /** Screen-space ambient occlusion (N8AO), always half resolution when on. */
+  ao: boolean;
+  /** Mirror reflection on the pool in view (one at a time). */
+  reflector: boolean;
+  /** Sun shadow map size (px). */
+  shadowMap: number;
+  /**
+   * Postprocessing composer (AO, bloom, MSAA buffer, vignette). Off → the renderer tone-maps itself
+   * (same Neutral curve) with the browser's native MSAA: same colours and edges, no glow — and ~40% faster
+   * on integrated GPUs (measured).
+   */
+  post: boolean;
 }
 
 export const qualityPresets: Record<QualityTier, QualityPreset> = {
-  // Resolution is never scaled below the screen's own (that read as "low quality"); the tiers trade
-  // DPR above 1.5, bloom levels, stars, particles and MSAA instead.
-  high: { maxDpr: 2, renderScale: 1, bloomLevels: 6, earthSegments: 160, stars: 4000, bloom: true, chromaticAberration: false, transmission: true, particles: 1, msaa: 8, ao: 'full' },
-  medium: { maxDpr: 1.75, renderScale: 1, bloomLevels: 5, earthSegments: 128, stars: 3000, bloom: true, chromaticAberration: false, transmission: false, particles: 0.65, msaa: 4, ao: 'half' },
-  low: { maxDpr: 1.5, renderScale: 1, bloomLevels: 4, earthSegments: 80, stars: 1800, bloom: true, chromaticAberration: false, transmission: false, particles: 0.4, msaa: 4, ao: 'off' },
+  high: { maxDpr: 2, renderScale: 1, motionDpr: false, bloomLevels: 5, particles: 1, msaa: 4, ao: true, reflector: true, shadowMap: 2048, post: true },
+  medium: { maxDpr: 1.25, renderScale: 1, motionDpr: true, bloomLevels: 4, particles: 0.7, msaa: 4, ao: false, reflector: false, shadowMap: 1024, post: false },
+  low: { maxDpr: 1.5, renderScale: 1, motionDpr: true, bloomLevels: 3, particles: 0.45, msaa: 2, ao: false, reflector: false, shadowMap: 1024, post: false },
 };
 
 export const tierOrder: QualityTier[] = ['low', 'medium', 'high'];
+
+/** Integrated / mobile / software GPUs (WEBGL_debug_renderer_info). Unknown → not weak. */
+function weakGpu() {
+  try {
+    const canvas = document.createElement('canvas');
+    const gl = canvas.getContext('webgl2') ?? canvas.getContext('webgl');
+    if (!gl) return true;
+    const ext = gl.getExtension('WEBGL_debug_renderer_info');
+    const name = ext ? String(gl.getParameter(ext.UNMASKED_RENDERER_WEBGL)) : '';
+    gl.getExtension('WEBGL_lose_context')?.loseContext();
+    return /intel|uhd|iris|mali|adreno|powervr|swiftshader|llvmpipe|basic render/i.test(name);
+  } catch {
+    return false;
+  }
+}
 
 export function detectDevice() {
   if (typeof window === 'undefined') return { tier: 'high' as QualityTier, textures: 'hd' as TextureSet, mobile: false, locked: false };
@@ -44,7 +71,7 @@ export function detectDevice() {
   const lowMemory = (nav.deviceMemory ?? 8) <= 4;
   const fewCores = (navigator.hardwareConcurrency ?? 8) <= 4;
 
-  let tier: QualityTier = mobile ? 'low' : lowMemory || fewCores ? 'medium' : 'high';
+  let tier: QualityTier = mobile ? 'low' : lowMemory || fewCores || weakGpu() ? 'medium' : 'high';
   // dev-only: force a tier with ?tier=low|medium|high
   const forced = import.meta.env.DEV ? new URLSearchParams(window.location.search).get('tier') : null;
   const locked = forced === 'low' || forced === 'medium' || forced === 'high';

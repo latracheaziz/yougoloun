@@ -27,9 +27,9 @@ const TEXTURES = [
 ];
 /** [id, simplify ratio (fraction of triangles kept)] */
 const MODELS = [
-  ['quiver_tree_01', 0.35],
-  ['shrub_01', 0.3],
-  ['shrub_03', 0.3],
+  ['quiver_tree_01', 0.16],
+  ['shrub_01', 0.14],
+  ['shrub_03', 0.2],
 ];
 
 const exists = (p) => access(p).then(() => true, () => false);

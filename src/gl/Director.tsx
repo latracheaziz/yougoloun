@@ -3,7 +3,8 @@ import { useFrame } from '@react-three/fiber';
 import { MathUtils, type PerspectiveCamera, Vector3 } from 'three';
 import { dive, world } from './state';
 import { bindPointer, pointer } from './pointer';
-import { hold } from '@/interaction/hold';
+import { hold, look as drag } from '@/interaction/hold';
+import { planets } from './world/Planets';
 import { CLOUD_PEAK_DEPTH } from './dive/Dive';
 import { ORB } from './world/layout';
 import { journey, sectionIds, sectionIndex } from '@/scroll/journey';
@@ -115,7 +116,9 @@ function diveShot(p: number, reduced: boolean) {
 
 const UP = new Vector3(0, 1, 0);
 const view = new Vector3();
-const smooth = { side: 1, land: 1, px: 0, py: 0, init: false };
+const smooth = { side: 1, land: 1, px: 0, py: 0, yaw: 0, pitch: 0, init: false };
+const focusPos = new Vector3();
+const focusDir = new Vector3();
 
 export function Director() {
   useEffect(() => bindPointer(), []);
@@ -154,6 +157,22 @@ export function Director() {
     // x is mirrored with the layout side (the world is laid out for LTR: text on the left)
     s.pos.x *= side;
     s.look.x *= side;
+    // a cornerstone planet in focus: fly in close, from the side the camera is already on
+    if (world.focusW > 0.001) {
+      const w = world.focusW * world.focusW * (3 - 2 * world.focusW);
+      const P = planets[world.focusIndex];
+      // from outside the orbit (the orb glows behind the planet), leaning towards the side we're on
+      focusDir.copy(P).sub(ORB.center).setY(0).normalize().multiplyScalar(0.7);
+      focusDir.add(view.copy(s.pos).sub(P).setY(0).normalize().multiplyScalar(0.3)).normalize();
+      focusPos.copy(P).addScaledVector(focusDir, 4.2);
+      focusPos.y += 0.9;
+      s.pos.lerp(focusPos, w);
+      s.look.lerp(P, w);
+      s.shift = lerp(s.shift, -0.13, w); // planet on the start side (the chapter text fades out), the card on the end side
+      s.shiftP = lerp(s.shiftP, -0.2, w); // portrait: planet in the upper half, the card below
+      s.backP = lerp(s.backP, 1.5, w);
+      s.fov = lerp(s.fov, 36, w);
+    }
     view.copy(s.look).sub(s.pos).normalize();
     camera.position.copy(s.pos).addScaledVector(view, -s.backP * (1 - land));
     camera.up.copy(UP);
@@ -163,6 +182,11 @@ export function Director() {
     const look = id === 'positioning' ? 1 - smoothstep(p, 0, 0.2) : 1;
     camera.rotateY(-smooth.px * 0.045 * look);
     camera.rotateX(smooth.py * 0.028 * look);
+    // drag to look around (springs back on release)
+    smooth.yaw = damp(smooth.yaw, drag.dragging ? drag.yaw : 0, drag.dragging ? 6 : 2.4, dt);
+    smooth.pitch = damp(smooth.pitch, drag.dragging ? drag.pitch : 0, drag.dragging ? 6 : 2.4, dt);
+    camera.rotateY(smooth.yaw * look);
+    camera.rotateX(smooth.pitch * look);
 
     // story elements
     world.reveal.fill(0);

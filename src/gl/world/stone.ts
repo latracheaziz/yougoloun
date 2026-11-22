@@ -51,8 +51,27 @@ vec3 triW(vec3 n) {
   vec3 w = pow(abs(n), vec3(4.0));
   return w / (w.x + w.y + w.z);
 }
+// only the projections that contribute are sampled: a wall facing one way costs 1 fetch, not 3
 vec4 triSample(sampler2D t, vec3 p, vec3 w, float k) {
-  return texture2D(t, p.zy * k) * w.x + texture2D(t, p.xz * k) * w.y + texture2D(t, p.xy * k) * w.z;
+  vec4 c = vec4(0.0);
+  if (w.x > 0.02) c += texture2D(t, p.zy * k) * w.x;
+  if (w.y > 0.02) c += texture2D(t, p.xz * k) * w.y;
+  if (w.z > 0.02) c += texture2D(t, p.xy * k) * w.z;
+  return c / max(dot(step(vec3(0.02), w), w), 1e-3);
+}
+float stHash(vec3 p) {
+  p = fract(p * 0.1031);
+  p += dot(p, p.zyx + 31.32);
+  return fract((p.x + p.y) * p.z);
+}
+float stNoise(vec3 p) {
+  vec3 i = floor(p);
+  vec3 f = fract(p);
+  f = f * f * (3.0 - 2.0 * f);
+  return mix(
+    mix(mix(stHash(i), stHash(i + vec3(1, 0, 0)), f.x), mix(stHash(i + vec3(0, 1, 0)), stHash(i + vec3(1, 1, 0)), f.x), f.y),
+    mix(mix(stHash(i + vec3(0, 0, 1)), stHash(i + vec3(1, 0, 1)), f.x), mix(stHash(i + vec3(0, 1, 1)), stHash(i + vec3(1, 1, 1)), f.x), f.y),
+    f.z);
 }
 float lumOf(vec3 c) { return dot(c, vec3(0.299, 0.587, 0.114)); }
 `;
@@ -104,9 +123,9 @@ export function stone({ scan: name, color, scale = 0.45, detail = 0.85, normalSc
         vec3 stN = normalize(vStNrm);
         vec3 stW = triW(stN);
         vec3 stDiff = triSample(uDiff, vStPos, stW, uScale).rgb;
-        vec3 stDiffBig = triSample(uDiff, vStPos + 17.3, stW, uScale * 0.23).rgb;
         vec4 stArm = triSample(uArm, vStPos, stW, uScale);
-        float stTone = lumOf(stDiff) / uMeanLum * 0.65 + lumOf(stDiffBig) / uMeanLum * 0.35;
+        // large-scale mottling breaks the tiling (procedural: no extra texture fetches)
+        float stTone = lumOf(stDiff) / uMeanLum * 0.7 + (0.82 + stNoise(vStPos * 0.35) * 0.36) * 0.3;
         diffuseColor.rgb *= mix(1.0, clamp(stTone, 0.55, 1.45), uDetail);
         diffuseColor.rgb *= mix(1.0, stArm.r, 0.45); // cavities`,
       )
@@ -121,9 +140,9 @@ export function stone({ scan: name, color, scale = 0.45, detail = 0.85, normalSc
         {
           // whiteout-blended triplanar normal mapping (world space), then into view space
           vec3 p = vStPos * uScale;
-          vec3 tx = texture2D(uNor, p.zy).xyz * 2.0 - 1.0;
-          vec3 ty = texture2D(uNor, p.xz).xyz * 2.0 - 1.0;
-          vec3 tz = texture2D(uNor, p.xy).xyz * 2.0 - 1.0;
+          vec3 tx = stW.x > 0.02 ? texture2D(uNor, p.zy).xyz * 2.0 - 1.0 : vec3(0.0, 0.0, 1.0);
+          vec3 ty = stW.y > 0.02 ? texture2D(uNor, p.xz).xyz * 2.0 - 1.0 : vec3(0.0, 0.0, 1.0);
+          vec3 tz = stW.z > 0.02 ? texture2D(uNor, p.xy).xyz * 2.0 - 1.0 : vec3(0.0, 0.0, 1.0);
           tx.xy *= uNormalScale; ty.xy *= uNormalScale; tz.xy *= uNormalScale;
           tx = vec3(tx.xy + stN.zy, abs(tx.z) * stN.x);
           ty = vec3(ty.xy + stN.xz, abs(ty.z) * stN.y);

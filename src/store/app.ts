@@ -24,6 +24,10 @@ interface AppState {
 
   reducedMotion: boolean;
 
+  /** Cornerstone the camera has flown to (click a planet), or null. */
+  focus: number | null;
+  setFocus: (focus: number | null) => void;
+
   /** The WebGL canvas is mounted and has its globe ready (the paper layer may reveal it). */
   glReady: boolean;
   setGlReady: (ready: boolean) => void;
@@ -55,6 +59,12 @@ export const useApp = create<AppState>((set, get) => ({
 
   reducedMotion: reduced,
 
+  focus: null,
+  setFocus: (focus) => set({ focus }),
+
   glReady: false,
   setGlReady: (glReady) => set({ glReady }),
 }));
+
+// dev: let scripts/moments.mjs drive the store (e.g. open a planet card)
+if (import.meta.env.DEV && typeof window !== 'undefined') (window as unknown as { __app: typeof useApp }).__app = useApp;

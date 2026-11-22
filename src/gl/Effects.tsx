@@ -27,17 +27,8 @@ export function Effects() {
 
   return (
     <EffectComposer multisampling={msaa} enableNormalPass={false}>
-      {ao !== 'off' ? (
-        <N8AO
-          ref={aoPass}
-          aoRadius={1.1}
-          distanceFalloff={0.6}
-          intensity={AO_INTENSITY}
-          quality={ao === 'full' ? 'medium' : 'low'}
-          halfRes={ao === 'half'}
-          depthAwareUpsampling
-          color="#1A2740"
-        />
+      {ao ? (
+        <N8AO ref={aoPass} aoRadius={1.1} distanceFalloff={0.6} intensity={AO_INTENSITY} quality="low" halfRes depthAwareUpsampling color="#1A2740" />
       ) : (
         <></>
       )}

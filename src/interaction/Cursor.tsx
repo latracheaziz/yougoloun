@@ -6,6 +6,10 @@ import { useApp } from '@/store/app';
 
 type Mode = 'view' | 'drag' | 'talk' | 'react' | 'hold';
 
+/** The 3D scene can force a mode (e.g. 'view' over a planet); null hands back to the DOM. */
+let override: ((mode: Mode | null) => void) | null = null;
+export const setCursorOverride = (mode: Mode | null) => override?.(mode);
+
 /**
  * Custom cursor: a dot + a ring that grows over anything clickable, and becomes a labelled
  * disc over [data-cursor="view|drag|talk"]. Difference blending keeps it visible on dark space
@@ -48,9 +52,27 @@ export function Cursor() {
       const clickable = target?.closest('a, button, [role="button"], summary, label');
       // a link/button inside a labelled area (e.g. the CTAs on a 'hold' stage) keeps the hover state
       const mode = (clickable && labelled?.contains(clickable) ? undefined : labelled?.dataset.cursor) as Mode | undefined;
-      ring.current!.dataset.state = mode ? 'label' : clickable ? 'hover' : '';
-      ring.current!.dataset.mode = mode ?? '';
-      if (label.current) label.current.textContent = mode ? labels[mode] : '';
+      domState = { state: mode ? 'label' : clickable ? 'hover' : '', mode: mode ?? '', text: mode ? labels[mode] : '' };
+      apply();
+    };
+    let domState = { state: '', mode: '', text: '' };
+    let forced: Mode | null = null;
+    const apply = () => {
+      const r = ring.current!;
+      if (forced) {
+        r.dataset.state = 'label';
+        r.dataset.mode = forced;
+        if (label.current) label.current.textContent = labels[forced];
+      } else {
+        r.dataset.state = domState.state;
+        r.dataset.mode = domState.mode;
+        if (label.current) label.current.textContent = domState.text;
+      }
+    };
+    override = (mode) => {
+      if (mode === forced) return;
+      forced = mode;
+      apply();
     };
     const onLeave = () => {
       shown = false;
@@ -66,6 +88,7 @@ export function Cursor() {
     window.addEventListener('pointerup', onUp);
     return () => {
       html.classList.remove('has-cursor');
+      override = null;
       window.removeEventListener('pointermove', onMove);
       document.removeEventListener('pointerover', onOver);
       document.documentElement.removeEventListener('pointerleave', onLeave);
