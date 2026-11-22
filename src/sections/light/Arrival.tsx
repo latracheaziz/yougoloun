@@ -32,8 +32,9 @@ export function Arrival() {
   const title = useRef<HTMLDivElement>(null);
   const coords = useRef<HTMLParagraphElement>(null);
   const place = useRef<HTMLParagraphElement>(null);
-  const link = useMemo<SpreadLink>(() => ({ p: 0, labels: {}, bubbles: [], messages: [], hud: null, surface: null }), []);
+  const link = useMemo<SpreadLink>(() => ({ p: 0, labels: {}, bubbles: [], messages: [], hud: null, surface: null, feed: null, cityNames: {} }), []);
   link.messages = [...t.ui.buzz.notifications, t.ui.buzz.hashtag];
+  link.cityNames = { ...t.ui.arrival.cities };
   const [mounted, setMounted] = useState(false);
   const [active, setActive] = useState(false);
 
@@ -109,6 +110,15 @@ export function Arrival() {
           <p ref={place} className="display mt-4 text-[clamp(3rem,9vw,8.5rem)] text-ink [text-shadow:0_0_40px_var(--color-paper),0_0_14px_var(--color-paper)]">
             {t.ui.arrival.place}
           </p>
+        </div>
+
+        {/* live feed: notifications arriving from the cities the word has reached */}
+        <div aria-hidden="true" className="wom-feed pointer-events-none absolute start-[var(--gutter)] top-1/2 -translate-y-1/2 max-lg:hidden">
+          <p className="label flex items-center gap-2 text-ink/60">
+            <span className="wom-live" />
+            {t.ui.buzz.live} · <span lang="en">{t.ui.buzz.handle}</span>
+          </p>
+          <ol ref={(el) => void (link.feed = el)} />
         </div>
 
         {/* the funnel fills as the word spreads */}

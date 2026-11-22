@@ -22,6 +22,8 @@ import { token } from '../palette';
 import { useApp } from '@/store/app';
 import { writeHold } from '@/interaction/hold';
 import { buildCrowd, CITIES, WINDOW, toWorld, type Crowd } from './crowd';
+import { gesture, mouse, shared, wave } from './state';
+import { Glow, Influencers, RisingBuzz } from './Buzz';
 
 /**
  * WORD OF MOUTH SPREADS — the landing after the clouds. Thousands of people (dots) on the real land of
@@ -49,12 +51,11 @@ export interface SpreadLink {
   hud: HTMLElement | null;
   /** The section (gestures are read on it). */
   surface: HTMLElement | null;
+  /** Live feed list (events are prepended) + city names for it. */
+  feed: HTMLElement | null;
+  cityNames: Record<string, string>;
 }
 
-const gesture = { pressing: false, charge: 0, burstAt: -99, dragging: false, yaw: 0, startX: 0, startY: 0, startYaw: 0, moved: 0 };
-const mouse = { ndc: new Vector2(9, 9), inside: false, world: new Vector3(), on: 0 };
-const wave = { origin: new Vector2(), at: -99 };
-const shared = { front: 0 };
 
 // window bounds in world units, for the edge fade
 const [W0, N0] = toWorld(WINDOW.lat[1], WINDOW.lon[0]);
@@ -66,10 +67,12 @@ attribute float aT;
 attribute float aSeed;
 uniform float uFront; uniform float uTime; uniform vec2 uMouse; uniform float uMouseOn;
 uniform vec2 uWaveO; uniform float uWaveR; uniform float uPx; uniform vec4 uWin;
-varying float vAct; varying float vFresh; varying float vRing; varying float vT; varying float vEdge;
+varying float vAct; varying float vFresh; varying float vRing; varying float vT; varying float vEdge; varying float vFlow;
 void main() {
   float act = smoothstep(aT, aT + 0.012, uFront);
   float fresh = act * exp(-max(uFront - aT, 0.0) * 28.0);
+  // the conversation keeps flowing outwards in waves through everyone already reached
+  float flow = act * smoothstep(0.86, 1.0, fract(uTime * 0.2 - aT * 5.0));
   vec3 p = position;
   p.y = act * (0.02 + 0.015 * sin(uTime * 1.6 + aSeed * 40.0)) + fresh * 0.3;
   // the cursor parts the crowd, people rise towards it
@@ -81,7 +84,8 @@ void main() {
   float ring = uWaveR > 0.0 ? exp(-pow((length(position.xz - uWaveO) - uWaveR) / 0.4, 2.0)) : 0.0;
   p.y += ring * 0.4;
   vec4 mv = modelViewMatrix * vec4(p, 1.0);
-  float size = 0.03 + act * 0.016 + fresh * 0.045 + ring * 0.035 + push * 0.02;
+  float size = 0.03 + act * 0.016 + fresh * 0.045 + ring * 0.035 + push * 0.02 + flow * 0.014;
+  vFlow = flow;
   gl_PointSize = size * uPx / -mv.z;
   gl_Position = projectionMatrix * mv;
   vAct = act; vFresh = fresh; vRing = ring; vT = aT;
@@ -90,13 +94,13 @@ void main() {
 }`;
 const crowdFrag = /* glsl */ `
 uniform vec3 uInk; uniform vec3 uBlue; uniform vec3 uGreen; uniform vec3 uLight;
-varying float vAct; varying float vFresh; varying float vRing; varying float vT; varying float vEdge;
+varying float vAct; varying float vFresh; varying float vRing; varying float vT; varying float vEdge; varying float vFlow;
 void main() {
   float r = length(gl_PointCoord - 0.5);
   if (r > 0.5) discard;
   float a = smoothstep(0.5, 0.36, r);
   vec3 col = mix(uInk, mix(uBlue, uGreen, smoothstep(0.0, 0.9, vT)), vAct);
-  col = mix(col, uLight, clamp(vFresh * 0.8 + vRing * 0.7, 0.0, 1.0));
+  col = mix(col, uLight, clamp(vFresh * 0.8 + vRing * 0.7 + vFlow * 0.55, 0.0, 1.0));
   gl_FragColor = vec4(col, a * mix(0.28, 1.0, vAct) * vEdge);
   #include <colorspace_fragment>
 }`;
@@ -104,20 +108,22 @@ void main() {
 // ── the conversation's paths (who told whom) ──────────────────────────────────────────
 const edgeVert = /* glsl */ `
 attribute float aT;
-uniform float uFront; uniform vec4 uWin;
-varying float vA; varying float vT;
+uniform float uFront; uniform vec4 uWin; uniform float uTime;
+varying float vA; varying float vT; varying float vFlow;
 void main() {
   vT = aT;
+  vFlow = smoothstep(0.86, 1.0, fract(uTime * 0.2 - aT * 5.0));
   vec2 e = min(position.xz - uWin.xy, uWin.zw - position.xz);
   vA = smoothstep(aT, aT + 0.02, uFront) * smoothstep(0.0, 1.4, min(e.x, e.y));
   gl_Position = projectionMatrix * modelViewMatrix * vec4(position + vec3(0.0, 0.015, 0.0), 1.0);
 }`;
 const edgeFrag = /* glsl */ `
-uniform vec3 uBlue; uniform vec3 uGreen;
-varying float vA; varying float vT;
+uniform vec3 uBlue; uniform vec3 uGreen; uniform vec3 uLight;
+varying float vA; varying float vT; varying float vFlow;
 void main() {
   if (vA < 0.01) discard;
-  gl_FragColor = vec4(mix(uBlue, uGreen, smoothstep(0.0, 0.9, vT)), vA * 0.32);
+  vec3 c = mix(mix(uBlue, uGreen, smoothstep(0.0, 0.9, vT)), uLight, vFlow * 0.6);
+  gl_FragColor = vec4(c, vA * (0.3 + vFlow * 0.55));
   #include <colorspace_fragment>
 }`;
 
@@ -187,7 +193,7 @@ function CrowdScene({ crowd }: { crowd: Crowd }) {
       fragmentShader: edgeFrag,
       transparent: true,
       depthWrite: false,
-      uniforms: { uFront: { value: 0 }, uWin: { value: [W0, N0, E0, S0] }, uBlue: { value: brand.blue }, uGreen: { value: brand.green } },
+      uniforms: { uFront: { value: 0 }, uTime: { value: 0 }, uWin: { value: [W0, N0, E0, S0] }, uBlue: { value: brand.blue }, uGreen: { value: brand.green }, uLight: { value: brand.light } },
     });
     return { g, m };
   }, [crowd, brand]);
@@ -241,6 +247,7 @@ function CrowdScene({ crowd }: { crowd: Crowd }) {
     const cam = camera as PerspectiveCamera;
     u.uPx.value = (size.height * gl.getPixelRatio()) / (2 * Math.tan(MathUtils.degToRad(cam.fov) / 2));
     lines.m.uniforms.uFront.value = front;
+    lines.m.uniforms.uTime.value = reduced ? 0 : t;
     arcs.forEach(({ m, j }) => {
       m.uniforms.uDraw.value = clamp((front - j.t0) / Math.max(j.t1 - j.t0, 1e-3), 0, 1.0);
       m.uniforms.uTime.value = t;
@@ -292,7 +299,7 @@ interface Pop {
 function Rig({ crowd, link }: { crowd: Crowd; link: SpreadLink }) {
   const camera = useThree((s) => s.camera as PerspectiveCamera);
   const size = useThree((s) => s.size);
-  const sm = useRef({ yaw: 0, px: 0, py: 0, lastFront: 0, timer: 0 });
+  const sm = useRef({ yaw: 0, px: 0, py: 0, lastFront: 0, timer: 0, feedTimer: 0, reached: new Set<string>() });
   const pops = useRef<(Pop | null)[]>([]);
 
   useEffect(() => {
@@ -353,23 +360,28 @@ function Rig({ crowd, link }: { crowd: Crowd; link: SpreadLink }) {
     shared.front = front;
     const scrolling = Math.abs(front - s.lastFront) > 1e-4;
     s.lastFront = front;
+    shared.scrolling = scrolling;
 
     // camera: close over Hail (reads as the arrival) → pulled back, tilted, the whole region alive
     const zoom = ease(smoothstep(p, 0.05, 0.72));
+    shared.zoom = zoom;
     const tilt = ease(smoothstep(p, 0.12, 0.78));
     const portrait = size.height > size.width;
-    const dist = lerp(portrait ? 4.2 : 3.0, portrait ? 30 : 18.5, zoom);
+    const dist = lerp(portrait ? 4.2 : 3.0, portrait ? 21 : 18.5, zoom);
     const polar = lerp(0.02, 0.7, tilt);
     if (!gesture.dragging) gesture.yaw = damp(gesture.yaw, 0, 0.9, dt);
     s.yaw = damp(s.yaw, gesture.yaw, 6, dt);
-    const yaw = lerp(0, dir === 'rtl' ? 0.22 : -0.22, tilt) + s.yaw + (reduced ? 0 : Math.sin(t * 0.06) * 0.05 * tilt) + s.px * 0.04 * tilt;
+    // portrait: turn so the peninsula's long NW→SE diagonal runs down the tall screen
+    const yaw = (portrait ? 0.78 * zoom : lerp(0, dir === 'rtl' ? 0.22 : -0.22, tilt)) + s.yaw + (reduced ? 0 : Math.sin(t * 0.06) * 0.05 * tilt) + s.px * 0.04 * tilt;
     const target = tmp.copy(CENTRE).multiplyScalar(zoom);
     camera.position.set(target.x + Math.sin(yaw) * Math.sin(polar) * dist, Math.cos(polar) * dist + s.py * 0.2 * tilt, target.z + Math.cos(yaw) * Math.sin(polar) * dist);
     camera.up.set(0, 1, 0);
     camera.lookAt(target);
     camera.fov = portrait ? 44 : 36;
     // the region sits a little high: the funnel above, the hint below
-    camera.setViewOffset(size.width, size.height, 0, size.height * lerp(0, 0.05, tilt), size.width, size.height);
+    // landscape: the region leans to the end side, leaving the start side to the live feed
+    const lean = portrait ? 0 : lerp(0, 0.07, zoom) * (dir === 'rtl' ? 1 : -1);
+    camera.setViewOffset(size.width, size.height, size.width * lean, size.height * lerp(0, portrait ? -0.03 : 0.05, tilt), size.width, size.height);
     camera.updateProjectionMatrix();
 
     // project a world point to the section's frame
@@ -451,12 +463,42 @@ function Rig({ crowd, link }: { crowd: Crowd; link: SpreadLink }) {
       el.style.transform = `translate(-10%, -120%) translate(${q.x.toFixed(1)}px, ${(q.y - inA * 10).toFixed(1)}px) scale(${sc.toFixed(3)})`;
     });
 
+    // live feed: an event when the word reaches a city, then a steady trickle from cities already talking
+    const reachedNow = CITIES.filter((c) => link.cityNames[c.key] && front >= crowd.cities[c.key].t);
+    for (const c of reachedNow)
+      if (!s.reached.has(c.key)) {
+        s.reached.add(c.key);
+        post(c.key);
+      }
+    for (const key of [...s.reached]) if (front < crowd.cities[key as keyof typeof crowd.cities].t) s.reached.delete(key);
+    s.feedTimer -= dt;
+    if (s.feedTimer <= 0 && reachedNow.length && !reduced) {
+      post(reachedNow[Math.floor(Math.random() * reachedNow.length)].key);
+      s.feedTimer = 1.4 + Math.random() * 1.2;
+    }
+    function post(key: string) {
+      const list = link.feed;
+      if (!list) return;
+      const li = document.createElement('li');
+      const dot = document.createElement('span');
+      dot.className = 'wom-feed-dot';
+      const msg = document.createElement('span');
+      msg.textContent = link.messages[Math.floor(Math.random() * (link.messages.length - 1))];
+      const where = document.createElement('span');
+      where.className = 'wom-feed-city';
+      where.textContent = link.cityNames[key];
+      li.append(dot, msg, where);
+      list.prepend(li);
+      while (list.children.length > 5) list.lastElementChild?.remove();
+    }
+
     // funnel HUD: Reach → Engagement → Conversion → Loyalty
     if (link.hud) {
       const stage = String(Math.min(3, Math.floor(clamp(front, 0, 0.999) * 4)));
       if (link.hud.dataset.stage !== stage) link.hud.dataset.stage = stage;
       link.hud.style.setProperty('--front', clamp(front, 0, 1).toFixed(3));
     }
+    link.feed?.parentElement?.style.setProperty('--front', clamp(front, 0, 1).toFixed(3));
   });
   return null;
 }
@@ -482,7 +524,10 @@ export default function WordOfMouth({ link, active }: { link: SpreadLink; active
     >
       {crowd && (
         <>
+          <Glow crowd={crowd} />
           <CrowdScene crowd={crowd} />
+          <Influencers crowd={crowd} />
+          <RisingBuzz crowd={crowd} />
           <Rig crowd={crowd} link={link} />
         </>
       )}

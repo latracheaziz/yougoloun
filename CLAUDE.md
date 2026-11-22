@@ -121,7 +121,11 @@ Vite 8 (Rolldown) · React 19 · TypeScript 7 · React Router 8 · three r187 ·
   random delays; each city hops to its 3 nearest cities after a delay). `WordOfMouth.tsx`: points + "who told
   whom" lines + city-hop arcs, all driven by `front` (scroll); camera close on Hail → whole region; notification
   bubbles (`ui.buzz.notifications`), funnel HUD (`ui.buzz.funnel`), city tags (`ui.arrival.cities`); cursor parts
-  the crowd, drag orbits, hold broadcasts a wave. ~100+ fps on an Intel iGPU.
+  the crowd, drag orbits, hold broadcasts a wave. Light pulses keep flowing outwards through the network.
+  `Buzz.tsx`: heat glow under the people talking, ~30 influencer pins (glossy heads on stems) that pop up when
+  reached, glossy hearts/comments rising from the crowd (more while scrolling, a burst on broadcast). Live feed
+  panel (start side, landscape; `ui.buzz.live/handle`, notifications · city). Shared state in `state.ts`.
+  Portrait: the camera turns ~45° so the peninsula's NW→SE diagonal fills the tall screen.
 - **Light-site 3D** (`src/gl/stage/`, lazy, one small transparent canvas each, `useNear` mounts near view and
   pauses off screen; `Studio.tsx` = Lightformer reflections + Neutral tone mapping, no postprocessing):
   `Assemble.tsx` in Statements (125 glossy blocks scatter and assemble per statement: funnel / cube grid / rising

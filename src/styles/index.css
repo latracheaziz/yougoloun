@@ -795,6 +795,72 @@ html[lang='ar'] {
   }
 }
 
+/* Word of mouth: the live feed panel. */
+.wom-feed {
+  width: 15.5rem;
+  opacity: calc(min(1, var(--front, 0) * 6));
+}
+.wom-feed ol {
+  margin-top: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+.wom-feed li {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.55rem 0.75rem;
+  border-radius: 0.9rem;
+  border-end-start-radius: 0.25rem;
+  background: var(--color-white);
+  box-shadow:
+    0 10px 24px -16px color-mix(in oklab, var(--color-ink) 45%, transparent),
+    inset 0 0 0 1px color-mix(in oklab, var(--color-ink) 7%, transparent);
+  font-size: 0.78rem;
+  color: var(--color-ink);
+  animation: wom-feed-in 0.6s var(--ease-out-expo) both;
+}
+.wom-feed li:nth-child(n + 4) {
+  opacity: 0.55;
+}
+.wom-feed li:nth-child(5) {
+  opacity: 0.25;
+}
+.wom-feed-dot,
+.wom-live {
+  width: 0.5rem;
+  height: 0.5rem;
+  flex: none;
+  border-radius: 999px;
+  background: var(--p-gradient-brand);
+}
+.wom-live {
+  animation: holdpulse 1.6s var(--ease-in-out-quart) infinite;
+}
+.wom-feed-city {
+  margin-inline-start: auto;
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  color: color-mix(in oklab, var(--color-ink) 55%, transparent);
+}
+:lang(ar) .wom-feed-city {
+  font-family: var(--font-body);
+  font-size: 0.74rem;
+}
+@keyframes wom-feed-in {
+  from {
+    opacity: 0;
+    transform: translateY(-12px) scale(0.96);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .wom-feed li,
+  .wom-live {
+    animation: none;
+  }
+}
+
 /* Dive title: mist → ink as the clouds brighten, with a matching scrim. */
 .dive-title {
   --ink: 0;
