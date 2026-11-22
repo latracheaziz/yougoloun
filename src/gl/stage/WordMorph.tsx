@@ -4,6 +4,7 @@ import { BufferAttribute, BufferGeometry, Color, MathUtils, NeutralToneMapping, 
 import { token } from '../palette';
 import { useApp } from '@/store/app';
 import { writeHold } from '@/interaction/hold';
+import { prodGl } from '../Precompile';
 
 /**
  * FROM → TO, IN PARTICLES. The positioning statements' words are drawn with the site's display font,
@@ -20,13 +21,16 @@ const WORDS = 6;
 
 /** Sample a word into `n` points (x, y, z), centred, height-normalised; shared `size` keeps letters equal. */
 function sampleWord(text: string, n: number, rtl: boolean, family: string, maxW: number) {
-  const W = 1800;
-  const H = 520;
+  // rasterised at 1/3 scale with every pixel sampled = the same density as full scale every 3 px,
+  // with 9× fewer pixels to read back
+  const R = 3;
+  const W = 1800 / R;
+  const H = 520 / R;
   const c = document.createElement('canvas');
   c.width = W;
   c.height = H;
   const ctx = c.getContext('2d', { willReadFrequently: true })!;
-  let size = 230;
+  let size = 230 / R;
   const font = (px: number) => `600 ${px}px ${family}`;
   // fit on one line, or break into two at the space nearest the middle
   let lines = [text];
@@ -45,11 +49,11 @@ function sampleWord(text: string, n: number, rtl: boolean, family: string, maxW:
       }
       lines = [words.slice(0, best).join(' '), words.slice(best).join(' ')];
     }
-    size = 200;
+    size = 200 / R;
   }
   ctx.font = font(size);
   while (Math.max(...lines.map((l) => ctx.measureText(l).width)) > W * 0.94 || size * lines.length * 1.1 > H * 0.95) {
-    size -= 8;
+    size -= 8 / R;
     ctx.font = font(size);
   }
   ctx.fillStyle = '#000';
@@ -60,16 +64,16 @@ function sampleWord(text: string, n: number, rtl: boolean, family: string, maxW:
   lines.forEach((l, i) => ctx.fillText(l, W / 2, H / 2 + (i - (lines.length - 1) / 2) * lh));
   const data = ctx.getImageData(0, 0, W, H).data;
   const cand: number[] = [];
-  const step = 3;
-  for (let y = 0; y < H; y += step) for (let x = 0; x < W; x += step) if (data[(y * W + x) * 4 + 3] > 140) cand.push(x, y);
+  const step = 1;
+  for (let y = 0; y < H; y += step) for (let x = 0; x < W; x += step) if (data[(y * W + x) * 4 + 3] > 140) cand.push(x * R, y * R);
   const out = new Float32Array(n * 3);
   const count = cand.length / 2;
   for (let i = 0; i < n; i++) {
     const k = Math.floor(Math.random() * count);
-    const jx = (Math.random() - 0.5) * step;
-    const jy = (Math.random() - 0.5) * step;
-    out[i * 3] = ((cand[k * 2] + jx - W / 2) / maxW) * 2;
-    out[i * 3 + 1] = (-(cand[k * 2 + 1] + jy - H / 2) / maxW) * 2;
+    const jx = (Math.random() - 0.5) * R;
+    const jy = (Math.random() - 0.5) * R;
+    out[i * 3] = ((cand[k * 2] + jx - (W * R) / 2) / maxW) * 2;
+    out[i * 3 + 1] = (-(cand[k * 2 + 1] + jy - (H * R) / 2) / maxW) * 2;
     // extruded: particles fill the letters' thickness (seen when the word tilts)
     out[i * 3 + 2] = -Math.pow(Math.random(), 1.6) * 0.07;
   }
@@ -177,12 +181,18 @@ function Particles({ words, link, surface }: { words: string[]; link: MorphLink;
   // sample the six words once the display font is ready
   useEffect(() => {
     let alive = true;
-    document.fonts.ready.then(() => {
+    const frame = () => new Promise((r) => requestAnimationFrame(r));
+    document.fonts.ready.then(async () => {
       if (!alive) return;
       const family = getComputedStyle(document.documentElement).getPropertyValue('--font-display') || 'sans-serif';
       const rtl = dir === 'rtl';
       const g = new BufferGeometry();
-      words.slice(0, WORDS).forEach((w, i) => g.setAttribute(`aW${i}`, new BufferAttribute(sampleWord(w, n, rtl, family, 1800), 3)));
+      // one word per frame: no single long task
+      for (const [i, w] of words.slice(0, WORDS).entries()) {
+        g.setAttribute(`aW${i}`, new BufferAttribute(sampleWord(w, n, rtl, family, 1800), 3));
+        await frame();
+        if (!alive) return;
+      }
       const rand = new Float32Array(n * 4);
       for (let i = 0; i < n; i++) rand.set([i / n, Math.random(), Math.random(), Math.random()], i * 4);
       g.setAttribute('aRand', new BufferAttribute(rand, 4));
@@ -200,20 +210,24 @@ function Particles({ words, link, surface }: { words: string[]; link: MorphLink;
   useEffect(() => {
     if (!surface) return;
     const move = (e: PointerEvent) => {
-      const r = surface.getBoundingClientRect();
-      ptr.current.ndc.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
-      ptr.current.inside = e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom;
+      const w = surface.clientWidth || 1;
+      const h = surface.clientHeight || 1;
+      ptr.current.ndc.set((e.offsetX / w) * 2 - 1, -(e.offsetY / h) * 2 + 1);
+      ptr.current.inside = true;
     };
+    const leave = () => (ptr.current.inside = false);
     const down = (e: PointerEvent) => {
       if (e.button === 0 && !(e.target as Element).closest('a, button')) ptr.current.pressing = true;
     };
     const up = () => (ptr.current.pressing = false);
-    window.addEventListener('pointermove', move, { passive: true });
+    surface.addEventListener('pointermove', move, { passive: true });
+    surface.addEventListener('pointerleave', leave);
     surface.addEventListener('pointerdown', down);
     window.addEventListener('pointerup', up);
     window.addEventListener('pointercancel', up);
     return () => {
-      window.removeEventListener('pointermove', move);
+      surface.removeEventListener('pointermove', move);
+      surface.removeEventListener('pointerleave', leave);
       surface.removeEventListener('pointerdown', down);
       window.removeEventListener('pointerup', up);
       window.removeEventListener('pointercancel', up);
@@ -268,6 +282,8 @@ export default function WordMorph({ words, link, active, surface, className }: {
       className={className}
       dpr={[1, 1.75]}
       frameloop={active ? 'always' : 'never'}
+      resize={{ scroll: false }}
+      onCreated={prodGl}
       gl={{ antialias: true, alpha: true, powerPreference: 'high-performance', toneMapping: NeutralToneMapping }}
       camera={{ fov: 30, near: 0.1, far: 60, position: [0, 0, 10] }}
     >

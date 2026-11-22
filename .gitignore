@@ -11,3 +11,4 @@ Thumbs.db
 .claude/settings.local.json
 # Playwright check output
 .check
+dist-prof

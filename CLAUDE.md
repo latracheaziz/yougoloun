@@ -29,6 +29,9 @@ Two parts, one page:
   `npm run media -- --placeholders` — regenerate portfolio placeholders in `public/media/work/`.
 - Dev-only URL switches: `?nofx` (no postprocessing), `?tier=low|medium|high` (force + lock a tier),
   `?no=clouds,arch,plants,trees,voice,ribbon,sky,env,sun,shadows,planets,orb,water` (switch 3D layers off).
+- `npm run perf` — real-use performance of the PRODUCTION build (build first): load timing, then a full wheel
+  scroll recording main-thread freezes (long tasks, with the section) and fps per section. `--dev`, `--lang=ar`,
+  `--dpr=1.5`. ⚠ Anything else on the GPU (the site open in a browser or in VS Code's preview) skews the fps.
 - `npm run probe -- <track> <p> "<query>" …` — fps at one scroll position per URL variant, on this GPU
   (`DPR=1.5`, `PREVIEW=1` for the production build). Close the site in your own browser while probing.
 - ⚠ Windows drive-letter case: `vite.config.ts` upper-cases the alias root (`fromRoot`). VS Code starts with
@@ -111,7 +114,14 @@ Vite 8 (Rolldown) · React 19 · TypeScript 7 · React Router 8 · three r187 ·
   on 'high'; otherwise the renderer tone-maps itself (same Neutral curve) with native MSAA. One mirror pool at a
   time, 'high' only. Shadow map refreshed at 30 Hz. Integrated GPUs: DPR cap 1.25 and 1× while scrolling
   (`MotionDpr`, full sharpness ~0.35 s after it stops). Triplanar stone samples only contributing projections.
-  No `backdrop-filter` over the live canvas, no blend-mode grain, never write custom properties on <html> per frame. **Never scale the render below the screen resolution and keep MSAA + clear-coat on every
+  No `backdrop-filter` over the live canvas, no blend-mode grain, never write custom properties on <html> per frame.
+- **Main-thread rules** (measured freezes): every canvas compiles its shaders with `compileAsync` before its
+  first frame and pre-uploads textures one per frame (`Precompile.tsx`; frameloop 'never' until done); images
+  for WebGL are decoded off the main thread (`useBitmapTexture` / `loadBitmapTexture` in `src/gl/bitmap.ts`,
+  never drei `useTexture`); `prodGl` turns off per-program shader error checks; every canvas uses
+  `resize={{ scroll: false }}`; no layout reads in per-frame / per-pointermove code (the header's tone comes
+  from the active stage or cached section offsets — never `elementsFromPoint`); the light site mounts at idle
+  after first paint (`useLightSite` in Home.tsx; `scrollToSection` asks for it via the `yg:light` event). **Never scale the render below the screen resolution and keep MSAA + clear-coat on every
   tier** — the client saw renderScale < 1 / no AA / Standard materials as "low quality". Bloom only catches real
   highlights (threshold 0.95); no chromatic aberration. Logo bubbles + blue heart carry a baked vertex-colour
   gradient (`gradient()` in geometry.ts, `glossy(…, { gradient: true })`).

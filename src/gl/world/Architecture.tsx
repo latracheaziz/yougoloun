@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
-import { MeshReflectorMaterial, useTexture } from '@react-three/drei';
+import { MeshReflectorMaterial } from '@react-three/drei';
+import { useBitmapTexture } from '../bitmap';
 import {
   BoxGeometry,
   CylinderGeometry,
@@ -183,7 +184,7 @@ function coverFit(tex: Texture, aspect: number, anisotropy: number) {
 }
 
 function Gallery({ plaster, base }: { plaster: Material; base: Material }) {
-  const textures = useTexture(PICTURES);
+  const textures = useBitmapTexture(PICTURES);
   const maxAniso = useThree((s) => s.gl.capabilities.getMaxAnisotropy());
   const pictureAspect = (FRAME.w - 2 * FRAME.t) / (FRAME.h - 2 * FRAME.t);
   const materials = useMemo(

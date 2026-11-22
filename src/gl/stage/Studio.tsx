@@ -1,7 +1,8 @@
-import type { ReactNode } from 'react';
+import { Suspense, useCallback, useState, type ReactNode } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { Environment, Lightformer } from '@react-three/drei';
 import { NeutralToneMapping } from 'three';
+import { Precompile, prodGl } from '../Precompile';
 
 /**
  * Small transparent "product shot" canvases for the light site (services, process, statements):
@@ -9,17 +10,24 @@ import { NeutralToneMapping } from 'three';
  * (brand colours stay true), native MSAA, no postprocessing. `active` pauses the loop when off screen.
  */
 export function StageCanvas({ active, children, className, fov = 30, z = 4 }: { active: boolean; children: ReactNode; className?: string; fov?: number; z?: number }) {
+  const [compiled, setCompiled] = useState(false);
+  const onCompiled = useCallback(() => setCompiled(true), []);
   return (
     <Canvas
       aria-hidden="true"
       className={className}
       dpr={[1, 1.5]}
-      frameloop={active ? 'always' : 'never'}
+      frameloop={active && compiled ? 'always' : 'never'}
+      resize={{ scroll: false }}
+      onCreated={prodGl}
       gl={{ antialias: true, alpha: true, powerPreference: 'high-performance', toneMapping: NeutralToneMapping }}
       camera={{ fov, near: 0.1, far: 50, position: [0, 0, z] }}
     >
       <Studio />
-      {children}
+      <Suspense fallback={null}>
+        {children}
+        <Precompile onDone={onCompiled} />
+      </Suspense>
     </Canvas>
   );
 }

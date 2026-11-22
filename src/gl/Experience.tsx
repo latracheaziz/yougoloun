@@ -1,8 +1,10 @@
-import { Suspense, useEffect, useRef } from 'react';
+import { Suspense, useCallback, useEffect, useRef, useState } from 'react';
 import { NeutralToneMapping, NoToneMapping } from 'three';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { PerformanceMonitor } from '@react-three/drei';
 import { Director } from './Director';
+import { Precompile, prodGl } from './Precompile';
+import { isWeakGpu } from '@/config/quality';
 import { Effects } from './Effects';
 import { World } from './world/World';
 import { HORIZON } from './world/Sky';
@@ -11,17 +13,6 @@ import { useApp } from '@/store/app';
 import { journey } from '@/scroll/journey';
 import { qualityPresets } from '@/config/quality';
 
-/** Flags the canvas as ready once the world (gallery textures included) has mounted. */
-function ReadySignal() {
-  useEffect(() => {
-    const id = requestAnimationFrame(() => useApp.getState().setGlReady(true));
-    return () => {
-      cancelAnimationFrame(id);
-      useApp.getState().setGlReady(false);
-    };
-  }, []);
-  return null;
-}
 
 /**
  * Tone mapping lives in the composer when there is one (it needs the HDR buffer), otherwise in the
@@ -73,6 +64,13 @@ export default function Experience({ active = true }: { active?: boolean }) {
   const dpr = Math.min(window.devicePixelRatio || 1, maxDpr) * renderScale;
   // dev-only profiling switch: /ar?nofx renders without postprocessing
   const noFx = import.meta.env.DEV && new URLSearchParams(window.location.search).has('nofx');
+  // nothing is drawn until every shader is compiled in the background (see Precompile)
+  const [compiled, setCompiled] = useState(false);
+  const onCompiled = useCallback(() => {
+    setCompiled(true);
+    requestAnimationFrame(() => requestAnimationFrame(() => useApp.getState().setGlReady(true)));
+  }, []);
+  useEffect(() => () => useApp.getState().setGlReady(false), []);
 
   return (
     <Canvas
@@ -80,17 +78,23 @@ export default function Experience({ active = true }: { active?: boolean }) {
       style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100lvh', zIndex: 0 }}
       dpr={dpr}
       shadows="percentage"
-      frameloop={active ? 'always' : 'never'}
+      frameloop={active && compiled ? 'always' : 'never'}
       resize={{ scroll: false }}
       gl={{ antialias: true, powerPreference: 'high-performance', stencil: false, alpha: false }}
       camera={{ fov: 35, near: 0.01, far: 900, position: [0, 0, 4.2] }}
-      onCreated={({ gl }) => gl.setClearColor(HORIZON, 1)}
+      onCreated={({ gl }) => {
+        prodGl({ gl });
+        gl.setClearColor(HORIZON, 1);
+        // integrated GPU → start at 'medium' (read from this context: no extra one at start-up)
+        const app = useApp.getState();
+        if (!app.tierLocked && app.tier === 'high' && isWeakGpu(gl.getContext())) app.capTier('medium');
+      }}
     >
       {!tierLocked && <PerformanceMonitor flipflops={3} onIncline={() => stepTier(1)} onDecline={() => stepTier(-1)} onFallback={() => setTier('low')} />}
       <Director />
       <Suspense fallback={null}>
         <World />
-        <ReadySignal />
+        <Precompile onDone={onCompiled} />
       </Suspense>
       <Dive />
       <ToneMode post={post && !noFx} />

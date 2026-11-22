@@ -1,4 +1,5 @@
-import { Color, MeshStandardMaterial, NoColorSpace, RepeatWrapping, TextureLoader, type Texture } from 'three';
+import { Color, MeshStandardMaterial, NoColorSpace, RepeatWrapping, type Texture } from 'three';
+import { loadBitmapTexture } from '../bitmap';
 
 /**
  * Stone for the architecture, from real scanned surfaces (Poly Haven, CC0; `npm run world-assets`).
@@ -18,13 +19,12 @@ interface ScanMaps {
   arm: Texture;
 }
 
-const loader = new TextureLoader();
 const scans = new Map<Scan, ScanMaps>();
 function scan(name: Scan): ScanMaps {
   let s = scans.get(name);
   if (!s) {
     const load = (suffix: string) => {
-      const t = loader.load(`/media/world/tex/${name}-${suffix}.webp`);
+      const t = loadBitmapTexture(`/media/world/tex/${name}-${suffix}.webp`); // decoded off the main thread
       t.wrapS = t.wrapT = RepeatWrapping;
       t.colorSpace = NoColorSpace; // detail only: luminance / normals / ARM, read as data
       t.anisotropy = 8;

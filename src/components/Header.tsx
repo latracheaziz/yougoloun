@@ -6,6 +6,8 @@ import { getLenis, scrollToSection } from '@/scroll/SmoothScroll';
 import { whatsappLink } from '@/config/site';
 import { Magnetic } from '@/interaction/Magnetic';
 import { Wordmark } from './Wordmark';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { journey, sectionIds } from '@/scroll/journey';
 
 /**
  * Header that stays readable everywhere: its tone (light text over space, dark text over clouds
@@ -25,14 +27,33 @@ export function Header() {
     if (!el) return;
     let lastY = window.scrollY;
     let raf = 0;
+    // Tone without hit-testing: elementsFromPoint on every frame forced a full layout + hit test of
+    // the whole page (measured ~2 s per page scroll). The 3D part's tone comes from the active stage;
+    // the light site's from cached section offsets (re-measured on resize / ScrollTrigger refresh).
+    let bands: { top: number; bottom: number; tone: string }[] = [];
+    let headerH = 0;
+    const measure = () => {
+      headerH = el.offsetHeight;
+      bands = [...document.querySelectorAll<HTMLElement>('[data-tone]:not(.stage):not(.site-header)')].map((n) => {
+        const r = n.getBoundingClientRect();
+        return { top: r.top + window.scrollY, bottom: r.bottom + window.scrollY, tone: n.dataset.tone ?? 'dark' };
+      });
+    };
+    const toneAt = (y: number) => {
+      const probe = y + headerH / 2;
+      if (y < journey.tracksEnd - window.innerHeight * 0.5) {
+        const stage = document.querySelector<HTMLElement>(`[data-stage="${sectionIds[journey.index]}"]`);
+        return stage?.dataset.tone ?? 'dark';
+      }
+      // innermost band containing the probe (bands are in document order; nested ones come later)
+      let tone = 'light';
+      for (const b of bands) if (probe >= b.top && probe < b.bottom) tone = b.tone;
+      return tone;
+    };
     const update = () => {
       raf = 0;
       const y = window.scrollY;
-      // tone: probe what sits under the header's middle line
-      const probeY = el.offsetHeight / 2;
-      const stack = document.elementsFromPoint(window.innerWidth / 2, probeY);
-      const under = stack.find((node) => !el.contains(node) && node.closest('[data-tone]'));
-      const tone = under?.closest<HTMLElement>('[data-tone]')?.dataset.tone ?? 'dark';
+      const tone = toneAt(y);
       if (el.dataset.tone !== tone) el.dataset.tone = tone;
       el.toggleAttribute('data-scrolled', y > 24);
       const goingDown = y > lastY + 4;
@@ -44,13 +65,22 @@ export function Header() {
     const onScroll = () => {
       if (!raf) raf = requestAnimationFrame(update);
     };
+    const onRefresh = () => {
+      measure();
+      onScroll();
+    };
+    measure();
     update();
+    const late = window.setTimeout(onRefresh, 1500); // lazy sections settle after first paint
+    ScrollTrigger.addEventListener('refresh', onRefresh);
     window.addEventListener('scroll', onScroll, { passive: true });
-    window.addEventListener('resize', onScroll);
+    window.addEventListener('resize', onRefresh);
     return () => {
       cancelAnimationFrame(raf);
+      window.clearTimeout(late);
+      ScrollTrigger.removeEventListener('refresh', onRefresh);
       window.removeEventListener('scroll', onScroll);
-      window.removeEventListener('resize', onScroll);
+      window.removeEventListener('resize', onRefresh);
     };
   }, []);
 

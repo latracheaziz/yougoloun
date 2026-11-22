@@ -1,4 +1,5 @@
 import { lazy, Suspense, useEffect, useRef, useState } from 'react';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useContent } from '@/i18n/LangContext';
 import { useApp } from '@/store/app';
 import { Header } from '@/components/Header';
@@ -74,9 +75,40 @@ function useCanvasLifecycle() {
   return { mounted, active };
 }
 
-/** Header highlight for the light sections (the space part reports its own track). */
-function useLightSectionObserver() {
+/**
+ * The light site (everything below the clouds) mounts just after first paint, when the browser is idle:
+ * at load, the hero's layout work then only covers the 3D part's small DOM (measured: building and
+ * laying out the whole page up front cost ~400 ms of freezes). Nobody can scroll there that fast; a deep
+ * link (#services…) mounts it at once.
+ */
+function useLightSite() {
+  const [ready, setReady] = useState(() => typeof window !== 'undefined' && window.location.hash.length > 1);
   useEffect(() => {
+    if (ready) return;
+    const go = () => setReady(true);
+    const idle = 'requestIdleCallback' in window;
+    const id = idle ? window.requestIdleCallback(go, { timeout: 1200 }) : window.setTimeout(go, 600);
+    // anything that needs it sooner (nav click, fast scroll) asks for it
+    window.addEventListener('yg:light', go);
+    return () => {
+      if (idle) window.cancelIdleCallback(id);
+      else window.clearTimeout(id);
+      window.removeEventListener('yg:light', go);
+    };
+  }, [ready]);
+  // the page just grew: re-measure every scroll trigger once it's laid out
+  useEffect(() => {
+    if (!ready) return;
+    const id = requestAnimationFrame(() => ScrollTrigger.refresh());
+    return () => cancelAnimationFrame(id);
+  }, [ready]);
+  return ready;
+}
+
+/** Header highlight for the light sections (the space part reports its own track). */
+function useLightSectionObserver(ready: boolean) {
+  useEffect(() => {
+    if (!ready) return;
     const io = new IntersectionObserver(
       (entries) => {
         for (const e of entries) if (e.isIntersecting) useApp.getState().setActiveSection(e.target.id);
@@ -88,13 +120,14 @@ function useLightSectionObserver() {
       if (el) io.observe(el);
     });
     return () => io.disconnect();
-  }, []);
+  }, [ready]);
 }
 
 export default function Home() {
   const t = useContent();
   const gl = useCanvasLifecycle();
-  useLightSectionObserver();
+  const light = useLightSite();
+  useLightSectionObserver(light);
 
   return (
     <>
@@ -121,16 +154,20 @@ export default function Home() {
 
         {/* LIGHT — normal document flow, slides up over the white-out */}
         <div className="light relative z-20">
-          <Arrival />
-          <Statements />
-          <Services />
-          <Platforms />
-          <Buzz />
-          <Feed />
-          <Portfolio />
-          <Process />
-          <Faq />
-          <Contact />
+          {light && (
+            <>
+              <Arrival />
+              <Statements />
+              <Services />
+              <Platforms />
+              <Buzz />
+              <Feed />
+              <Portfolio />
+              <Process />
+              <Faq />
+              <Contact />
+            </>
+          )}
         </div>
       </main>
 

@@ -6,7 +6,7 @@ import { DataTexture, LinearFilter, LinearMipmapLinearFilter, NoColorSpace, Repe
  */
 let cached: DataTexture | null = null;
 
-export function rippleNormals(size = 256) {
+export function rippleNormals(size = 128) {
   if (cached) return cached;
   const TAU = Math.PI * 2;
   let s = 4242;

@@ -47,15 +47,11 @@ export const qualityPresets: Record<QualityTier, QualityPreset> = {
 
 export const tierOrder: QualityTier[] = ['low', 'medium', 'high'];
 
-/** Integrated / mobile / software GPUs (WEBGL_debug_renderer_info). Unknown → not weak. */
-function weakGpu() {
+/** Integrated / mobile / software GPUs, from an existing context (WEBGL_debug_renderer_info). */
+export function isWeakGpu(gl: WebGLRenderingContext | WebGL2RenderingContext) {
   try {
-    const canvas = document.createElement('canvas');
-    const gl = canvas.getContext('webgl2') ?? canvas.getContext('webgl');
-    if (!gl) return true;
     const ext = gl.getExtension('WEBGL_debug_renderer_info');
     const name = ext ? String(gl.getParameter(ext.UNMASKED_RENDERER_WEBGL)) : '';
-    gl.getExtension('WEBGL_lose_context')?.loseContext();
     return /intel|uhd|iris|mali|adreno|powervr|swiftshader|llvmpipe|basic render/i.test(name);
   } catch {
     return false;
@@ -71,7 +67,7 @@ export function detectDevice() {
   const lowMemory = (nav.deviceMemory ?? 8) <= 4;
   const fewCores = (navigator.hardwareConcurrency ?? 8) <= 4;
 
-  let tier: QualityTier = mobile ? 'low' : lowMemory || fewCores || weakGpu() ? 'medium' : 'high';
+  let tier: QualityTier = mobile ? 'low' : lowMemory || fewCores ? 'medium' : 'high';
   // dev-only: force a tier with ?tier=low|medium|high
   const forced = import.meta.env.DEV ? new URLSearchParams(window.location.search).get('tier') : null;
   const locked = forced === 'low' || forced === 'medium' || forced === 'high';

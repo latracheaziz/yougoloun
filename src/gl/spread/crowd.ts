@@ -118,15 +118,22 @@ export function buildCrowd(step: number): Promise<Crowd> {
     const img = new Image();
     img.src = '/textures/earth/sd/ocean.webp';
     img.decode().then(() => {
+      // only the window of the world mask is drawn and read (~1% of the image)
+      const W = img.naturalWidth;
+      const H = img.naturalHeight;
+      const x0 = Math.floor(((WINDOW.lon[0] - 1 + 180) / 360) * W);
+      const x1 = Math.ceil(((WINDOW.lon[1] + 1 + 180) / 360) * W);
+      const y0 = Math.floor(((90 - (WINDOW.lat[1] + 1)) / 180) * H);
+      const y1 = Math.ceil(((90 - (WINDOW.lat[0] - 1)) / 180) * H);
       const canvas = document.createElement('canvas');
-      canvas.width = img.naturalWidth;
-      canvas.height = img.naturalHeight;
+      canvas.width = x1 - x0;
+      canvas.height = y1 - y0;
       const ctx = canvas.getContext('2d', { willReadFrequently: true })!;
-      ctx.drawImage(img, 0, 0);
+      ctx.drawImage(img, x0, y0, canvas.width, canvas.height, 0, 0, canvas.width, canvas.height);
       const { data, width, height } = ctx.getImageData(0, 0, canvas.width, canvas.height);
       const land = (lat: number, lon: number) => {
-        const px = Math.min(width - 1, Math.max(0, Math.floor(((lon + 180) / 360) * width)));
-        const py = Math.min(height - 1, Math.max(0, Math.floor(((90 - lat) / 180) * height)));
+        const px = Math.min(width - 1, Math.max(0, Math.floor(((lon + 180) / 360) * W) - x0));
+        const py = Math.min(height - 1, Math.max(0, Math.floor(((90 - lat) / 180) * H) - y0));
         return data[(py * width + px) * 4] <= 110;
       };
 

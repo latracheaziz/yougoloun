@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
+import { prodGl } from './Precompile';
 import { Line } from '@react-three/drei';
 import {
   AdditiveBlending,
@@ -222,7 +223,7 @@ export default function MiniGlobe() {
 
   return (
     <div ref={wrap} aria-hidden="true" className="absolute inset-0 touch-pan-y">
-      <Canvas dpr={[1, 2]} flat camera={{ fov: 35, position: [0, 0, 3.6] }} gl={{ antialias: true, alpha: true, powerPreference: 'low-power' }}>
+      <Canvas dpr={[1, 2]} flat resize={{ scroll: false }} onCreated={prodGl} camera={{ fov: 35, position: [0, 0, 3.6] }} gl={{ antialias: true, alpha: true, powerPreference: 'low-power' }}>
         <Globe drag={drag} />
       </Canvas>
     </div>

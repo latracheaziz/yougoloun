@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { Environment, Lightformer } from '@react-three/drei';
 import {
@@ -24,6 +24,7 @@ import { writeHold } from '@/interaction/hold';
 import { buildCrowd, CITIES, WINDOW, toWorld, type Crowd } from './crowd';
 import { gesture, mouse, shared, wave } from './state';
 import { Glow, Influencers, RisingBuzz } from './Buzz';
+import { Precompile, prodGl } from '../Precompile';
 
 /**
  * WORD OF MOUTH SPREADS — the landing after the clouds. Thousands of people (dots) on the real land of
@@ -315,8 +316,7 @@ function Rig({ crowd, link }: { crowd: Crowd; link: SpreadLink }) {
       gesture.moved = 0;
     };
     const move = (e: PointerEvent) => {
-      const r = el.getBoundingClientRect();
-      mouse.inside = e.clientY >= Math.max(r.top, 0) && e.clientY <= Math.min(r.bottom, window.innerHeight);
+      mouse.inside = link.p > 0.02 && link.p < 0.999;
       mouse.ndc.set((e.clientX / window.innerWidth) * 2 - 1, -(e.clientY / window.innerHeight) * 2 + 1);
       sm.current.px = mouse.ndc.x;
       sm.current.py = mouse.ndc.y;
@@ -506,6 +506,8 @@ function Rig({ crowd, link }: { crowd: Crowd; link: SpreadLink }) {
 export default function WordOfMouth({ link, active }: { link: SpreadLink; active: boolean }) {
   const mobile = useApp((s) => s.mobile);
   const [crowd, setCrowd] = useState<Crowd | null>(null);
+  const [compiled, setCompiled] = useState(false);
+  const onCompiled = useCallback(() => setCompiled(true), []);
   useEffect(() => {
     let alive = true;
     buildCrowd(mobile ? 0.34 : 0.24).then((c) => alive && setCrowd(c));
@@ -518,7 +520,9 @@ export default function WordOfMouth({ link, active }: { link: SpreadLink; active
       aria-hidden="true"
       className="!absolute inset-0"
       dpr={[1, 1.75]}
-      frameloop={active ? 'always' : 'never'}
+      frameloop={active && compiled ? 'always' : 'never'}
+      resize={{ scroll: false }}
+      onCreated={prodGl}
       gl={{ antialias: true, alpha: true, powerPreference: 'high-performance', toneMapping: NeutralToneMapping }}
       camera={{ fov: 36, near: 0.05, far: 200, position: [0, 3, 0.05] }}
     >
@@ -528,6 +532,7 @@ export default function WordOfMouth({ link, active }: { link: SpreadLink; active
           <CrowdScene crowd={crowd} />
           <Influencers crowd={crowd} />
           <RisingBuzz crowd={crowd} />
+          <Precompile onDone={onCompiled} />
           <Rig crowd={crowd} link={link} />
         </>
       )}

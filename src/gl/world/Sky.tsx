@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
-import { useTexture } from '@react-three/drei';
 import { BackSide, Color, LinearFilter, Mesh, RepeatWrapping, ShaderMaterial, SphereGeometry, SRGBColorSpace, Vector3 } from 'three';
 import { token } from '../palette';
+import { useBitmapTexture } from '../bitmap';
 
 /**
  * The sky: a real photographed sky (Poly Haven "Kloofendal 48d partly cloudy, pure sky", CC0) graded
@@ -57,7 +57,7 @@ void main() {
 }`;
 
 export function SkyDome({ radius = 450 }: { radius?: number }) {
-  const map = useTexture(SKY_IMAGE);
+  const map = useBitmapTexture(SKY_IMAGE);
   const geometry = useMemo(() => new SphereGeometry(radius, 64, 32), [radius]);
   const material = useMemo(() => {
     map.colorSpace = SRGBColorSpace;

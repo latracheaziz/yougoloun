@@ -17,6 +17,8 @@ interface AppState {
   tierLocked: boolean;
   stepTier: (delta: 1 | -1) => void;
   setTier: (tier: QualityTier) => void;
+  /** Lower the tier and the ceiling (a weak GPU found once the canvas exists). */
+  capTier: (tier: QualityTier) => void;
 
   /** Section currently on screen: a space track id, or a light section id (see NavTarget). */
   activeSection: string;
@@ -53,6 +55,7 @@ export const useApp = create<AppState>((set, get) => ({
     if (next !== tier) set({ tier: next });
   },
   setTier: (tier) => set({ tier }),
+  capTier: (tier) => set({ tier, maxTier: tier }),
 
   activeSection: 'home',
   setActiveSection: (id) => set({ activeSection: id }),

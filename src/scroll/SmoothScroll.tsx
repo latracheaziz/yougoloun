@@ -25,7 +25,12 @@ export function scrollToSection(id: string, opts: { immediate?: boolean } = {}) 
     y = (journey.starts[i] ?? 0) + (journey.lengths[i] ?? 0) * (enter ? enter[1] + 0.01 : 0);
   } else {
     const el = document.getElementById(id);
-    if (!el) return;
+    if (!el) {
+      // the light site mounts after first paint (Home.tsx): ask for it now, scroll once it's there
+      window.dispatchEvent(new Event('yg:light'));
+      setTimeout(() => document.getElementById(id) && scrollToSection(id, opts), 120);
+      return;
+    }
     y = el.getBoundingClientRect().top + window.scrollY;
   }
   if (lenis) lenis.scrollTo(y, { immediate: opts.immediate, duration: 1.6 });
