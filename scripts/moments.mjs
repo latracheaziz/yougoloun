@@ -44,7 +44,11 @@ const KEY = [
   ['4d-studio', { selector: '#studio', vh: 0.1 }, { hover: '#studio [data-cursor="drag"]' }],
   ['5-portfolio', { selector: '#portfolio', vh: 0.02 }, { hover: '#portfolio article:first-of-type img' }],
   ['5b-portfolio-scrolled', { selector: '#portfolio', vh: 0.9 }],
-  ['6-process', { selector: '#process', vh: 2.05 }],
+  // process pins for 3 × 85svh (desktop): step i is in the middle at vh = 2.55 × (i + 0.5) / 4
+  ['6a-process-audit', { selector: '#process', vh: 0.32 }],
+  ['6b-process-strategy', { selector: '#process', vh: 0.96 }],
+  ['6c-process-launch', { selector: '#process', vh: 1.59 }],
+  ['6d-process-scale', { selector: '#process', vh: 2.23 }],
   ['7-contact', { selector: '#contact', vh: 0.02 }],
   ['7b-contact-details', { selector: '#contact', vh: 0.9 }],
 ];

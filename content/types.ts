@@ -140,6 +140,15 @@ export interface Content {
       next: string;
       posts: readonly string[];
     };
+    /** "How we work": the dashboard scene shown beside each step (short interface labels). */
+    process: {
+      /** Panel title per step (01 → 04). */
+      scenes: readonly string[];
+      audit: { axes: readonly string[]; today: string; potential: string; found: string };
+      roadmap: { title: string; weeks: string; rows: readonly string[]; tracking: string; site: string; connected: string };
+      launch: { formats: readonly string[]; channels: string; live: string };
+      scale: { chart: string; week: string; test: string; winner: string; budget: string; scaling: string };
+    };
   };
 
   /** ⚠ NOT FROM THE PDF — meta tags composed from PDF phrases. Review before launch. */

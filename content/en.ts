@@ -202,6 +202,25 @@ export const en: Content = {
         'Yougoloun creative: transform your office into a sustainable workspace',
       ],
     },
+    process: {
+      scenes: ['Growth audit', 'Roadmap & tracking', 'Production & launch', 'Optimization & scaling'],
+      audit: {
+        axes: ['Business model', 'Competitors', 'Audience', 'Digital presence'],
+        today: 'Today',
+        potential: 'Potential',
+        found: 'Growth opportunities found',
+      },
+      roadmap: {
+        title: 'Marketing roadmap',
+        weeks: 'Weeks',
+        rows: ['Roadmap', 'Tracking & analytics', 'Visual guidelines', 'Messaging'],
+        tracking: 'Tracking',
+        site: 'Your site',
+        connected: 'Connected',
+      },
+      launch: { formats: ['Photo', 'Video', 'Copy'], channels: 'Channels', live: 'Live' },
+      scale: { chart: 'Weekly conversions', week: 'Week', test: 'Creative test', winner: 'Winner', budget: 'Budget', scaling: 'Scaling' },
+    },
   },
 
   // ⚠ NOT FROM THE PDF — title approved by the client

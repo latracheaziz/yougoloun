@@ -56,6 +56,9 @@ export const projects: Record<ProjectSlug, { accent: string; tint: string; ink: 
 // ── Platforms marquee (brand names, not translated) ────────────────────────────────
 export const platforms = ['Meta', 'TikTok', 'Snapchat', 'Google', 'Salla', 'Zid', 'Shopify'] as const;
 
+// ── Process dashboard (step 02: tracking set up; product names, not translated) ─────
+export const trackingTags = ['Meta Pixel', 'GA4', 'TikTok Pixel', 'Snap Pixel'] as const;
+
 // ── Studio feed (the agency's own campaign creatives, public/media/feed) ───────────
 /** Order = deck order. `blur`: tiny blurred copy that fills the frame around non-square posts. Alts in ui.feed.posts. */
 export const feedPosts = [

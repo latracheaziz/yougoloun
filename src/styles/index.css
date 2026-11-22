@@ -1007,3 +1007,79 @@ html[lang='ar'] {
 @media (prefers-reduced-motion: reduce) {
   .feed-lightbox, .feed-lightbox img { animation: none; }
 }
+
+/* Process — "how we work" dashboard scenes (src/sections/light/Process.tsx).
+   Idle loops only; entrances are GSAP. `.proc-paused` (section off screen) freezes them. */
+.proc-paused * {
+  animation-play-state: paused !important;
+}
+.proc-sweep {
+  transform-origin: 160px 160px;
+  animation: proc-spin 4.5s linear infinite;
+}
+@keyframes proc-spin {
+  to { transform: rotate(360deg); }
+}
+.proc-pulse {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: proc-pulse 2.4s ease-out infinite;
+}
+@keyframes proc-pulse {
+  0% { transform: scale(0.6); opacity: 0.55; }
+  100% { transform: scale(2.4); opacity: 0; }
+}
+.proc-flow {
+  animation: proc-flow 1.9s linear infinite;
+}
+@keyframes proc-flow {
+  from { stroke-dashoffset: 1; }
+  to { stroke-dashoffset: 0; }
+}
+.proc-progress {
+  transform-origin: left center;
+  animation: proc-progress 5s linear infinite;
+}
+[dir='rtl'] .proc-progress {
+  transform-origin: right center;
+}
+@keyframes proc-progress {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+.proc-blink {
+  animation: proc-blink 1.4s ease-in-out infinite;
+}
+@keyframes proc-blink {
+  50% { opacity: 0.25; }
+}
+.proc-caret {
+  animation: proc-caret 1s steps(2) infinite;
+}
+@keyframes proc-caret {
+  50% { opacity: 0; }
+}
+.proc-now {
+  animation: proc-now 9s cubic-bezier(0.45, 0, 0.55, 1) infinite alternate;
+}
+[dir='rtl'] .proc-now {
+  animation-name: proc-now-rtl;
+}
+@keyframes proc-now {
+  from { transform: translateX(8%); }
+  to { transform: translateX(92%); }
+}
+@keyframes proc-now-rtl {
+  from { transform: translateX(-8%); }
+  to { transform: translateX(-92%); }
+}
+.proc-swap {
+  animation: proc-swap 0.6s var(--ease-out-expo) both;
+}
+@keyframes proc-swap {
+  from { opacity: 0; transform: translateY(6px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .proc-sweep, .proc-pulse, .proc-flow, .proc-progress, .proc-blink, .proc-caret, .proc-now, .proc-swap { animation: none; }
+  .proc-sweep, .proc-flow, .proc-pulse { opacity: 0; }
+}
