@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { lazy, Suspense, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
@@ -6,6 +6,29 @@ import { useContent } from '@/i18n/LangContext';
 import { useReveal } from '@/interaction/useReveal';
 import { useApp } from '@/store/app';
 import { SectionMark } from '@/components/SectionMark';
+import { useNear } from '@/hooks/useNear';
+import type { ObjKey } from '@/gl/stage/ObjectStage';
+
+const ObjectStage = lazy(() => import('@/gl/stage/ObjectStage'));
+/** Discovery, strategy, production & launch, optimisation & scaling. */
+const STEP_OBJECTS: ObjKey[] = ['target', 'chart', 'megaphone', 'growth'];
+
+/** The step's glossy 3D object, on the empty side of its card. */
+function StepObject({ i, front }: { i: number; front: boolean }) {
+  const box = useRef<HTMLDivElement>(null);
+  const { mounted, active: visible } = useNear(box, '50% 0px');
+  // cards pile up: only the one in front renders (the ones underneath are covered)
+  const active = visible && front;
+  return (
+    <div ref={box} aria-hidden="true" className="absolute end-[4%] bottom-[8%] size-[clamp(9rem,24vw,22rem)] max-md:end-0 max-md:bottom-0">
+      {mounted && (
+        <Suspense fallback={null}>
+          <ObjectStage keys={[STEP_OBJECTS[i % STEP_OBJECTS.length]]} index={0} active={active} scale={1.5} className="!absolute inset-0" />
+        </Suspense>
+      )}
+    </div>
+  );
+}
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
@@ -26,12 +49,17 @@ export function Process() {
   const t = useContent();
   const reduced = useApp((s) => s.reducedMotion);
   const root = useRef<HTMLElement>(null);
+  const [front, setFront] = useState(0);
   useReveal(root);
 
   useGSAP(
     () => {
       if (reduced) return;
       const items = gsap.utils.toArray<HTMLElement>('[data-step]', root.current);
+      // which card is in front (its 3D object is the only one rendering)
+      items.forEach((item, i) =>
+        ScrollTrigger.create({ trigger: item, start: 'top 60%', onEnter: () => setFront(i), onLeaveBack: () => setFront(Math.max(0, i - 1)) }),
+      );
       items.slice(0, -1).forEach((item, i) => {
         const card = item.querySelector('[data-card]');
         const next = items[i + 1];
@@ -79,6 +107,7 @@ export function Process() {
                   className="relative grid-12 min-h-[min(68vh,620px)] origin-top content-between gap-y-10 overflow-hidden rounded-[28px] p-[clamp(1.75rem,4vw,3.5rem)] shadow-[0_-24px_60px_-40px_rgba(20,20,46,0.55)] will-change-transform"
                   style={{ background: s.bg, color: s.fg }}
                 >
+                  <StepObject i={i} front={front === i || !!reduced} />
                   {/* faint speech-bubble shape, the logo's motif */}
                   <span aria-hidden="true" className="bubble pointer-events-none absolute -end-16 -bottom-20 h-64 w-96 opacity-25 max-md:-end-10 max-md:-bottom-12 max-md:h-32 max-md:w-48" style={{ background: s.accent }} />
                   <div className="relative col-span-12 flex items-start justify-between gap-6">

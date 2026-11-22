@@ -122,6 +122,12 @@ Vite 8 (Rolldown) · React 19 · TypeScript 7 · React Router 8 · three r187 ·
   whom" lines + city-hop arcs, all driven by `front` (scroll); camera close on Hail → whole region; notification
   bubbles (`ui.buzz.notifications`), funnel HUD (`ui.buzz.funnel`), city tags (`ui.arrival.cities`); cursor parts
   the crowd, drag orbits, hold broadcasts a wave. ~100+ fps on an Intel iGPU.
+- **Light-site 3D** (`src/gl/stage/`, lazy, one small transparent canvas each, `useNear` mounts near view and
+  pauses off screen; `Studio.tsx` = Lightformer reflections + Neutral tone mapping, no postprocessing):
+  `Assemble.tsx` in Statements (125 glossy blocks scatter and assemble per statement: funnel / cube grid / rising
+  bars; cursor knocks blocks loose, drag spins), `ObjectStage.tsx` (glossy prop per item, morphs between items):
+  Services cursor preview (`SERVICE_OBJECTS`, in front of the brand-image card) and Process cards
+  (`STEP_OBJECTS`; only the card in front renders).
 - Small extra WebGL: `src/gl/MiniGlobe.tsx` (dotted globe in Contact, own lazy chunk, mounted near view) and
   `src/interaction/distort.ts` (ONE raw WebGL2 canvas for portfolio hover distortion, attached only while hovering).
 - `prefers-reduced-motion`: no dive/shake/streaks/cloud layers — static shot + plain fade to white.

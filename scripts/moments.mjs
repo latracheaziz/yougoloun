@@ -76,7 +76,7 @@ const JOURNEY = [
   ['w5-broadcast', { selector: '#statements', vh: -4.2 + 3.2 * 0.9 }, { burst: true }],
 ];
 const only = arg('only');
-const moments = (space ? JOURNEY : all ? [...SPACE, ...KEY] : KEY).filter(([name]) => !only || name.startsWith(only));
+const moments = (space ? JOURNEY : all ? [...SPACE, ...KEY] : KEY).filter(([name]) => !only || only.split(',').some((o) => name.startsWith(o)));
 
 const viewports = {
   desktop: { viewport: { width: 1440, height: 900 }, deviceScaleFactor: 1 },

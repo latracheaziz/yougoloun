@@ -1,10 +1,20 @@
-import { useEffect, useRef, useState } from 'react';
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 import { useContent } from '@/i18n/LangContext';
 import { useReveal } from '@/interaction/useReveal';
 import { useApp } from '@/store/app';
 import { brandImages, categoryOf, servicePreviews, type ServiceCategory } from '@/config/light';
 import { SectionMark } from '@/components/SectionMark';
+import { useNear } from '@/hooks/useNear';
+import type { ObjKey } from '@/gl/stage/ObjectStage';
+
+// glossy 3D object per service (lazy 3D chunk), in the cursor preview
+const ObjectStage = lazy(() => import('@/gl/stage/ObjectStage'));
+/** Service number -> its object (01 performance ... 12 community). */
+const SERVICE_OBJECTS: Record<string, ObjKey> = {
+  '01': 'chart', '02': 'logo', '03': 'hash', '04': 'camera', '05': 'play', '06': 'megaphone',
+  '07': 'target', '08': 'phone', '09': 'bell', '10': 'comment', '11': 'growth', '12': 'heart',
+};
 
 type Filter = 'all' | ServiceCategory;
 const FILTERS: Filter[] = ['all', 'growth', 'brand', 'content'];
@@ -24,6 +34,10 @@ export function Services() {
   const [open, setOpen] = useState<string | null>(null);
   const [hovered, setHovered] = useState<string | null>(null);
   const intent = useRef(0);
+  const tilt = useMemo(() => ({ current: 0 }), []);
+  const objectKeys = useMemo(() => t.services.items.map((s) => SERVICE_OBJECTS[s.num] ?? 'logo'), [t.services.items]);
+  const fine = typeof window !== 'undefined' && window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+  const { mounted: stageMounted } = useNear(root, '40% 0px');
   useReveal(root);
 
   // hover intent: rows expand after a short pause, so the list doesn't jump while the pointer travels
@@ -52,6 +66,7 @@ export function Services() {
       x(anchor + (e.clientX - anchor) * 0.06);
       y(e.clientY);
       if (!reduced) rot(gsap.utils.clamp(-6, 6, (e.clientX - lastX) * 0.3));
+      tilt.current = gsap.utils.clamp(-1, 1, (e.clientX - lastX) * 0.08);
       lastX = e.clientX;
     };
     list.addEventListener('pointermove', onMove);
@@ -138,8 +153,17 @@ export function Services() {
 
       {/* cursor-following preview (decorative) */}
       <div ref={preview} aria-hidden="true" className="pointer-events-none fixed top-0 left-0 z-30 hidden opacity-0 [@media(hover:hover)_and_(pointer:fine)]:block" style={{ visibility: 'hidden' }}>
-        <div className="-translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-xl shadow-[0_30px_60px_-20px_rgba(20,20,46,0.5)] ring-2 ring-white">
-          <div ref={previewImg} className="h-[200px] w-[300px] bg-navy bg-no-repeat transition-[background-position,background-size] duration-700 ease-[var(--ease-out-expo)]" />
+        <div className="relative h-[300px] w-[340px] -translate-x-1/2 -translate-y-1/2">
+          {/* the brand visual, a small tilted card behind... */}
+          <div className="absolute start-2 top-10 overflow-hidden rounded-xl shadow-[0_30px_60px_-20px_rgba(20,20,46,0.5)] ring-2 ring-white [rotate:-5deg]">
+            <div ref={previewImg} className="h-[150px] w-[220px] bg-navy bg-no-repeat transition-[background-position,background-size] duration-700 ease-[var(--ease-out-expo)]" />
+          </div>
+          {/* ...and the service as a glossy 3D object in front of it */}
+          {fine && stageMounted && (
+            <Suspense fallback={null}>
+              <ObjectStage keys={objectKeys} index={hovered ? t.services.items.findIndex((s) => s.num === hovered) : -1} active={!!hovered} tilt={tilt} className="!absolute -end-6 -bottom-6 !h-[260px] !w-[260px]" />
+            </Suspense>
+          )}
         </div>
       </div>
     </section>

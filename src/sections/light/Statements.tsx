@@ -1,4 +1,4 @@
-import { useId, useRef } from 'react';
+import { lazy, Suspense, useId, useMemo, useRef } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { SplitText } from 'gsap/SplitText';
@@ -6,6 +6,10 @@ import { useGSAP } from '@gsap/react';
 import { useContent } from '@/i18n/LangContext';
 import { useApp } from '@/store/app';
 import { SectionMark } from '@/components/SectionMark';
+import { useNear } from '@/hooks/useNear';
+
+// chaos -> order sculpture (lazy 3D chunk)
+const Assemble = lazy(() => import('@/gl/stage/Assemble'));
 
 gsap.registerPlugin(ScrollTrigger, SplitText, useGSAP);
 
@@ -35,6 +39,9 @@ export function Statements() {
   const reduced = useApp((s) => s.reducedMotion);
   const root = useRef<HTMLElement>(null);
   const items = t.positioning.items;
+  const sculpture = useMemo(() => ({ p: 0 }), []);
+  const stage = useRef<HTMLDivElement>(null);
+  const { mounted, active } = useNear(stage);
 
   useGSAP(
     () => {
@@ -50,7 +57,7 @@ export function Statements() {
         if (cancelled) return;
         gsap.set(numbers.slice(1), { yPercent: 100, autoAlpha: 1 });
         const tl = gsap.timeline({
-          scrollTrigger: { trigger: el, start: 'top top', end: 'bottom bottom', scrub: 0.7 },
+          scrollTrigger: { trigger: el, start: 'top top', end: 'bottom bottom', scrub: 0.7, onUpdate: (self) => (sculpture.p = self.progress) },
         });
         slides.forEach((slide, i) => {
           const statement = slide.querySelector<HTMLElement>('[data-statement]')!;
@@ -121,7 +128,16 @@ export function Statements() {
           </div>
         </div>
 
-        <div className="shell grid-12 w-full flex-1 items-center gap-y-8">
+        {/* the sculpture: the blocks assemble into each statement's order as you scroll */}
+        <div ref={stage} className="absolute end-[1%] bottom-0 z-0 h-[52%] w-[40%] max-md:hidden">
+          {mounted && (
+            <Suspense fallback={null}>
+              <Assemble link={sculpture} active={active} className="!absolute inset-0" />
+            </Suspense>
+          )}
+        </div>
+
+        <div className="shell pointer-events-none relative z-10 grid-12 w-full flex-1 items-center gap-y-8">
           {/* big step number + rail */}
           <div aria-hidden="true" className="col-span-12 flex items-center gap-6 md:col-span-3 md:flex-col md:items-start">
             <div className="relative h-[clamp(5rem,13vw,12rem)] overflow-hidden">
