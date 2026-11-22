@@ -148,7 +148,7 @@ function Audit({ active, fill }: SceneProps) {
   return (
     <div ref={ref} className={`flex flex-col items-center gap-6 p-5 @lg:flex-row @lg:gap-8 @lg:p-8 ${fill ? 'h-full justify-center' : ''}`}>
       {/* radar */}
-      <div className="relative aspect-square w-[min(100%,19rem)] shrink-0 @lg:w-[min(52%,24rem)]">
+      <div className="relative aspect-square w-[min(100%,19rem)] shrink-0 @lg:w-[min(56%,30rem)]">
         <svg viewBox="0 0 320 320" className="absolute inset-0 size-full overflow-visible rtl:-scale-x-100">
           {[0.25, 0.5, 0.75, 1].map((r) => (
             <circle key={r} data-ring cx={RC} cy={RC} r={RR * r} fill="none" stroke="#fff" strokeOpacity={r === 1 ? 0.22 : 0.1} strokeDasharray={r === 1 ? undefined : '2 5'} />
@@ -188,7 +188,7 @@ function Audit({ active, fill }: SceneProps) {
       </div>
 
       {/* what the audit checks, and what it finds */}
-      <div className="w-full min-w-0 max-w-[24rem] flex-1">
+      <div className="w-full min-w-0 max-w-[22rem] flex-1">
         <ul className="space-y-3.5">
           {a.axes.map((label, k) => (
             <li key={label} data-row className="flex items-center gap-3">
@@ -397,6 +397,16 @@ function Tile({ fill, badge, paper = false, children }: { fill: boolean; badge: 
   );
 }
 
+/** A whole creative (never cropped: its text matters) over a blurred copy of itself, like a story. */
+function Creative({ post }: { post: { image: string; blur: string } }) {
+  return (
+    <>
+      <img src={post.blur} alt="" draggable={false} className="absolute inset-0 size-full scale-125 object-cover blur-xl" />
+      <img src={post.image} alt="" loading="lazy" decoding="async" draggable={false} className="absolute inset-0 size-full object-contain" />
+    </>
+  );
+}
+
 function Production({ active, fill }: SceneProps) {
   const t = useContent();
   const l = t.ui.process.launch;
@@ -416,10 +426,10 @@ function Production({ active, fill }: SceneProps) {
     <div ref={ref} className={`flex flex-col gap-4 p-5 @lg:p-7 ${fill ? 'h-full' : ''}`}>
       <div className={`grid grid-cols-3 gap-2.5 @lg:gap-3.5 ${fill ? 'min-h-0 flex-1' : ''}`}>
         <Tile fill={fill} badge={l.formats[0]}>
-          <img src={feedPosts[0].image} alt="" loading="lazy" decoding="async" draggable={false} className="absolute inset-0 size-full object-cover" />
+          <Creative post={feedPosts[0]} />
         </Tile>
         <Tile fill={fill} badge={l.formats[1]}>
-          <img src={feedPosts[1].image} alt="" loading="lazy" decoding="async" draggable={false} className="absolute inset-0 size-full object-cover" />
+          <Creative post={feedPosts[1]} />
           <span className="absolute inset-0 bg-gradient-to-t from-ink/75 via-ink/10 to-transparent" />
           <span className="absolute start-1/2 top-1/2 grid size-11 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full bg-white/90 text-ink shadow-lg rtl:translate-x-1/2">
             <Glyph name="play" fill className="size-5 translate-x-px" />

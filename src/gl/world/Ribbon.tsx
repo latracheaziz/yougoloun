@@ -49,7 +49,7 @@ function useRibbonTexture() {
       for (let i = 0; i < 4; i++) {
         const word = parts[i % 2];
         const arabic = /[؀-ۿ]/.test(word);
-        ctx.font = arabic ? '600 64px Alexandria, "IBM Plex Sans Arabic", sans-serif' : '600 58px "Clash Display", "IBM Plex Sans", sans-serif';
+        ctx.font = arabic ? '700 68px Zain, sans-serif' : '700 62px Zain, sans-serif';
         ctx.direction = arabic ? 'rtl' : 'ltr';
         ctx.textAlign = 'center';
         ctx.fillText(word, x + step / 2 - 40, H / 2 + 2);
@@ -61,7 +61,10 @@ function useRibbonTexture() {
       texture.needsUpdate = true;
     };
     draw();
-    document.fonts.ready.then(draw);
+    // a canvas doesn't make the browser fetch a font: ask for both scripts of Zain, then redraw
+    Promise.all([document.fonts.load('700 68px Zain', t.brand.nameAlt), document.fonts.load('700 62px Zain', t.brand.name)])
+      .catch(() => {})
+      .then(() => !cancelled && draw());
     return () => {
       cancelled = true;
     };

@@ -30,13 +30,14 @@ export function Header() {
     // Tone without hit-testing: elementsFromPoint on every frame forced a full layout + hit test of
     // the whole page (measured ~2 s per page scroll). The 3D part's tone comes from the active stage;
     // the light site's from cached section offsets (re-measured on resize / ScrollTrigger refresh).
-    let bands: { top: number; bottom: number; tone: string }[] = [];
+    // offsets are cached; the tone itself is read live (a section may change it, e.g. Follow us → light on yellow)
+    let bands: { top: number; bottom: number; node: HTMLElement }[] = [];
     let headerH = 0;
     const measure = () => {
       headerH = el.offsetHeight;
       bands = [...document.querySelectorAll<HTMLElement>('[data-tone]:not(.stage):not(.site-header)')].map((n) => {
         const r = n.getBoundingClientRect();
-        return { top: r.top + window.scrollY, bottom: r.bottom + window.scrollY, tone: n.dataset.tone ?? 'dark' };
+        return { top: r.top + window.scrollY, bottom: r.bottom + window.scrollY, node: n };
       });
     };
     const toneAt = (y: number) => {
@@ -47,7 +48,7 @@ export function Header() {
       }
       // innermost band containing the probe (bands are in document order; nested ones come later)
       let tone = 'light';
-      for (const b of bands) if (probe >= b.top && probe < b.bottom) tone = b.tone;
+      for (const b of bands) if (probe >= b.top && probe < b.bottom) tone = b.node.dataset.tone ?? 'dark';
       return tone;
     };
     const update = () => {

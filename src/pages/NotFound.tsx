@@ -1,8 +1,11 @@
+import { useEffect } from 'react';
 import { Link } from 'react-router';
 import { useContent } from '@/i18n/LangContext';
+import { finishLoader } from '@/loader';
 
 export default function NotFound() {
   const t = useContent();
+  useEffect(() => finishLoader(), []);
   return (
     <main className="grid min-h-svh place-items-center px-[var(--gutter)] text-center">
       <div>

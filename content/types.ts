@@ -140,6 +140,16 @@ export interface Content {
       next: string;
       posts: readonly string[];
     };
+    /** Services: the per-service WhatsApp button and its pre-filled message (service title appended). */
+    services: { ask: string; message: string };
+    /** "Follow us" (after Contact; accounts in src/config/social.ts). `about`: one line per platform. */
+    social: {
+      title: string;
+      hint: string;
+      follow: string;
+      newTab: string;
+      about: { tiktok: string; snapchat: string; facebook: string; x: string; youtube: string; instagram: string };
+    };
     /** "How we work": the dashboard scene shown beside each step (short interface labels). */
     process: {
       /** Panel title per step (01 → 04). */

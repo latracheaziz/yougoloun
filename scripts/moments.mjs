@@ -38,7 +38,8 @@ const KEY = [
   ['3c-word-from', { selector: '#statements', vh: 0.04 }],
   ['3d-word-morph', { selector: '#statements', vh: 0.3 }],
   ['3e-word-to', { selector: '#statements', vh: 0.7 }],
-  ['4-services', { selector: '#services', vh: 0.62 }, { hover: '#services li:nth-child(4) button', tap: '#services li:nth-child(4) button' }],
+  ['4-services', { selector: '#services', vh: 0.35 }, { hover: '#services li:nth-child(4) button', tap: '#services li:nth-child(4) button' }],
+  ['4a-services-lower', { selector: '#services', vh: 1.3 }],
   ['4b-buzz', { selector: '#buzz', vh: 0.12 }],
   ['4c-buzz-lower', { selector: '#buzz', vh: 0.85 }],
   ['4d-studio', { selector: '#studio', vh: 0.1 }, { hover: '#studio [data-cursor="drag"]' }],
@@ -51,6 +52,13 @@ const KEY = [
   ['6d-process-scale', { selector: '#process', vh: 2.23 }],
   ['7-contact', { selector: '#contact', vh: 0.02 }],
   ['7b-contact-details', { selector: '#contact', vh: 0.9 }],
+  // follow us pins for 5.6 × 62svh: platform i is centred at vh = 3.472 × (i + 0.3) / 5.6
+  ['8a-social-tiktok', { selector: '#social', vh: 0.19 }],
+  ['8b-social-snapchat', { selector: '#social', vh: 0.81 }],
+  ['8c-social-flip', { selector: '#social', vh: 1.07 }],
+  ['8d-social-facebook', { selector: '#social', vh: 1.43 }, { hover: '#social a[data-cursor="view"]' }],
+  ['8e-social-youtube', { selector: '#social', vh: 2.67 }],
+  ['8f-social-instagram', { selector: '#social', vh: 3.29 }],
 ];
 const SPACE = [
   ['0a-hero', { track: 'home', p: 0 }],
@@ -83,6 +91,8 @@ const JOURNEY = [
   ['w5-broadcast', { selector: '#statements', vh: -4.2 + 3.2 * 0.9 }, { burst: true }],
 ];
 const only = arg('only');
+/** ms to wait after each scroll (raise it to see entrance animations finished). */
+const settle = Number(arg('wait') ?? 1700);
 const moments = (space ? JOURNEY : all ? [...SPACE, ...KEY] : KEY).filter(([name]) => !only || only.split(',').some((o) => name.startsWith(o)));
 
 const viewports = {
@@ -134,7 +144,7 @@ async function main() {
           }, where);
           await page.mouse.move(5, 5);
           await page.evaluate((y) => window.scrollTo(0, y), Math.max(0, Math.round(y)));
-          await page.waitForTimeout(1700);
+          await page.waitForTimeout(settle);
           if (action?.hover && size === 'desktop') {
             const box = await page.locator(action.hover).first().boundingBox();
             if (box) {

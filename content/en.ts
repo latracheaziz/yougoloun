@@ -202,6 +202,24 @@ export const en: Content = {
         'Yougoloun creative: transform your office into a sustainable workspace',
       ],
     },
+    services: {
+      ask: 'Discuss this service',
+      message: "Hello Yougoloun, I'd like to know more about this service:",
+    },
+    social: {
+      title: 'Follow us',
+      hint: 'Scroll to switch platforms',
+      follow: 'Follow us on',
+      newTab: '(opens in a new tab)',
+      about: {
+        tiktok: 'Short videos, trends and the stories behind our campaigns.',
+        snapchat: 'Everyday moments from behind the scenes at our studio.',
+        facebook: 'News, case studies and our community.',
+        x: 'Quick updates, insights and conversations.',
+        youtube: 'In-depth case studies and full productions.',
+        instagram: 'Our campaigns and creative work, post by post.',
+      },
+    },
     process: {
       scenes: ['Growth audit', 'Roadmap & tracking', 'Production & launch', 'Optimization & scaling'],
       audit: {

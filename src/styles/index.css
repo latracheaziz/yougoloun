@@ -30,18 +30,13 @@
   --color-link: var(--p-link);
   --color-band: var(--p-band);
 
-  --font-display: 'Clash Display', 'Alexandria Variable', ui-sans-serif, system-ui, sans-serif;
-  --font-body: 'IBM Plex Sans', 'IBM Plex Sans Arabic', ui-sans-serif, system-ui, sans-serif;
+  /* one family for Arabic + Latin (src/styles/fonts.css) */
+  --font-display: 'Zain', ui-sans-serif, system-ui, sans-serif;
+  --font-body: 'Zain', ui-sans-serif, system-ui, sans-serif;
   --font-mono: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', monospace;
 
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-in-out-quart: cubic-bezier(0.76, 0, 0.24, 1);
-}
-
-/* Arabic pages swap the families; Latin runs inside Arabic text fall back gracefully. */
-html[lang='ar'] {
-  --font-display: 'Alexandria Variable', 'Clash Display', ui-sans-serif, system-ui, sans-serif;
-  --font-body: 'IBM Plex Sans Arabic', 'IBM Plex Sans', ui-sans-serif, system-ui, sans-serif;
 }
 
 @layer base {
@@ -96,10 +91,9 @@ html[lang='ar'] {
   /* Display type: tight tracking for Latin only — letter-spacing breaks Arabic joining. */
   .display {
     font-family: var(--font-display);
-    font-weight: 600;
-    line-height: 0.92;
-    letter-spacing: -0.035em;
-    word-spacing: 0.08em;
+    font-weight: 700;
+    line-height: 0.98;
+    letter-spacing: -0.02em;
   }
   .display:lang(ar) {
     font-weight: 700;
@@ -1082,4 +1076,43 @@ html[lang='ar'] {
 @media (prefers-reduced-motion: reduce) {
   .proc-sweep, .proc-pulse, .proc-flow, .proc-progress, .proc-blink, .proc-caret, .proc-now, .proc-swap { animation: none; }
   .proc-sweep, .proc-flow, .proc-pulse { opacity: 0; }
+}
+
+/* Services (src/sections/light/Services.tsx) — editorial list. A hovered / open row fills with navy from the
+   bottom (full-bleed band) and turns white; on hover-capable screens the other rows step back. */
+.svc-row {
+  position: relative;
+  isolation: isolate;
+  transition: color 0.5s var(--ease-out-expo), opacity 0.5s var(--ease-out-expo);
+}
+.svc-row::before {
+  content: '';
+  position: absolute;
+  inset-block: 0;
+  inset-inline: calc(-1 * var(--gutter));
+  z-index: -1;
+  background: var(--color-navy);
+  transform: scaleY(0);
+  transform-origin: 50% 100%;
+  transition: transform 0.65s var(--ease-out-expo);
+}
+.svc-row[data-open] {
+  color: #fff;
+}
+.svc-row[data-open]::before {
+  transform: scaleY(1);
+}
+@media (hover: hover) and (pointer: fine) {
+  .svc-row:hover {
+    color: #fff;
+  }
+  .svc-row:hover::before {
+    transform: scaleY(1);
+  }
+  .svc-list:hover .svc-row:not(:hover):not([data-open]) {
+    opacity: 0.38;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .svc-row::before { transition: none; }
 }

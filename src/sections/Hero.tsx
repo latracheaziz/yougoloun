@@ -6,6 +6,7 @@ import { useContent } from '@/i18n/LangContext';
 import { useApp } from '@/store/app';
 import { scrollToSection } from '@/scroll/SmoothScroll';
 import { whatsappLink } from '@/config/site';
+import { whenLoaded } from '@/loader';
 
 gsap.registerPlugin(SplitText, useGSAP);
 
@@ -17,35 +18,48 @@ export function Hero() {
   const title = useRef<HTMLHeadingElement>(null);
 
   useGSAP(
-    () => {
+    (_, contextSafe) => {
+      const ins = gsap.utils.toArray<HTMLElement>('[data-hero-in]', root.current);
+      // the intro waits for the boot loader (src/loader.ts) and plays as its curtain lifts
       if (reducedMotion) {
-        gsap.from('[data-hero-in]', { opacity: 0, duration: 1.2, stagger: 0.08 });
-        return;
+        gsap.set(ins, { opacity: 0 });
+        return whenLoaded(contextSafe!(() => void gsap.to(ins, { opacity: 1, duration: 1.2, stagger: 0.08 })));
       }
       let split: SplitText | undefined;
       let cancelled = false;
-      // Split only once fonts are in, otherwise line breaks are measured with the fallback font.
-      document.fonts.ready.then(() => {
-        if (cancelled || !title.current) return;
-        const arabic = t.lang === 'ar';
-        split = SplitText.create(title.current, {
-          // never split Arabic into characters — it breaks letter joining
-          type: arabic ? 'lines,words' : 'lines,words,chars',
-          mask: 'lines',
-          autoSplit: true,
-          onSplit: (self) =>
-            gsap.from(arabic ? self.words : self.chars, {
-              yPercent: 118,
-              duration: 1.5,
-              ease: 'expo.out',
-              stagger: arabic ? 0.07 : 0.022,
-              delay: 0.15,
+      gsap.set(ins, { opacity: 0, y: 26 });
+      gsap.set(title.current, { autoAlpha: 0 });
+      const off = whenLoaded(
+        contextSafe!((afterLoader: boolean) => {
+          const wait = afterLoader ? 0.35 : 0;
+          // Split only once fonts are in, otherwise line breaks are measured with the fallback font.
+          document.fonts.ready.then(
+            contextSafe!(() => {
+              if (cancelled || !title.current) return;
+              gsap.set(title.current, { autoAlpha: 1 });
+              const arabic = t.lang === 'ar';
+              split = SplitText.create(title.current, {
+                // never split Arabic into characters — it breaks letter joining
+                type: arabic ? 'lines,words' : 'lines,words,chars',
+                mask: 'lines',
+                autoSplit: true,
+                onSplit: (self) =>
+                  gsap.from(arabic ? self.words : self.chars, {
+                    yPercent: 118,
+                    duration: 1.5,
+                    ease: 'expo.out',
+                    stagger: arabic ? 0.07 : 0.022,
+                    delay: 0.15 + wait,
+                  }),
+              });
             }),
-        });
-      });
-      gsap.from('[data-hero-in]', { opacity: 0, y: 26, duration: 1.4, ease: 'expo.out', stagger: 0.09, delay: 0.55 });
+          );
+          gsap.to(ins, { opacity: 1, y: 0, duration: 1.4, ease: 'expo.out', stagger: 0.09, delay: 0.55 + wait });
+        }),
+      );
       return () => {
         cancelled = true;
+        off();
         split?.revert();
       };
     },

@@ -12,6 +12,7 @@ import { Dive } from './dive/Dive';
 import { useApp } from '@/store/app';
 import { journey } from '@/scroll/journey';
 import { qualityPresets } from '@/config/quality';
+import { markGlDrawn } from '@/loader';
 
 
 /**
@@ -24,6 +25,38 @@ function ToneMode({ post }: { post: boolean }) {
     gl.toneMapping = post ? NoToneMapping : NeutralToneMapping;
     gl.toneMappingExposure = 1;
   }, [gl, post]);
+  return null;
+}
+
+/**
+ * Tells the boot loader the world is really on screen. glReady (compiled) comes earlier, and "frames
+ * issued" isn't "frames drawn": on integrated GPUs the first heavy frames queue up for a second or more.
+ * So a GPU fence goes in after the first two frames and is polled (non-blocking) until the GPU has
+ * actually finished them. WebGL1: a few frames' grace instead.
+ */
+function Drawn() {
+  const gl = useThree((s) => s.gl);
+  const st = useRef<{ frames: number; sync: WebGLSync | null; done: boolean }>({ frames: 0, sync: null, done: false });
+  useFrame(() => {
+    const s = st.current;
+    if (s.done) return;
+    const ctx = gl.getContext();
+    const gl2 = typeof WebGL2RenderingContext !== 'undefined' && ctx instanceof WebGL2RenderingContext ? ctx : null;
+    s.frames++;
+    // useFrame runs before this frame's render: a fence placed now follows the two frames already drawn
+    if (s.frames === 3) {
+      s.sync = gl2?.fenceSync(gl2.SYNC_GPU_COMMANDS_COMPLETE, 0) ?? null;
+      gl2?.flush();
+      return;
+    }
+    if (s.frames < 3) return;
+    const finished = s.sync && gl2 ? gl2.getSyncParameter(s.sync, gl2.SYNC_STATUS) === gl2.SIGNALED : s.frames > 8;
+    if (finished) {
+      if (s.sync && gl2) gl2.deleteSync(s.sync);
+      s.done = true;
+      markGlDrawn();
+    }
+  });
   return null;
 }
 
@@ -95,6 +128,7 @@ export default function Experience({ active = true }: { active?: boolean }) {
       <Suspense fallback={null}>
         <World />
         <Precompile onDone={onCompiled} />
+        <Drawn />
       </Suspense>
       <Dive />
       <ToneMode post={post && !noFx} />

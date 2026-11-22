@@ -26,6 +26,8 @@ import { Portfolio } from '@/sections/light/Portfolio';
 import { Process } from '@/sections/light/Process';
 import { Faq } from '@/sections/light/Faq';
 import { Contact } from '@/sections/light/Contact';
+import { Socials } from '@/sections/light/Socials';
+import { boot, finishLoader } from '@/loader';
 
 // three.js + R3F load in their own chunk, after the HTML has painted.
 const Experience = lazy(() => import('@/gl/Experience'));
@@ -35,6 +37,27 @@ const PAUSE_AT = sectionConfig('positioning').keys.paper[1] + 0.02;
 const UNMOUNT_AFTER_MS = 4000;
 const LIGHT_SECTIONS = ['services', 'portfolio', 'process', 'faq', 'contact'];
 
+/** Scroll position (px) past which the space part is covered by paper and needs no canvas. */
+const pausePoint = () => (journey.starts[sectionIndex.positioning] ?? 0) + (journey.lengths[sectionIndex.positioning] ?? 0) * PAUSE_AT;
+
+/** Boot loader (index.html): leaves once the 3D world has drawn — or isn't needed (reloaded further
+ *  down the page) — after at least one wave of the letters; never later than LOADER_MAX_MS. */
+const LOADER_MIN_MS = 1700;
+const LOADER_MAX_MS = 8000;
+function useBootLoader() {
+  useEffect(() => {
+    const id = window.setInterval(() => {
+      const now = performance.now(); // since navigation start
+      const spaceInView = !journey.lengths.length || journey.y <= pausePoint();
+      if (now > LOADER_MAX_MS || (now > LOADER_MIN_MS && (boot.glDrawn || !spaceInView))) {
+        window.clearInterval(id);
+        finishLoader();
+      }
+    }, 120);
+    return () => window.clearInterval(id);
+  }, []);
+}
+
 /** Canvas lifecycle: mounted while the space part can be seen; paused, then freed, after the clouds. */
 function useCanvasLifecycle() {
   const [mounted, setMounted] = useState(false);
@@ -43,7 +66,6 @@ function useCanvasLifecycle() {
 
   useEffect(() => {
     const s = state.current;
-    const pausePoint = () => (journey.starts[sectionIndex.positioning] ?? 0) + (journey.lengths[sectionIndex.positioning] ?? 0) * PAUSE_AT;
     const apply = () => {
       if (!journey.lengths.length) return;
       const past = journey.y > pausePoint();
@@ -126,6 +148,7 @@ function useLightSectionObserver(ready: boolean) {
 export default function Home() {
   const t = useContent();
   const gl = useCanvasLifecycle();
+  useBootLoader();
   const light = useLightSite();
   useLightSectionObserver(light);
 
@@ -166,6 +189,7 @@ export default function Home() {
               <Process />
               <Faq />
               <Contact />
+              <Socials />
             </>
           )}
         </div>

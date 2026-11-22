@@ -17,7 +17,8 @@ Two parts, one page:
 - `npm run check` — **phase gate**: boots Vite, opens /ar and /en (desktop + mobile) in headless Edge/Chrome,
   scrolls every section, fails on any console error, writes screenshots to `.check/`. `-- --quick` = hero only.
 - `npm run moments` — key-moment screenshots (desktop + mobile, AR + EN) + contact sheets in `.check/moments/`.
-  Flags: `--all`, `--space` (3D journey only, densely sampled), `--lang=en`, `--reduced`, `--fps`,
+  Flags: `--all`, `--space` (3D journey only, densely sampled), `--lang=en`, `--reduced`, `--fps`, `--only=6,7c`
+  (name prefixes), `--wait=4800` (ms after each scroll; raise it to see entrance animations finished),
   `--query=nofx|tier=low` (use `tier=high` for 3D screenshots: headless WebGL is slow and would otherwise step down). Moments are listed at the top of the script.
 - `npm run textures` — (re)download Earth maps. Only `public/textures/earth/sd/ocean.webp` is still used (land mask
   of the Contact mini globe); the other maps were deleted with the Earth — don't re-add them.
@@ -61,15 +62,35 @@ Vite 8 (Rolldown) · React 19 · TypeScript 7 · React Router 8 · three r187 ·
   and stages) fades to `#F5F3EF` over `keys.paper`, so the tone-mapped/vignetted WebGL white becomes exact paper.
   The light document starts right after the last track; its first block (`Arrival`) has a transparent top fading to
   paper, so it slides over the white-out with no edge. The positioning track keeps full length on phones for this.
+- **Boot loader** (`#yg-loader`, inline HTML + CSS in `index.html`, painted before any JS; palette via `--p-*`):
+  YOUGOLOUN with each letter jumping in turn (Latin letters only — Arabic is never split). `src/loader.ts`:
+  `finishLoader()` (letters leap off, curtain lifts) and `whenLoaded(fn)` (the hero intro waits for it). Home's
+  `useBootLoader` sends it away once the 3D world is really drawn (`boot.glDrawn`: a GPU fence after the first
+  frames, `Drawn` in Experience.tsx — glReady/"frames issued" came ~1–2 s early on iGPUs), or at once if the page
+  reopens below the space part; min 1.7 s, max 8 s; CSS safety exit at 14 s. NotFound finishes it on mount.
 - **Canvas lifecycle** (`useCanvasLifecycle` in `src/pages/Home.tsx`): paused (`frameloop="never"`) once past
   `keys.paper[1]`, unmounted 4 s later, re-mounted when scrolling back up (hidden behind paper until `glReady`).
 - **Light part** — normal document flow in `src/sections/light/*`. Order: `Arrival` (word of mouth spreading from
   Hail across the peninsula, own lazy canvas `src/gl/spread/`) → `Statements` (pinned, particle word morph) →
-  Services → Platforms → `Buzz` ("word of mouth" agency-identity interlude: typing name, live post with reactions,
+  `Services` (editorial list — the client found cards/icons "school presentation": large light titles on hairlines;
+  hover = the row fills navy from the bottom, full-bleed (`.svc-row`), the others step back, and a photo of the
+  service (`servicePreviews` crop) opens beside the pointer with its glossy 3D object in front; click / tap opens the
+  row: text + WhatsApp button pre-filled with the service (`ui.services`); touch shows the photo in the open row;
+  text-tab filters, rows fold away) → Platforms → `Buzz` ("word of mouth" agency-identity interlude: typing name, live post with reactions,
   growth chart, funnel, notifications, click-to-react burst; labels in `ui.buzz`; no section number) → `Feed` (#studio, navy band: swipeable deck of the agency's own creatives from
   `public/media/feed`, story bars auto-advance, click = lightbox; `feedPosts` in `src/config/light.ts`, alts in
-  `ui.feed.posts`) → `Portfolio` (pinned horizontal track on desktop, swipe on mobile) → Process (sticky cards) →
-  FAQ → Contact (`CtaMarquee` band + mini globe). `ScrollProgress` = gradient bar after the space part.
+  `ui.feed.posts`) → `Portfolio` (pinned horizontal track on desktop, swipe on mobile) → `Process` (#process: a "growth
+  dashboard" — desktop pins (CSS sticky, 85svh of scroll per step): step list with a gradient rail + one navy panel
+  playing a DOM/SVG scene per step (audit radar · roadmap + tracking wires · creatives + channels live ·
+  conversions chart with crosshair, A/B winner, budget); touch/tablet/reduced motion: stacked steps, each with
+  its own panel. Scene entrances = GSAP `useScene` (natural DOM = finished state); idle loops = `.proc-*` CSS,
+  paused off screen; labels in `ui.process`) →
+  FAQ → Contact (`CtaMarquee` band + mini globe) → `Socials` (#social "Follow us", after Contact — modelled on
+  ghaliachocolate.com's collections: pinned, 62svh of scroll per platform; the screen takes each platform's colour
+  (`platformColors` in palette.ts, the next one grows as a clip-path circle out of the icon), giant names slide
+  sideways with the scroll, the 3D icon turns over to the next logo, name/line/button swap at mid-turn; rail
+  jumps; `data-tone` follows the colour (Snapchat yellow = light). Reduced motion: a grid of coloured cards).
+  `ScrollProgress` = gradient bar after the space part.
 - **Pinning = CSS sticky, not GSAP `pin`** (pin-spacers break in this layout): give the section extra height, make an
   inner frame `sticky top-0 h-[100svh]`, drive the animation with a scrub ScrollTrigger `top top → bottom bottom`.
 - Portfolio cards with a `url` (`src/config/light.ts`) show the real site screenshot and link to it (new tab);
@@ -141,9 +162,12 @@ Vite 8 (Rolldown) · React 19 · TypeScript 7 · React Router 8 · three r187 ·
   `WordMorph.tsx` in Statements (the from/to words drawn with the display font, sampled into ~14k extruded
   particles; scroll morphs from₀→to₀→from₁… via `stageAt()`, muted ink → brand gradient, swirl through depth;
   cursor repels, hold explodes, the word tilts with the mouse; the statement text stays as `sr-only`),
-  `ObjectStage.tsx` (glossy prop per item, morphs between items):
-  Services cursor preview (`SERVICE_OBJECTS`, in front of the brand-image card) and Process cards
-  (`STEP_OBJECTS`; only the card in front renders).
+  `ObjectStage.tsx` (glossy prop per item, morphs between items): the Services showcase (`SERVICE_OBJECTS`,
+  over the service's brand-image crop). `SocialFlip.tsx` ("Follow us", `Socials.tsx`): ONE pearl-white glossy
+  app-icon tile with a logo extruded on each face (Simple Icons CC0 paths in `src/config/social.ts`); its turn
+  follows the scroll, and the face turning away is re-skinned (logo geometry + colour) while hidden, so every
+  half-turn shows the next platform. Leans to the pointer, hops on each flip, drag spins it (settles on a
+  whole turn). Driven by a mutable `FlipRig`; a flat icon shows until it has compiled.
 - Small extra WebGL: `src/gl/MiniGlobe.tsx` (dotted globe in Contact, own lazy chunk, mounted near view) and
   `src/interaction/distort.ts` (ONE raw WebGL2 canvas for portfolio hover distortion, attached only while hovering).
 - `prefers-reduced-motion`: no dive/shake/streaks/cloud layers — static shot + plain fade to white.
@@ -174,7 +198,10 @@ Tailwind tokens in `src/styles/index.css` (`@theme`) only point at them; WebGL r
   `collapse` — Tailwind utility). Portfolio cards keep each project's own accent (`src/config/light.ts`); their text
   uses the project's dark `ink`, accents only on tags/borders.
 - Interactions: `Cursor` (`data-cursor="view|drag|talk"`), `Magnetic`, `useReveal(scope)` (`[data-reveal="lines|up"]`).
-- Fonts (self-hosted): Clash Display, Alexandria, IBM Plex Sans / Sans Arabic, IBM Plex Mono. Film grain = CSS `.grain`.
+- Fonts (self-hosted, Fontsource): **Zain** for ALL text — Arabic + Latin, headlines (700) + body (400) — chosen by
+  the client from a reference (light, low-contrast geometric); IBM Plex Mono only for the Latin small-caps labels.
+  `--font-display` / `--font-body` both point at it; canvas text (Ribbon) loads it with `document.fonts.load`.
+  Film grain = CSS `.grain`.
 
 ## Arabic / RTL rules
 - `<html lang dir>` per route (`/ar` rtl, `/en` ltr). Use logical properties (`ps-`, `ms-`, `start-`, `end-`).
@@ -186,12 +213,13 @@ Tailwind tokens in `src/styles/index.css` (`@theme`) only point at them; WebGL r
 ## Placeholders / TODO
 - `src/config/site.ts`: domain (`url`), phone/WhatsApp number. Logo: typeset `Wordmark` until the SVG arrives.
 - Portfolio images: placeholders in `public/media/work/*/cover.webp`.
-- Privacy Policy page + footer link (Phase 4). Loader (Phase 4).
+- Social accounts: `url` + `handle` in `src/config/social.ts` are guesses from @yougoloun — replace with the real ones.
+- Privacy Policy page + footer link (Phase 4).
 - `THREE.Clock` deprecation warning comes from R3F internals — ignored by `npm run check` (client OK).
 
 ## Phases
 1. ✅ Setup, content (EN/AR), hero (Earth, later replaced by the social-media world)
 2. ✅ Space camera journey
 3. ✅ Redesign: space part ends in the clouds → light editorial site (all content sections, interactions)
-4. Loader, page transitions, Privacy Policy, sound toggle
+4. ✅ Loader · page transitions, Privacy Policy, sound toggle
 5. Responsive, performance, accessibility, SEO (prerender, JSON-LD `ProfessionalService`), polish

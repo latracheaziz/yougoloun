@@ -58,6 +58,21 @@ export const gradients = {
   green: `linear-gradient(135deg, ${brand.greenLight}, ${brand.greenDeep})`,
 };
 
+/**
+ * Social platforms ("Follow us", src/sections/light/Socials.tsx): the section takes the colour of the
+ * platform on screen as you scroll. Deepened so white text stays ≥ 4.5:1; no orange (Instagram's
+ * gradient stops before its orange end). `bg`: gradient stops · `logo`: the logo on the white 3D tile ·
+ * `ink`: dark text on this background (Snapchat yellow).
+ */
+export const platformColors = {
+  tiktok: { bg: ['#0E2A30', '#050608'], logo: '#111114', ink: false },
+  snapchat: { bg: ['#FFFC00', '#F2DF00'], logo: '#141414', ink: true },
+  facebook: { bg: ['#1466D8', '#0A3F99'], logo: '#1466D8', ink: false },
+  x: { bg: ['#202327', '#000000'], logo: '#000000', ink: false },
+  youtube: { bg: ['#CC1016', '#7E080C'], logo: '#E0141B', ink: false },
+  instagram: { bg: ['#5E2A84', '#B02C78'], logo: '#B02C78', ink: false },
+} as const;
+
 const kebab = (s: string) => s.replace(/[A-Z]/g, (m) => `-${m.toLowerCase()}`).replace(/(\d+)/g, '-$1');
 
 /** `:root { --p-… }` — injected into <head> by the Vite plugin (available at first paint, no JS needed). */
