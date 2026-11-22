@@ -61,7 +61,7 @@ Vite 8 (Rolldown) · React 19 · TypeScript 7 · React Router 8 · three r187 ·
 - **Canvas lifecycle** (`useCanvasLifecycle` in `src/pages/Home.tsx`): paused (`frameloop="never"`) once past
   `keys.paper[1]`, unmounted 4 s later, re-mounted when scrolling back up (hidden behind paper until `glReady`).
 - **Light part** — normal document flow in `src/sections/light/*`. Order: `Arrival` (word of mouth spreading from
-  Hail across the peninsula, own lazy canvas `src/gl/spread/`) → `Statements` (pinned, word fill) →
+  Hail across the peninsula, own lazy canvas `src/gl/spread/`) → `Statements` (pinned, particle word morph) →
   Services → Platforms → `Buzz` ("word of mouth" agency-identity interlude: typing name, live post with reactions,
   growth chart, funnel, notifications, click-to-react burst; labels in `ui.buzz`; no section number) → `Feed` (#studio, navy band: swipeable deck of the agency's own creatives from
   `public/media/feed`, story bars auto-advance, click = lightbox; `feedPosts` in `src/config/light.ts`, alts in
@@ -128,8 +128,10 @@ Vite 8 (Rolldown) · React 19 · TypeScript 7 · React Router 8 · three r187 ·
   Portrait: the camera turns ~45° so the peninsula's NW→SE diagonal fills the tall screen.
 - **Light-site 3D** (`src/gl/stage/`, lazy, one small transparent canvas each, `useNear` mounts near view and
   pauses off screen; `Studio.tsx` = Lightformer reflections + Neutral tone mapping, no postprocessing):
-  `Assemble.tsx` in Statements (125 glossy blocks scatter and assemble per statement: funnel / cube grid / rising
-  bars; cursor knocks blocks loose, drag spins), `ObjectStage.tsx` (glossy prop per item, morphs between items):
+  `WordMorph.tsx` in Statements (the from/to words drawn with the display font, sampled into ~14k extruded
+  particles; scroll morphs from₀→to₀→from₁… via `stageAt()`, muted ink → brand gradient, swirl through depth;
+  cursor repels, hold explodes, the word tilts with the mouse; the statement text stays as `sr-only`),
+  `ObjectStage.tsx` (glossy prop per item, morphs between items):
   Services cursor preview (`SERVICE_OBJECTS`, in front of the brand-image card) and Process cards
   (`STEP_OBJECTS`; only the card in front renders).
 - Small extra WebGL: `src/gl/MiniGlobe.tsx` (dotted globe in Contact, own lazy chunk, mounted near view) and

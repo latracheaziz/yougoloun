@@ -1,4 +1,4 @@
-import { lazy, Suspense, useId, useMemo, useRef } from 'react';
+import { lazy, Suspense, useId, useMemo, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { SplitText } from 'gsap/SplitText';
@@ -8,8 +8,21 @@ import { useApp } from '@/store/app';
 import { SectionMark } from '@/components/SectionMark';
 import { useNear } from '@/hooks/useNear';
 
-// chaos -> order sculpture (lazy 3D chunk)
-const Assemble = lazy(() => import('@/gl/stage/Assemble'));
+// the statements' words as morphing 3D particles (lazy chunk)
+const WordMorph = lazy(() => import('@/gl/stage/WordMorph'));
+
+/** Timeline position (units of the GSAP timeline) -> particle stage 0..5 (from0, to0, from1, to1, from2, to2). */
+function stageAt(T: number, count: number) {
+  for (let i = count - 1; i >= 0; i--) {
+    const at = i * 1.2;
+    if (T < at - 0.05 && i > 0) continue;
+    if (T < at + 0.15) return 2 * i;
+    if (T < at + 0.6) return 2 * i + (T - (at + 0.15)) / 0.45;
+    if (T < at + 0.95 || i === count - 1) return 2 * i + 1;
+    return Math.min(2 * i + 2, 2 * i + 1 + (T - (at + 0.95)) / 0.2);
+  }
+  return 0;
+}
 
 gsap.registerPlugin(ScrollTrigger, SplitText, useGSAP);
 
@@ -39,8 +52,10 @@ export function Statements() {
   const reduced = useApp((s) => s.reducedMotion);
   const root = useRef<HTMLElement>(null);
   const items = t.positioning.items;
-  const sculpture = useMemo(() => ({ p: 0 }), []);
+  const morph = useMemo(() => ({ stage: 0 }), []);
+  const words = useMemo(() => items.flatMap((it) => [it.from, it.to]), [items]);
   const stage = useRef<HTMLDivElement>(null);
+  const [surface, setSurface] = useState<HTMLDivElement | null>(null);
   const { mounted, active } = useNear(stage);
 
   useGSAP(
@@ -57,19 +72,15 @@ export function Statements() {
         if (cancelled) return;
         gsap.set(numbers.slice(1), { yPercent: 100, autoAlpha: 1 });
         const tl = gsap.timeline({
-          scrollTrigger: { trigger: el, start: 'top top', end: 'bottom bottom', scrub: 0.7, onUpdate: (self) => (sculpture.p = self.progress) },
+          scrollTrigger: { trigger: el, start: 'top top', end: 'bottom bottom', scrub: 0.7, onUpdate: (self) => (morph.stage = stageAt(self.progress * tl.duration(), items.length)) },
         });
         slides.forEach((slide, i) => {
-          const statement = slide.querySelector<HTMLElement>('[data-statement]')!;
-          const split = SplitText.create(statement, { type: 'words', wordsClass: 'fill-word' });
-          splits.push(split);
           const body = slide.querySelector('[data-body]');
           const at = i * 1.2;
           if (i > 0) {
             tl.fromTo(slide, { autoAlpha: 0, y: 60 }, { autoAlpha: 1, y: 0, duration: 0.25, ease: 'power2.out' }, at - 0.05);
             tl.fromTo(numbers[i], { yPercent: 100 }, { yPercent: 0, duration: 0.25 }, at - 0.05);
           }
-          tl.fromTo(split.words, { opacity: 0.12 }, { opacity: 1, duration: 0.6, stagger: 0.6 / split.words.length, ease: 'none' }, at + 0.05);
           tl.fromTo(body, { autoAlpha: 0, y: 24 }, { autoAlpha: 1, y: 0, duration: 0.2 }, at + 0.55);
           tl.fromTo(rails[i], { scaleY: 0 }, { scaleY: 1, duration: 0.85, ease: 'none' }, at);
           if (i < slides.length - 1) {
@@ -128,16 +139,7 @@ export function Statements() {
           </div>
         </div>
 
-        {/* the sculpture: the blocks assemble into each statement's order as you scroll */}
-        <div ref={stage} className="absolute end-[1%] bottom-0 z-0 h-[52%] w-[40%] max-md:hidden">
-          {mounted && (
-            <Suspense fallback={null}>
-              <Assemble link={sculpture} active={active} className="!absolute inset-0" />
-            </Suspense>
-          )}
-        </div>
-
-        <div className="shell pointer-events-none relative z-10 grid-12 w-full flex-1 items-center gap-y-8">
+        <div className="shell relative z-10 grid-12 w-full flex-1 items-center gap-y-6">
           {/* big step number + rail */}
           <div aria-hidden="true" className="col-span-12 flex items-center gap-6 md:col-span-3 md:flex-col md:items-start">
             <div className="relative h-[clamp(5rem,13vw,12rem)] overflow-hidden">
@@ -165,18 +167,35 @@ export function Statements() {
             </div>
           </div>
 
-          {/* statements (stacked; one visible at a time) */}
+          {/* the statement's words, morphing in particles (from -> to), then its body */}
           <div className="relative col-span-12 md:col-span-9">
+            <div
+              ref={(el) => {
+                stage.current = el;
+                setSurface(el);
+              }}
+              data-cursor="hold"
+              aria-hidden="true"
+              className="relative -mx-[var(--gutter)] h-[clamp(13rem,40vh,26rem)] md:mx-0"
+            >
+              {mounted && (
+                <Suspense fallback={null}>
+                  <WordMorph words={words} link={morph} active={active} surface={surface} className="!absolute inset-0" />
+                </Suspense>
+              )}
+            </div>
+            <div className="relative">
             {items.map((item, i) => (
               <article key={item.num} data-slide className={i === 0 ? 'relative' : 'absolute inset-x-0 top-0'} style={i === 0 ? undefined : { opacity: 0, visibility: 'hidden' }}>
-                <p data-statement className="display text-[clamp(2.4rem,6vw,6rem)]">
-                  <span className="text-ink/50">{item.from}</span> <GradientArrow /> {item.to}
+                <p data-statement className="sr-only">
+                  {item.from} {item.to}
                 </p>
-                <p data-body className="mt-8 max-w-[34rem] text-[clamp(1rem,1.25vw,1.2rem)] leading-relaxed muted" style={{ opacity: 0 }}>
+                <p data-body className="max-w-[34rem] text-[clamp(1rem,1.25vw,1.2rem)] leading-relaxed muted" style={{ opacity: 0 }}>
                   {item.body}
                 </p>
               </article>
             ))}
+            </div>
           </div>
         </div>
       </div>
