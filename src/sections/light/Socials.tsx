@@ -271,7 +271,7 @@ function Pinned() {
           </div>
 
           {/* rail: every platform, the scroll progress under it */}
-          <nav aria-label={s.title} className="mx-auto mt-4 w-full max-w-[60rem]">
+          <nav aria-label={s.title} className="mx-auto mt-4 w-full max-w-[68rem]">
             <ol className="flex items-center justify-between gap-1">
               {socials.map((p, i) => (
                 <li key={p.id}>

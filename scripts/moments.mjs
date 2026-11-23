@@ -52,13 +52,16 @@ const KEY = [
   ['6d-process-scale', { selector: '#process', vh: 2.23 }],
   ['7-contact', { selector: '#contact', vh: 0.02 }],
   ['7b-contact-details', { selector: '#contact', vh: 0.9 }],
-  // follow us pins for 5.6 × 62svh: platform i is centred at vh = 3.472 × (i + 0.3) / 5.6
+  // follow us pins for (platforms − 1 + 0.6) × 62svh: platform i is centred at vh = 0.62 × (i + 0.3)
+  // (order in src/config/social.ts: tiktok, snapchat, facebook, threads, youtube, instagram, bluesky)
   ['8a-social-tiktok', { selector: '#social', vh: 0.19 }],
   ['8b-social-snapchat', { selector: '#social', vh: 0.81 }],
   ['8c-social-flip', { selector: '#social', vh: 1.07 }],
   ['8d-social-facebook', { selector: '#social', vh: 1.43 }, { hover: '#social a[data-cursor="view"]' }],
+  ['8d2-social-threads', { selector: '#social', vh: 2.05 }],
   ['8e-social-youtube', { selector: '#social', vh: 2.67 }],
   ['8f-social-instagram', { selector: '#social', vh: 3.29 }],
+  ['8g-social-bluesky', { selector: '#social', vh: 3.91 }],
 ];
 const SPACE = [
   ['0a-hero', { track: 'home', p: 0 }],

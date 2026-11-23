@@ -33,7 +33,7 @@ export function Contact() {
       <CtaMarquee />
       <div className="shell section-y">
         <SectionMark n={9} label={contactLabel} variant="brand" className="text-paper/70" />
-        <h2 id="contact-title" data-reveal="lines" className="display mt-8 max-w-[15ch] text-[clamp(2.75rem,8vw,8.5rem)] text-balance">
+        <h2 key={t.lang} id="contact-title" data-reveal="lines" className="display mt-8 max-w-[15ch] text-[clamp(2.75rem,8vw,8.5rem)] text-balance">
           {t.contact.headline}
         </h2>
 

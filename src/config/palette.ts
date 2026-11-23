@@ -68,9 +68,10 @@ export const platformColors = {
   tiktok: { bg: ['#0E2A30', '#050608'], logo: '#111114', ink: false },
   snapchat: { bg: ['#FFFC00', '#F2DF00'], logo: '#141414', ink: true },
   facebook: { bg: ['#1466D8', '#0A3F99'], logo: '#1466D8', ink: false },
-  x: { bg: ['#202327', '#000000'], logo: '#000000', ink: false },
+  threads: { bg: ['#202327', '#000000'], logo: '#000000', ink: false },
   youtube: { bg: ['#CC1016', '#7E080C'], logo: '#E0141B', ink: false },
   instagram: { bg: ['#5E2A84', '#B02C78'], logo: '#B02C78', ink: false },
+  bluesky: { bg: ['#0A6CE6', '#003A8C'], logo: '#0085FF', ink: false },
 } as const;
 
 const kebab = (s: string) => s.replace(/[A-Z]/g, (m) => `-${m.toLowerCase()}`).replace(/(\d+)/g, '-$1');

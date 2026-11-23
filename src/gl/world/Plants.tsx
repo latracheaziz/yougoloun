@@ -4,11 +4,10 @@ import { Box3, Vector3, type Mesh, type Object3D } from 'three';
 import { PLANTS, type PlantKind } from './layout';
 
 /**
- * Real plants (Poly Haven scans, CC0, optimised by `npm run world-assets`): desert quiver trees and
- * shrubs, placed from `PLANTS` in layout.ts. Each model is normalised to a target height in metres.
+ * Real plants (Poly Haven scans, CC0, optimised by `npm run world-assets`): shrubs, placed from `PLANTS`
+ * in layout.ts. Each model is normalised to a target height in metres. (Trees: date palms, Palm.tsx.)
  */
 const URL: Record<PlantKind, string> = {
-  quiver: '/media/world/models/quiver_tree_01.glb',
   shrub: '/media/world/models/shrub_01.glb',
   bush: '/media/world/models/shrub_03.glb',
 };
@@ -20,7 +19,7 @@ function useNormalised(kind: PlantKind) {
       const m = o as Mesh;
       if (m.isMesh) {
         // shrubs are small on screen: their shadow isn't worth drawing them twice
-        m.castShadow = kind === 'quiver';
+        m.castShadow = false;
         m.receiveShadow = true;
       }
     });
@@ -37,7 +36,7 @@ function Plant({ src, x, z, height, rotY }: { src: { scene: Object3D; height: nu
 }
 
 export function Plants() {
-  const models = { quiver: useNormalised('quiver'), shrub: useNormalised('shrub'), bush: useNormalised('bush') };
+  const models = { shrub: useNormalised('shrub'), bush: useNormalised('bush') };
   return (
     <group>
       {PLANTS.map(([kind, x, z, h, r], i) => (

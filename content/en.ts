@@ -202,6 +202,7 @@ export const en: Content = {
         'Yougoloun creative: transform your office into a sustainable workspace',
       ],
     },
+    showreel: { title: 'Yougoloun in 30 seconds', play: 'Play', pause: 'Pause' },
     services: {
       ask: 'Discuss this service',
       message: "Hello Yougoloun, I'd like to know more about this service:",
@@ -215,9 +216,10 @@ export const en: Content = {
         tiktok: 'Short videos, trends and the stories behind our campaigns.',
         snapchat: 'Everyday moments from behind the scenes at our studio.',
         facebook: 'News, case studies and our community.',
-        x: 'Quick updates, insights and conversations.',
+        threads: 'Quick updates, ideas and conversations.',
         youtube: 'In-depth case studies and full productions.',
         instagram: 'Our campaigns and creative work, post by post.',
+        bluesky: 'Marketing news and insights, shared openly.',
       },
     },
     process: {

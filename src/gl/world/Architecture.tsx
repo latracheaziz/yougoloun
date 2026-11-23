@@ -21,13 +21,17 @@ import {
   type Mesh,
   type Texture,
 } from 'three';
-import { ARCH_ANGLES, GALLERY, HERO, ORB, PLAZA, PORTAL, WALK } from './layout';
-import { archFrameGeometry, archPictureGeometry, doorwayGeometry, portalGeometry } from './shapes';
-import { floorStone, trimStone, wallStone } from './stone';
+import { ARCH_ANGLES, GALLERY, HERO, HERO_PALMS, ORB, PLANTS, PLAZA, PLAZA_PALMS, PORTAL, WALK } from './layout';
+import { portalGeometry } from './shapes';
+import { doorGlowGeometry, framePictureGeometry, merge, merlonsLine, merlonsRing, najdiFrameGeometry, najdiGateGeometry } from './najdi';
+import { floorStone, mudStone, trimStone, wallStone } from './stone';
 import { rippleNormals } from './ripples';
 import { Cypresses } from './Cypress';
 import { Plants } from './Plants';
 import { Planets } from './Planets';
+import { Palms } from './Palm';
+import { GardenRing, type Gap } from './Garden';
+import { Fortress } from './Fortress';
 import { gradient } from '../props/geometry';
 import { glossy } from '../props/materials';
 import { token, type Token } from '../palette';
@@ -205,8 +209,9 @@ function Gallery({ plaster, base }: { plaster: Material; base: Material }) {
         <group key={i} position={[x, 0, z]} rotation-y={ry}>
           <mesh geometry={plinth} material={base} position-y={0.17} castShadow receiveShadow />
           <group position-y={0.34}>
-            <mesh geometry={archFrameGeometry(FRAME.w, FRAME.h, FRAME.t, FRAME.depth)} material={plaster} castShadow receiveShadow />
-            <mesh geometry={archPictureGeometry(FRAME.w, FRAME.h, FRAME.t)} material={materials[i % materials.length]} position-z={-0.02} receiveShadow />
+            {/* a Najdi frame: rectangular, crowned with merlon teeth */}
+            <mesh geometry={najdiFrameGeometry(FRAME.w, FRAME.h, FRAME.t, FRAME.depth)} material={plaster} castShadow receiveShadow />
+            <mesh geometry={framePictureGeometry(FRAME.w, FRAME.h, FRAME.t)} material={materials[i % materials.length]} position-z={-0.02} receiveShadow />
           </group>
         </group>
       ))}
@@ -226,10 +231,9 @@ function Plaza({ plaster, trim }: { plaster: Material; trim: Material }) {
   useEffect(() => () => glowMats.forEach((m) => m.dispose()), [glowMats]);
   const plinth = useMemo(() => new CylinderGeometry(0.62, 0.7, 1.25, 48), []);
   const plinthCap = useMemo(() => new CylinderGeometry(0.74, 0.74, 0.1, 48), []);
-  // the arches read as built: a projecting cornice on top, a base course at the foot
-  const cornice = useMemo(() => new BoxGeometry(ARCH.W + 0.34, 0.28, ARCH.depth + 0.3), []);
+  // a white base course at the foot of each gate tower
   const base = useMemo(() => new BoxGeometry(ARCH.W + 0.2, 0.26, ARCH.depth + 0.2), []);
-  useEffect(() => () => (plinth.dispose(), plinthCap.dispose(), cornice.dispose(), base.dispose()), [plinth, plinthCap, cornice, base]);
+  useEffect(() => () => (plinth.dispose(), plinthCap.dispose(), base.dispose()), [plinth, plinthCap, base]);
 
   useFrame(() => {
     world.reveal.forEach((r, i) => {
@@ -248,11 +252,11 @@ function Plaza({ plaster, trim }: { plaster: Material; trim: Material }) {
         return (
           <group key={i}>
             <group position={[x, 0, z]} rotation-y={ry}>
-              <mesh geometry={doorwayGeometry(ARCH.W, ARCH.H, ARCH.w, ARCH.hIn, ARCH.depth)} material={plaster} castShadow receiveShadow />
-              <mesh geometry={cornice} material={trim} position-y={ARCH.H + 0.14} castShadow receiveShadow />
+              {/* a Najdi gate tower: battered mud block, flat-lintel doorway, triangular vents, merlon crown */}
+              <mesh geometry={najdiGateGeometry(ARCH.W, ARCH.H, ARCH.w, ARCH.hIn, ARCH.depth)} material={plaster} castShadow receiveShadow />
               <mesh geometry={base} material={trim} position-y={0.13} receiveShadow />
               {/* the doorway lights up in the cornerstone's colour */}
-              <mesh geometry={archPictureGeometry(ARCH.w, ARCH.hIn, 0)} material={glowMats[i]} position-z={-0.2} />
+              <mesh geometry={doorGlowGeometry(ARCH.w, ARCH.hIn)} material={glowMats[i]} position-z={-0.2} />
             </group>
             <mesh geometry={plinth} material={trim} position={[px, 0.625, pz]} castShadow receiveShadow />
             <mesh geometry={plinthCap} material={trim} position={[px, 1.25, pz]} castShadow receiveShadow />
@@ -295,48 +299,86 @@ function Orb() {
   );
 }
 
+// ── Najdi crenellations (shurfat) on every parapet and the walkway walls: ONE merged mesh ──
+const HERO_GAP = Math.asin(WALK.width / 2 / HERO.radius) + 0.04;
+const PLAZA_GAP = Math.asin(WALK.width / 2 / PLAZA.radius) + 0.04;
+const MERLON = { size: 0.36, thick: 0.26 };
+
+function crenellations() {
+  const parts: ReturnType<typeof merge>[] = [];
+  // parapets: lathe walls 0.32 thick, 0.68 tall, outer radius = island radius
+  merlonsRing(parts, HERO.radius - 0.16, 0.68, Math.PI, HERO_GAP, MERLON);
+  const plaza: ReturnType<typeof merge>[] = [];
+  merlonsRing(plaza, PLAZA.radius - 0.16, 0.68, 0, PLAZA_GAP, MERLON);
+  plaza.forEach((g) => parts.push(g.translate(PLAZA.center.x, 0, PLAZA.center.z)));
+  // walkway walls, between the two parapets' ends
+  for (const x of [-WALK.width / 2 + 0.15, WALK.width / 2 - 0.15]) merlonsLine(parts, [x, -8.2], [x, -26.0], 0.62, { size: 0.34, thick: 0.24 });
+  return merge(parts);
+}
+
+// ── the gardens (the client's Hail park reference) ──────────────────────────────────
+const HERO_GARDEN_GAPS: Gap[] = [
+  { at: Math.PI / 2, half: HERO_GAP + 0.06 }, // the walkway
+  { at: (Math.PI * 3) / 2, half: 0.14 }, // a paved path to the pool, at the front
+];
+const PLAZA_GARDEN_GAPS: Gap[] = [{ at: (Math.PI * 3) / 2, half: 0.5 }]; // towards the walkway
+/** Flower beds keep clear of the palms (on either side: the hero palms mirror with RTL) and the shrubs. */
+const GARDEN_AVOID: [number, number][] = [
+  ...HERO_PALMS.flatMap(([x, z]) => [[x, z], [-x, z]] as [number, number][]),
+  ...PLAZA_PALMS.map(([x, z]) => [x, z] as [number, number]),
+  ...PLANTS.map(([, x, z]) => [x, z] as [number, number]),
+];
+const PLAZA_CENTER: [number, number] = [PLAZA.center.x, PLAZA.center.z];
+
 // ── the whole place ─────────────────────────────────────────────────────────────────
 export function Architecture() {
   const plaster = wallStone();
+  const mud = mudStone();
   const trim = trimStone();
   const floor = floorStone();
   const walkway = useMemo(() => new BoxGeometry(WALK.width, 1.6, WALK.from - WALK.to), []);
   const wall = useMemo(() => new BoxGeometry(0.3, 0.62, WALK.from - WALK.to), []);
-  useEffect(() => () => (walkway.dispose(), wall.dispose()), [walkway, wall]);
+  const merlons = useMemo(crenellations, []);
+  useEffect(() => () => (walkway.dispose(), wall.dispose(), merlons.dispose()), [walkway, wall, merlons]);
   const walkZ = (WALK.from + WALK.to) / 2;
-  const heroGap = Math.asin(WALK.width / 2 / HERO.radius) + 0.04;
-  const plazaGap = Math.asin(WALK.width / 2 / PLAZA.radius) + 0.04;
 
   return (
     <group>
-      {/* hero island */}
+      {/* hero island: the bubble portals on the pool, in a garden ringed by a crenellated mud parapet */}
       <group position={HERO.center}>
         <Slab radius={HERO.radius} top={floor} side={plaster} />
-        <Parapet radius={HERO.radius} gapAt={Math.PI} gap={heroGap} material={plaster} />
+        <Parapet radius={HERO.radius} gapAt={Math.PI} gap={HERO_GAP} material={mud} />
         <PoolRim radius={HERO.pool} material={trim} />
         <Water radius={HERO.pool} inView={(G) => G < 1.35} />
         <Portals />
       </group>
+      {!NO.has('garden') && <GardenRing center={[0, 0]} inner={7.15} outer={8.55} gaps={HERO_GARDEN_GAPS} avoid={GARDEN_AVOID} />}
 
       {/* walkway */}
       <mesh geometry={walkway} material={[plaster, plaster, floor, plaster, plaster, plaster]} position={[0, -0.8, walkZ]} receiveShadow castShadow />
-      <mesh geometry={wall} material={plaster} position={[-WALK.width / 2 + 0.15, 0.31, walkZ]} castShadow receiveShadow />
-      <mesh geometry={wall} material={plaster} position={[WALK.width / 2 - 0.15, 0.31, walkZ]} castShadow receiveShadow />
-      <Gallery plaster={trim} base={plaster} />
+      <mesh geometry={wall} material={mud} position={[-WALK.width / 2 + 0.15, 0.31, walkZ]} castShadow receiveShadow />
+      <mesh geometry={wall} material={mud} position={[WALK.width / 2 - 0.15, 0.31, walkZ]} castShadow receiveShadow />
+      <Gallery plaster={mud} base={trim} />
 
-      {/* plaza */}
+      {/* plaza: four Najdi gate towers (the cornerstones) round the orb, a garden round its pool */}
       <group position={PLAZA.center}>
         <Slab radius={PLAZA.radius} top={floor} side={plaster} />
-        <Parapet radius={PLAZA.radius} gapAt={0} gap={plazaGap} material={plaster} />
+        <Parapet radius={PLAZA.radius} gapAt={0} gap={PLAZA_GAP} material={mud} />
         <PoolRim radius={PLAZA.pool} material={trim} />
         {!NO.has('water') && <Water radius={PLAZA.pool} inView={(G) => G > 1.65} />}
       </group>
-      <Plaza plaster={plaster} trim={trim} />
+      {!NO.has('garden') && <GardenRing center={PLAZA_CENTER} inner={4.4} outer={5.35} gaps={PLAZA_GARDEN_GAPS} avoid={GARDEN_AVOID} beds={1.6} />}
+      <Plaza plaster={mud} trim={trim} />
+      <mesh geometry={merlons} material={mud} castShadow receiveShadow />
       {!NO.has('planets') && <Planets />}
       {!NO.has('orb') && <Orb />}
 
       {!NO.has('trees') && <Cypresses />}
+      {/* hero palms stand on the end side, away from the headline (mirrored in RTL) */}
+      {!NO.has('trees') && <Palms list={HERO_PALMS} mirror />}
+      {!NO.has('trees') && <Palms list={PLAZA_PALMS} />}
       {!NO.has('plants') && <Plants />}
+      {!NO.has('fort') && <Fortress />}
     </group>
   );
 }

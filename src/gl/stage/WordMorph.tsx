@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { BufferAttribute, BufferGeometry, Color, MathUtils, NeutralToneMapping, ShaderMaterial, Vector2, type Group, type PerspectiveCamera } from 'three';
+import { BufferAttribute, BufferGeometry, CanvasTexture, Color, MathUtils, NeutralToneMapping, SRGBColorSpace, ShaderMaterial, Vector2, type Group, type Mesh, type MeshBasicMaterial, type PerspectiveCamera } from 'three';
 import { token } from '../palette';
+import { brand } from '@/config/palette';
 import { useApp } from '@/store/app';
 import { writeHold } from '@/interaction/hold';
 import { prodGl } from '../Precompile';
@@ -18,24 +19,20 @@ import { prodGl } from '../Precompile';
 
 const { clamp, damp } = MathUtils;
 const WORDS = 6;
+/** The word's layout box (canvas px). Particles and the crisp text share it, so they line up exactly. */
+const W_FULL = 1800;
+const H_FULL = 520;
 
-/** Sample a word into `n` points (x, y, z), centred, height-normalised; shared `size` keeps letters equal. */
-function sampleWord(text: string, n: number, rtl: boolean, family: string, maxW: number) {
-  // rasterised at 1/3 scale with every pixel sampled = the same density as full scale every 3 px,
-  // with 9× fewer pixels to read back
-  const R = 3;
-  const W = 1800 / R;
-  const H = 520 / R;
-  const c = document.createElement('canvas');
-  c.width = W;
-  c.height = H;
-  const ctx = c.getContext('2d', { willReadFrequently: true })!;
-  let size = 230 / R;
-  const font = (px: number) => `600 ${px}px ${family}`;
-  // fit on one line, or break into two at the space nearest the middle
+type Layout = { lines: string[]; size: number };
+const fontOf = (family: string, px: number) => `700 ${px}px ${family}`;
+
+/** Fit a word on one line, or two (split at the space nearest the middle); same size for every word. */
+function layoutWord(text: string, family: string): Layout {
+  const ctx = document.createElement('canvas').getContext('2d')!;
+  let size = 230;
   let lines = [text];
-  ctx.font = font(size);
-  if (ctx.measureText(text).width > W * 0.94) {
+  ctx.font = fontOf(family, size);
+  if (ctx.measureText(text).width > W_FULL * 0.94) {
     const words = text.split(' ');
     if (words.length > 1) {
       let best = 1;
@@ -49,19 +46,75 @@ function sampleWord(text: string, n: number, rtl: boolean, family: string, maxW:
       }
       lines = [words.slice(0, best).join(' '), words.slice(best).join(' ')];
     }
-    size = 200 / R;
+    size = 200;
   }
-  ctx.font = font(size);
-  while (Math.max(...lines.map((l) => ctx.measureText(l).width)) > W * 0.94 || size * lines.length * 1.1 > H * 0.95) {
-    size -= 8 / R;
-    ctx.font = font(size);
+  ctx.font = fontOf(family, size);
+  while (Math.max(...lines.map((l) => ctx.measureText(l).width)) > W_FULL * 0.94 || size * lines.length * 1.1 > H_FULL * 0.95) {
+    size -= 8;
+    ctx.font = fontOf(family, size);
   }
-  ctx.fillStyle = '#000';
+  return { lines, size };
+}
+
+/** Draw a laid-out word into `ctx` at `scale` (1 = the full W_FULL × H_FULL box). Returns the widest line (box px). */
+function drawWord(ctx: CanvasRenderingContext2D, layout: Layout, family: string, scale: number, rtl: boolean, fill: string) {
+  ctx.save();
+  ctx.scale(scale, scale);
+  ctx.font = fontOf(family, layout.size);
+  ctx.fillStyle = fill;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   ctx.direction = rtl ? 'rtl' : 'ltr';
-  const lh = size * 1.08;
-  lines.forEach((l, i) => ctx.fillText(l, W / 2, H / 2 + (i - (lines.length - 1) / 2) * lh));
+  const lh = layout.size * 1.08;
+  layout.lines.forEach((l, i) => ctx.fillText(l, W_FULL / 2, H_FULL / 2 + (i - (layout.lines.length - 1) / 2) * lh));
+  const widest = Math.max(...layout.lines.map((l) => ctx.measureText(l).width));
+  ctx.restore();
+  return widest;
+}
+
+/**
+ * The word as crisp text (shown while the morph is at rest — particles alone read as a fuzzy cloud).
+ * "from" words: muted ink (the site's `.muted`); "to" words: brand navy + a brand-gradient underline
+ * (blue/green stay shapes, never text on paper).
+ */
+function wordTexture(layout: Layout, family: string, rtl: boolean, to: boolean, scale: number) {
+  const c = document.createElement('canvas');
+  c.width = Math.round(W_FULL * scale);
+  c.height = Math.round(H_FULL * scale);
+  const ctx = c.getContext('2d')!;
+  // opaque colours: a translucent fill darkens where joined Arabic letters overlap (ink 64% on paper = #656473)
+  const widest = drawWord(ctx, layout, family, scale, rtl, to ? brand.navy : '#656473');
+  if (to) {
+    const lh = layout.size * 1.08;
+    const y = (H_FULL / 2 + ((layout.lines.length - 1) / 2) * lh + layout.size * 0.62) * scale;
+    const x0 = ((W_FULL - widest) / 2) * scale;
+    const g = ctx.createLinearGradient(x0, 0, x0 + widest * scale, 0);
+    g.addColorStop(0, brand.blue);
+    g.addColorStop(1, brand.green);
+    ctx.fillStyle = g;
+    const h = Math.max(3, layout.size * 0.06 * scale);
+    ctx.beginPath();
+    ctx.roundRect(x0, y, widest * scale, h, h / 2);
+    ctx.fill();
+  }
+  const tex = new CanvasTexture(c);
+  tex.colorSpace = SRGBColorSpace;
+  tex.anisotropy = 4;
+  return tex;
+}
+
+/** Sample a word into `n` points (x, y, z), centred, height-normalised; shared `size` keeps letters equal. */
+function sampleWord(layout: Layout, n: number, rtl: boolean, family: string, maxW: number) {
+  // rasterised at 1/3 scale with every pixel sampled = the same density as full scale every 3 px,
+  // with 9× fewer pixels to read back
+  const R = 3;
+  const W = W_FULL / R;
+  const H = H_FULL / R;
+  const c = document.createElement('canvas');
+  c.width = W;
+  c.height = H;
+  const ctx = c.getContext('2d', { willReadFrequently: true })!;
+  drawWord(ctx, layout, family, 1 / R, rtl, '#000');
   const data = ctx.getImageData(0, 0, W, H).data;
   const cand: number[] = [];
   const step = 1;
@@ -130,7 +183,7 @@ void main() {
 }`;
 
 const frag = /* glsl */ `
-uniform vec3 uInk; uniform vec3 uBlue; uniform vec3 uGreen; uniform vec3 uLight;
+uniform vec3 uInk; uniform vec3 uBlue; uniform vec3 uGreen; uniform vec3 uLight; uniform float uAlpha;
 varying float vBrand; varying float vX; varying float vMid; varying float vDepth;
 void main() {
   float r = length(gl_PointCoord - 0.5);
@@ -140,7 +193,8 @@ void main() {
   vec3 col = mix(uInk, brand, vBrand);
   col = mix(col, uLight, vMid * 0.35);
   col *= 1.0 - vDepth * 0.38; // the letters' back layers are in shadow
-  gl_FragColor = vec4(col, a * mix(0.6, 1.0, vBrand) * (1.0 - vDepth * 0.35));
+  // uAlpha: the particles step back to a faint sparkle while the crisp word is shown
+  gl_FragColor = vec4(col, a * mix(0.75, 1.0, vBrand) * (1.0 - vDepth * 0.35) * uAlpha);
   #include <colorspace_fragment>
 }`;
 
@@ -168,7 +222,8 @@ function Particles({ words, link, surface }: { words: string[]; link: MorphLink;
           uBurst: { value: 0 },
           uScale: { value: 1 },
           uPx: { value: 800 },
-          uInk: { value: new Color('#14142E').lerp(new Color('#F5F3EF'), 0.42) },
+          uAlpha: { value: 1 },
+          uInk: { value: new Color('#14142E').lerp(new Color('#F5F3EF'), 0.34) },
           uBlue: { value: token('blueDeep').multiplyScalar(0.95) },
           uGreen: { value: token('greenDeep').multiplyScalar(0.95) },
           uLight: { value: token('blueLight') },
@@ -178,32 +233,47 @@ function Particles({ words, link, surface }: { words: string[]; link: MorphLink;
   );
   useEffect(() => () => material.dispose(), [material]);
 
-  // sample the six words once the display font is ready
+  // sample the six words (particles + crisp text) once the display font is ready
+  const gl = useThree((s) => s.gl);
+  const [textures, setTextures] = useState<CanvasTexture[]>([]);
   useEffect(() => {
     let alive = true;
+    const made: CanvasTexture[] = [];
     const frame = () => new Promise((r) => requestAnimationFrame(r));
-    document.fonts.ready.then(async () => {
-      if (!alive) return;
-      const family = getComputedStyle(document.documentElement).getPropertyValue('--font-display') || 'sans-serif';
-      const rtl = dir === 'rtl';
-      const g = new BufferGeometry();
-      // one word per frame: no single long task
-      for (const [i, w] of words.slice(0, WORDS).entries()) {
-        g.setAttribute(`aW${i}`, new BufferAttribute(sampleWord(w, n, rtl, family, 1800), 3));
-        await frame();
+    const family = getComputedStyle(document.documentElement).getPropertyValue('--font-display') || 'sans-serif';
+    // the canvas draws with the font only once it's loaded (a canvas never triggers the download itself)
+    Promise.all(words.slice(0, WORDS).map((w) => document.fonts.load(fontOf(family, 60), w)))
+      .catch(() => {})
+      .then(async () => {
         if (!alive) return;
-      }
-      const rand = new Float32Array(n * 4);
-      for (let i = 0; i < n; i++) rand.set([i / n, Math.random(), Math.random(), Math.random()], i * 4);
-      g.setAttribute('aRand', new BufferAttribute(rand, 4));
-      g.setAttribute('position', new BufferAttribute(new Float32Array(n * 3), 3)); // unused (bounds)
-      setGeometry(g);
-    });
+        const rtl = dir === 'rtl';
+        const texScale = mobile ? 0.85 : 1; // phones: ~620 css px × DPR 2 wide
+        const g = new BufferGeometry();
+        // one word per frame (sample + crisp text + its upload): no single long task
+        for (const [i, w] of words.slice(0, WORDS).entries()) {
+          const layout = layoutWord(w, family);
+          g.setAttribute(`aW${i}`, new BufferAttribute(sampleWord(layout, n, rtl, family, W_FULL), 3));
+          const tex = wordTexture(layout, family, rtl, i % 2 === 1, texScale);
+          gl.initTexture(tex);
+          made.push(tex);
+          await frame();
+          if (!alive) return;
+        }
+        const rand = new Float32Array(n * 4);
+        for (let i = 0; i < n; i++) rand.set([i / n, Math.random(), Math.random(), Math.random()], i * 4);
+        g.setAttribute('aRand', new BufferAttribute(rand, 4));
+        g.setAttribute('position', new BufferAttribute(new Float32Array(n * 3), 3)); // unused (bounds)
+        setGeometry(g);
+        setTextures(made);
+      });
     return () => {
       alive = false;
+      made.forEach((tex) => tex.dispose());
     };
-  }, [words, n, dir]);
+  }, [words, n, dir, mobile, gl]);
   useEffect(() => () => geometry?.dispose(), [geometry]);
+  const plane = useRef<Mesh>(null);
+  const shown = useRef(-1);
 
   // pointer + hold on the section
   const ptr = useRef({ ndc: new Vector2(9, 9), inside: false, pressing: false, charge: 0, burst: 0 });
@@ -261,18 +331,47 @@ function Particles({ words, link, surface }: { words: string[]; link: MorphLink;
     p.burst = damp(p.burst, p.pressing ? p.charge : 0, p.pressing ? 3 : 4, dt);
     u.uBurst.value = p.burst;
     writeHold(p.charge);
+    // at rest on a word (the stage holds on whole numbers while you read): the crisp word shows and the
+    // particles step back to a faint sparkle; as the morph starts it dissolves into them, and back
+    const k = Math.round(link.stage);
+    const rest = 1 - MathUtils.smoothstep(Math.abs(link.stage - k), 0.02, 0.14);
+    const text = rest * (1 - p.burst);
+    u.uAlpha.value = MathUtils.lerp(1, 0.04, text);
+    const m = plane.current;
+    if (m) {
+      const mat = m.material as MeshBasicMaterial;
+      const tex = textures[clamp(k, 0, WORDS - 1)];
+      if (tex && shown.current !== k) {
+        mat.map = tex;
+        mat.needsUpdate = true;
+        shown.current = k;
+      }
+      mat.opacity = tex ? text : 0;
+      m.visible = mat.opacity > 0.002;
+      m.scale.setScalar(u.uScale.value);
+    }
     // the word tilts in 3D with the mouse
     if (group.current) {
       // a slow sway shows the letters' depth even without the mouse
       const t = clock.elapsedTime;
-      const swayY = Math.sin(t * 0.45) * 0.16 * (1 - on.current);
-      const swayX = Math.sin(t * 0.33 + 1) * 0.06 * (1 - on.current);
-      group.current.rotation.y = damp(group.current.rotation.y, reduced ? 0 : p.ndc.x * 0.32 * on.current + swayY, 4, dt);
-      group.current.rotation.x = damp(group.current.rotation.x, reduced ? 0 : -p.ndc.y * 0.2 * on.current + swayX, 4, dt);
+      // (kept small: the crisp word must stay easy to read)
+      const swayY = Math.sin(t * 0.45) * 0.05 * (1 - on.current);
+      const swayX = Math.sin(t * 0.33 + 1) * 0.02 * (1 - on.current);
+      group.current.rotation.y = damp(group.current.rotation.y, reduced ? 0 : p.ndc.x * 0.2 * on.current + swayY, 4, dt);
+      group.current.rotation.x = damp(group.current.rotation.x, reduced ? 0 : -p.ndc.y * 0.12 * on.current + swayX, 4, dt);
     }
   });
 
-  return <group ref={group}>{geometry && <points geometry={geometry} material={material} frustumCulled={false} />}</group>;
+  return (
+    <group ref={group}>
+      {geometry && <points geometry={geometry} material={material} frustumCulled={false} />}
+      {/* the crisp word, in the same box as the particles (W_FULL × H_FULL → 2 × 2·H/W units, × uScale) */}
+      <mesh ref={plane} renderOrder={1} visible={false}>
+        <planeGeometry args={[2, (2 * H_FULL) / W_FULL]} />
+        <meshBasicMaterial transparent depthWrite={false} toneMapped={false} opacity={0} />
+      </mesh>
+    </group>
+  );
 }
 
 export default function WordMorph({ words, link, active, surface, className }: { words: string[]; link: MorphLink; active: boolean; surface: HTMLElement | null; className?: string }) {

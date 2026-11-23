@@ -72,7 +72,13 @@ async function main() {
           else if (msg.type() === 'warning') warnings.push(`[${tag}] console.warn: ${text}`);
         });
         page.on('pageerror', (err) => problems.push(`[${tag}] page error: ${err.message}`));
-        page.on('requestfailed', (req) => problems.push(`[${tag}] request failed: ${req.url()} (${req.failure()?.errorText})`));
+        page.on('requestfailed', (req) => {
+          const msg = `[${tag}] request failed: ${req.url()} (${req.failure()?.errorText})`;
+          // browsers cancel video/audio range requests themselves when playback pauses or the element
+          // leaves the screen — normal streaming, not an error (a missing file still fails: HTTP 404 below)
+          if (req.resourceType() === 'media' && req.failure()?.errorText === 'net::ERR_ABORTED') warnings.push(msg);
+          else problems.push(msg);
+        });
         page.on('response', (res) => {
           if (res.status() >= 400) problems.push(`[${tag}] HTTP ${res.status()}: ${res.url()}`);
         });

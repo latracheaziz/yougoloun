@@ -132,7 +132,7 @@ export function Services() {
         <div className="grid-12 items-end gap-y-10">
           <div className="col-span-12 lg:col-span-7">
             <SectionMark n={5} label={t.services.label} variant="brand" className="muted" />
-            <h2 id="services-title" data-reveal="lines" className="display h-section mt-6">
+            <h2 key={t.lang} id="services-title" data-reveal="lines" className="display h-section mt-6">
               {t.services.title}
             </h2>
           </div>

@@ -48,14 +48,12 @@ export const CYPRESS: [number, number, number][] = [
  */
 export const ARCH_ANGLES = [Math.PI * 1.0, Math.PI * 1.34, Math.PI * 1.66, Math.PI * 2.0];
 
-export type PlantKind = 'quiver' | 'shrub' | 'bush';
+export type PlantKind = 'shrub' | 'bush';
 /**
- * Real plants: [kind, x, z, height (m), rotation]. Desert quiver trees frame the hero island and the
- * far side of the plaza; shrubs sit at the foot of the pool rims, frames and arches (grounding them).
+ * Real plants: [kind, x, z, height (m), rotation]. Shrubs sit at the foot of the pool rims, frames and
+ * arches (grounding them). (The desert quiver trees became date palms: `PALMS`.)
  */
 export const PLANTS: [PlantKind, number, number, number, number][] = [
-  ['quiver', -6.4, -5.2, 4.4, 0.4],
-  ['quiver', 7.4, 1.3, 3.6, 2.1],
   ['shrub', -6.4, 4.1, 0.9, 0.2],
   ['bush', 7.1, -2.7, 0.7, 1.4],
   ['shrub', 6.6, 4.4, 1.0, 2.6],
@@ -65,8 +63,39 @@ export const PLANTS: [PlantKind, number, number, number, number][] = [
   ['shrub', -3.95, -16.7, 0.75, 2.2],
   ['bush', 3.95, -19.2, 0.7, 1.7],
   ['shrub', -3.95, -22.1, 0.8, 0.6],
-  ['quiver', -6.2, -44.6, 4.8, 1.2],
-  ['quiver', 6.4, -44.2, 4.2, 2.9],
   ['shrub', -2.9, -31.6, 0.8, 0.5],
   ['bush', 3.1, -32.0, 0.7, 2.4],
 ];
+
+/**
+ * Date palms (Hail's gardens): [x, z, height (m), lean (rad), yaw].
+ * HERO_PALMS stand on the hero lawn on the END side (+x); the group is mirrored with the layout side, so
+ * they never rise behind the headline. PLAZA_PALMS frame the far side of the plaza (where the quiver
+ * trees stood). The fortress hill adds its own (`FORT.palms`).
+ */
+export const HERO_PALMS: [number, number, number, number, number][] = [
+  [7.4, 1.3, 5.6, -0.09, 2.1],
+  [6.1, -5.9, 6.6, 0.06, 0.4],
+];
+export const PLAZA_PALMS: [number, number, number, number, number][] = [
+  [-6.2, -44.6, 7.0, 0.06, 1.2],
+  [6.4, -44.2, 6.2, -0.07, 2.9],
+];
+
+/**
+ * The Hail fortress (Najdi mud architecture — A'arif / Qishlah) on a hill straight behind the plaza, the
+ * end of the journey: seen through the portal's window from the hero, down the walkway, behind the orb.
+ * Local coordinates inside: front = +z (towards the plaza). Mirrored with the layout side (the keep and
+ * the minaret stand on the end side).
+ */
+export const FORT = {
+  x: 0,
+  z: -68,
+  y: 1.4,
+  island: 12.5,
+  palms: [
+    [-8.2, 4.6, 6.4, 0.08, 0.3],
+    [8.4, 4.2, 5.4, -0.1, 1.9],
+    [-4.6, 8.6, 4.8, 0.12, 2.7],
+  ] as [number, number, number, number, number][],
+};

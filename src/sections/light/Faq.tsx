@@ -16,7 +16,7 @@ export function Faq() {
         <div className="grid-12 gap-y-10">
           <div className="col-span-12 lg:col-span-4">
             <SectionMark n={8} label={<span lang="en">{t.faq.label}</span>} variant="brand" className="muted" />
-            <h2 id="faq-title" data-reveal="lines" className="display mt-6 text-[clamp(2.25rem,4.4vw,4.25rem)]">
+            <h2 key={t.lang} id="faq-title" data-reveal="lines" className="display mt-6 text-[clamp(2.25rem,4.4vw,4.25rem)]">
               {t.faq.title}
             </h2>
           </div>

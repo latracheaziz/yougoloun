@@ -9,6 +9,7 @@ import { distortEnter, distortLeave, distortMove } from '@/interaction/distort';
 import { projects } from '@/config/light';
 import { useApp } from '@/store/app';
 import { SectionMark } from '@/components/SectionMark';
+import { Showreel } from './Showreel';
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
@@ -29,6 +30,7 @@ export function Portfolio() {
   const root = useRef<HTMLElement>(null);
   const track = useRef<HTMLDivElement>(null);
   const frame = useRef<HTMLDivElement>(null);
+  const intro = useRef<HTMLDivElement>(null);
   const rail = useRef<HTMLDivElement>(null);
   const [index, setIndex] = useState(0);
   const pin = useRef<ScrollTrigger | null>(null);
@@ -49,8 +51,11 @@ export function Portfolio() {
         if (!el || !section || !frameEl || !railEl) return;
         const rtl = dir === 'rtl';
         const distance = () => Math.max(0, railEl.scrollWidth - el.clientWidth);
+        // the title + video sit above the sticky frame: the section is that much taller, and the rail
+        // starts moving once the frame reaches the top
+        const above = () => intro.current?.offsetHeight ?? 0;
         const size = () => {
-          section.style.height = `${window.innerHeight + distance()}px`;
+          section.style.height = `${above() + window.innerHeight + distance()}px`;
         };
         el.scrollLeft = 0;
         el.style.overflowX = 'hidden';
@@ -64,7 +69,7 @@ export function Portfolio() {
           ease: 'none',
           scrollTrigger: {
             trigger: section,
-            start: 'top top',
+            start: () => `top+=${above()} top`,
             end: 'bottom bottom',
             scrub: 0.8,
             invalidateOnRefresh: true,
@@ -208,16 +213,21 @@ export function Portfolio() {
 
   return (
     <section ref={root} id="portfolio" data-tone="light" aria-labelledby="portfolio-title" className="relative bg-paper">
+      {/* title + the story video, right under it (above the pinned rail) */}
+      <div ref={intro} className="shell section-y w-full pb-0 lg:pt-[clamp(6rem,13vh,8.5rem)]">
+        <SectionMark n={6} label={t.portfolio.label} variant="brand" className="muted" />
+        <h2 key={t.lang} id="portfolio-title" data-reveal="lines" className="display h-section mt-6">
+          {t.portfolio.title}
+        </h2>
+        <div data-reveal="up" className="mt-[clamp(2rem,4vw,3.5rem)]">
+          <Showreel />
+        </div>
+      </div>
+
       <div ref={frame} className="flex flex-col overflow-hidden">
-      <div className="shell section-y w-full pb-[clamp(3rem,6vw,5rem)] lg:pt-[clamp(6rem,13vh,8.5rem)] lg:pb-8">
-        <div className="grid-12 items-end gap-y-8">
-          <div className="col-span-12 lg:col-span-8">
-            <SectionMark n={6} label={t.portfolio.label} variant="brand" className="muted" />
-            <h2 id="portfolio-title" data-reveal="lines" className="display h-section mt-6">
-              {t.portfolio.title}
-            </h2>
-          </div>
-          <div data-reveal="up" className="col-span-12 flex items-center gap-4 lg:col-span-4 lg:justify-end">
+      <div className="shell w-full pt-[clamp(2.5rem,5vw,4rem)] pb-[clamp(1.5rem,3vw,2.5rem)] lg:pt-[clamp(6rem,13vh,8rem)] lg:pb-8">
+        <div className="flex items-center justify-end">
+          <div data-reveal="up" className="flex items-center gap-4">
             <span lang="en" dir="ltr" className="font-mono text-sm muted">
               {String(index + 1).padStart(2, '0')} / {String(count).padStart(2, '0')}
             </span>

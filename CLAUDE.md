@@ -16,6 +16,7 @@ Two parts, one page:
 - `npm run typecheck`
 - `npm run check` — **phase gate**: boots Vite, opens /ar and /en (desktop + mobile) in headless Edge/Chrome,
   scrolls every section, fails on any console error, writes screenshots to `.check/`. `-- --quick` = hero only.
+  (A video/audio request the browser cancels itself — `ERR_ABORTED` on pause/scroll-away — is only a warning.)
 - `npm run moments` — key-moment screenshots (desktop + mobile, AR + EN) + contact sheets in `.check/moments/`.
   Flags: `--all`, `--space` (3D journey only, densely sampled), `--lang=en`, `--reduced`, `--fps`, `--only=6,7c`
   (name prefixes), `--wait=4800` (ms after each scroll; raise it to see entrance animations finished),
@@ -79,7 +80,10 @@ Vite 8 (Rolldown) · React 19 · TypeScript 7 · React Router 8 · three r187 ·
   text-tab filters, rows fold away) → Platforms → `Buzz` ("word of mouth" agency-identity interlude: typing name, live post with reactions,
   growth chart, funnel, notifications, click-to-react burst; labels in `ui.buzz`; no section number) → `Feed` (#studio, navy band: swipeable deck of the agency's own creatives from
   `public/media/feed`, story bars auto-advance, click = lightbox; `feedPosts` in `src/config/light.ts`, alts in
-  `ui.feed.posts`) → `Portfolio` (pinned horizontal track on desktop, swipe on mobile) → `Process` (#process: a "growth
+  `ui.feed.posts`) → `Portfolio` (title, then `Showreel` — the agency's story video right under it, loads near view,
+  plays muted/looped on screen, play/pause + sound, `showreel` in light.ts, labels `ui.showreel` — then the pinned
+  horizontal track on desktop (its sticky frame starts after the title + video: section height and trigger start
+  add `intro.offsetHeight`), swipe on mobile) → `Process` (#process: a "growth
   dashboard" — desktop pins (CSS sticky, 85svh of scroll per step): step list with a gradient rail + one navy panel
   playing a DOM/SVG scene per step (audit radar · roadmap + tracking wires · creatives + channels live ·
   conversions chart with crosshair, A/B winner, budget); touch/tablet/reduced motion: stacked steps, each with
@@ -111,11 +115,23 @@ Vite 8 (Rolldown) · React 19 · TypeScript 7 · React Router 8 · three r187 ·
   `layout.ts` (every position, metres — the camera path is written against it), `Sky.tsx` (sky dome + `SUN_DIR`),
   `World.tsx` (sun with a camera-following shadow frustum, hemisphere fill, the sky HDR as env map),
   `Sky.tsx` (photographed sky graded to the brand blue; `SUN_DIR` measured on the photo — keep them in sync),
-  `Architecture.tsx` (hero island: blue/green bubble portals on a pool · walkway of arch frames with the agency's
-  creatives as lit prints · plaza of four arches (cornerstones) round the orb), `stone.ts` (scanned stone sampled
+  `Architecture.tsx` (hero island: blue/green bubble portals on a pool · walkway of Najdi frames with the agency's
+  creatives as lit prints · plaza of four Najdi gate towers (cornerstones) round the orb). **Hail / Najdi
+  architecture** (client's references: A'arif fort + a Hail park): `najdi.ts` (merlon = pierced triangle, battered
+  blocks, gate tower + frame outlines with merlon crowns and triangular vents; `bake`/`merge` → static parts in ONE
+  merged mesh per material: all parapet/wall crenellations are one draw), `Fortress.tsx` (`FORT` in layout.ts: a
+  fort on a hill straight behind the plaza — terrace + steps, walls, 3 towers + keep, wooden gate in white gypsum,
+  spouts, white octagonal minaret, palms; seen through the portal window, down the walkway, behind the orb;
+  mirrored with the layout side so keep + minaret stay on the end side), `Garden.tsx` (`GardenRing`: lawn arcs
+  broken by paved paths, clipped hedge, flower-bed mounds with instanced blossoms — pinks/magenta/white/violet, no
+  orange; `nature()` = noise-mottled foliage material), `Palm.tsx` (procedural date palms: ringed lathe trunks
+  merged, ALL fronds one InstancedMesh, gentle sway at 15 Hz; `HERO_PALMS` sit on the END side and mirror with RTL
+  so no tree rises behind the headline; `PLAZA_PALMS` frame the plaza). Keep instanced meshes frustum-culled and
+  small things out of the shadow pass (measured: home 42 → 60 fps). `stone.ts` (scanned stone sampled
   triplanar in world space — only the scan's DETAIL is used, colour comes from our palette: `wallStone` Hail
-  sandstone, `trimStone` limestone, `floorStone` travertine; no UVs, never stretches), `Plants.tsx` (real models,
-  placed from `PLANTS` in layout.ts), `Cypress.tsx` (instanced foliage cards), `ripples.ts` (pool normals),
+  sandstone, `mudStone` Najdi mud plaster, `trimStone` limestone, `floorStone` travertine; no UVs, never
+  stretches), `Plants.tsx` (scanned shrubs, placed from `PLANTS` in layout.ts — the quiver trees became palms; the
+  quiver model is still fetched by `world-assets` but unused), `Cypress.tsx` (instanced foliage cards), `ripples.ts` (pool normals),
   `CloudSea.tsx`, `Ribbon.tsx` (name band; flips u where the print would read mirrored), `Voice.tsx` (hold to
   awaken: burst of glossy hearts/comments + pool rings; charge in `src/interaction/hold.ts`, shown by the cursor's
   `hold` mode and the hero's hint via `--hold`). **No orange**: the architecture is warm sand, not terracotta.
@@ -161,7 +177,11 @@ Vite 8 (Rolldown) · React 19 · TypeScript 7 · React Router 8 · three r187 ·
   pauses off screen; `Studio.tsx` = Lightformer reflections + Neutral tone mapping, no postprocessing):
   `WordMorph.tsx` in Statements (the from/to words drawn with the display font, sampled into ~14k extruded
   particles; scroll morphs from₀→to₀→from₁… via `stageAt()`, muted ink → brand gradient, swirl through depth;
-  cursor repels, hold explodes, the word tilts with the mouse; the statement text stays as `sr-only`),
+  cursor repels, hold explodes, the word tilts with the mouse; the statement text stays as `sr-only`. At rest on
+  a word (the client found the particle-only word unreadable) a CRISP text plane is shown in the very same box
+  (`layoutWord`/`drawWord` shared with the sampling) and the particles fade to 4%: "from" = solid `#656473` (ink 64%
+  on paper — a translucent fill darkened the Arabic joins), "to" = brand navy + gradient underline; it dissolves
+  into the particles as the morph starts),
   `ObjectStage.tsx` (glossy prop per item, morphs between items): the Services showcase (`SERVICE_OBJECTS`,
   over the service's brand-image crop). `SocialFlip.tsx` ("Follow us", `Socials.tsx`): ONE pearl-white glossy
   app-icon tile with a logo extruded on each face (Simple Icons CC0 paths in `src/config/social.ts`); its turn
@@ -207,13 +227,22 @@ Tailwind tokens in `src/styles/index.css` (`@theme`) only point at them; WebGL r
 - `<html lang dir>` per route (`/ar` rtl, `/en` ltr). Use logical properties (`ps-`, `ms-`, `start-`, `end-`).
 - **No letter-spacing on Arabic** (breaks joining) — rules use `:lang(ar)`. Give Latin snippets inside Arabic `lang="en"`.
 - **Never split Arabic into characters** (SplitText `lines,words` only).
+- **Every SplitText target is keyed by language** (`<h2 key={t.lang} …>`, hero `h1` too): SplitText rewrites the
+  node's text, so on an AR⇄EN switch React's update went to a detached node and the revert restored the old
+  Arabic, which was then re-split letter by letter on /en. A new split heading needs `key={t.lang}`.
 - Western digits in both languages; wrap coordinates/phone/email in `dir="ltr"`. Mirror arrows with `rtl:-scale-x-100`.
 - Horizontal scrollers: `scrollBy` in physical pixels (next = −width in RTL).
 
 ## Placeholders / TODO
 - `src/config/site.ts`: domain (`url`), phone/WhatsApp number. Logo: typeset `Wordmark` until the SVG arrives.
 - Portfolio images: placeholders in `public/media/work/*/cover.webp`.
-- Social accounts: `url` + `handle` in `src/config/social.ts` are guesses from @yougoloun — replace with the real ones.
+- Showreel `public/media/video/yougoloun-story.mp4` is the client's original (H.264 1080p, ~9 Mbit/s, 33 MB):
+  compress it (~4–6 MB, e.g. ffmpeg `-crf 26 -preset slow -movflags +faststart`, 1280p) and add a poster before launch.
+  (Headless Edge/Chrome here can't decode it for a poster capture: crashes/hangs.)
+- Social accounts (`src/config/social.ts`): the client's real links (TikTok, Snapchat, Facebook, Threads, YouTube,
+  Instagram, Bluesky; no X). ⚠ The Snapchat link is Snapchat's web app, not the profile — ask for
+  `snapchat.com/add/<username>`. Adding a platform = an entry there (Simple Icons path) + `platformColors` +
+  `ui.social.about.<id>` (EN/AR) + a moment at vh = 0.62 × (i + 0.3).
 - Privacy Policy page + footer link (Phase 4).
 - `THREE.Clock` deprecation warning comes from R3F internals — ignored by `npm run check` (client OK).
 

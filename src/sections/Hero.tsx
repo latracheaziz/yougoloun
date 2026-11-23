@@ -81,7 +81,9 @@ export function Hero() {
           <p data-hero-in className="label flex items-center gap-3 text-mist/65">
             {t.hero.tagline}
           </p>
-          <h1 id="hero-title" ref={title} className="display hero-title mt-6 text-balance">
+          {/* keyed by language: SplitText rebuilds this node's text, so a language switch needs a fresh element
+              (otherwise the split Arabic stays and is re-split letter by letter) */}
+          <h1 key={t.lang} id="hero-title" ref={title} className="display hero-title mt-6 text-balance">
             {t.hero.headline}
           </h1>
           <p data-hero-in className="mt-7 max-w-[33rem] text-[clamp(0.95rem,1.05vw,1.0625rem)] leading-relaxed text-mist/72">

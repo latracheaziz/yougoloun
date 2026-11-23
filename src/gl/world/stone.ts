@@ -164,5 +164,10 @@ const MEAN_LUM: Record<Scan, number> = { sandstone: 0.502, plaster: 0.441, pavin
 export const wallStone = () => stone({ scan: 'plaster', color: '#E4C9A6', scale: 0.3, detail: 0.75, normalScale: 0.75, roughness: 0.88 });
 /** Frames, cornices, plinths, pool rims, planters — white limestone. */
 export const trimStone = () => stone({ scan: 'plaster', color: '#F1ECE4', scale: 0.55, detail: 0.5, normalScale: 0.6, roughness: 0.8 });
+/**
+ * Najdi mud plaster (Hail's forts: A'arif, Qishlah) — the gate towers, crenellated walls, gallery frames and
+ * the fortress. Hand-smoothed earth: deeper relief than the walls' plaster, in warm sand (not terracotta).
+ */
+export const mudStone = () => stone({ scan: 'plaster', color: '#D9B78E', scale: 0.4, detail: 0.95, normalScale: 1.2, roughness: 0.95 });
 /** Floors — cream travertine paving. */
 export const floorStone = () => stone({ scan: 'paving', color: '#DACBB4', scale: 0.32, detail: 0.7, normalScale: 0.9, roughness: 0.78 });

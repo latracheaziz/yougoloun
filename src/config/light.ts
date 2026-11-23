@@ -53,6 +53,10 @@ export const projects: Record<ProjectSlug, { accent: string; tint: string; ink: 
   odun: { accent: brand.navy, tint: '#E6E6F0', ink: light.ink, image: '/media/work/odun/cover.webp' },
 };
 
+// ── Showreel (Portfolio, under the title) ──────────────────────────────────────────
+/** The agency's 30 s story (H.264 1920×1080, moov at the front so it streams). ⚠ 33 MB: compress before launch. */
+export const showreel = { src: '/media/video/yougoloun-story.mp4' } as const;
+
 // ── Platforms marquee (brand names, not translated) ────────────────────────────────
 export const platforms = ['Meta', 'TikTok', 'Snapchat', 'Google', 'Salla', 'Zid', 'Shopify'] as const;
 

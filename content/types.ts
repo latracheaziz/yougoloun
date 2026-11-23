@@ -140,6 +140,8 @@ export interface Content {
       next: string;
       posts: readonly string[];
     };
+    /** Portfolio: the agency's story video under the section title (sound labels: `sound`). */
+    showreel: { title: string; play: string; pause: string };
     /** Services: the per-service WhatsApp button and its pre-filled message (service title appended). */
     services: { ask: string; message: string };
     /** "Follow us" (after Contact; accounts in src/config/social.ts). `about`: one line per platform. */
@@ -148,7 +150,7 @@ export interface Content {
       hint: string;
       follow: string;
       newTab: string;
-      about: { tiktok: string; snapchat: string; facebook: string; x: string; youtube: string; instagram: string };
+      about: { tiktok: string; snapchat: string; facebook: string; threads: string; youtube: string; instagram: string; bluesky: string };
     };
     /** "How we work": the dashboard scene shown beside each step (short interface labels). */
     process: {

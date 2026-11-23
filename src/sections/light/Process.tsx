@@ -837,7 +837,7 @@ function Pinned() {
         <div className="shell grid-12 h-full items-center pt-[clamp(5.5rem,12vh,7.5rem)] pb-[clamp(1.5rem,4.5vh,3rem)]">
           <div className="col-span-5 flex flex-col pe-[clamp(0rem,2vw,2.5rem)]">
             <SectionMark n={7} label={t.process.label} variant="brand" className="muted" />
-            <h2 id="process-title" data-reveal="lines" className="display mt-5 text-[clamp(2.4rem,min(4.4vw,8.5vh),5rem)]">
+            <h2 key={t.lang} id="process-title" data-reveal="lines" className="display mt-5 text-[clamp(2.4rem,min(4.4vw,8.5vh),5rem)]">
               {t.process.title}
             </h2>
             <ol className="mt-[clamp(1.5rem,5vh,3.25rem)]">
@@ -936,7 +936,7 @@ function Stacked() {
       <div className="grid-12">
         <div className="col-span-12 lg:col-span-8">
           <SectionMark n={7} label={t.process.label} variant="brand" className="muted" />
-          <h2 id="process-title" data-reveal="lines" className="display h-section mt-6">
+          <h2 key={t.lang} id="process-title" data-reveal="lines" className="display h-section mt-6">
             {t.process.title}
           </h2>
         </div>
